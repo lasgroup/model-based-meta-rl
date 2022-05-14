@@ -1,6 +1,5 @@
 from typing import Union, SupportsFloat, Iterable, Callable
 
-import torch
 import argparse
 import numpy as np
 from torch import nn

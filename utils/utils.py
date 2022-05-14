@@ -1,7 +1,8 @@
 from typing import Callable
 
 
-def get_logger_layout(num_heads):
+def get_logger_layout(num_heads: int) -> dict:
+
     layout = {
         "Model Training": {
             "average": [
