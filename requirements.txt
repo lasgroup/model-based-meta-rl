@@ -1,6 +1,6 @@
 -e git+https://github.com/sebascuri/rllib.git@master#egg=rllib
 torch~=1.11.0
-numpy~=1.22.3
+numpy>=1.20.0
 gpytorch~=1.1.1
 gym~=0.23.1
 tqdm~=4.64.0

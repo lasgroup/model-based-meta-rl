@@ -9,19 +9,19 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     # Training Parameters
-    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--environment_max_steps", type=int, default=400)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=1)
 
     # Environment parameters
-    parser.add_argument("--pendulum-mass", type=float, default=1)
-    parser.add_argument("--pendulum-length", type=float, default=1)
+    parser.add_argument("--pendulum-mass", type=float, default=0.3)
+    parser.add_argument("--pendulum-length", type=float, default=0.5)
     parser.add_argument("--pendulum-friction", type=float, default=0.005)
     parser.add_argument("--pendulum-step-size", type=float, default=0.0125)
 
     # Reward parameters
-    parser.add_argument("--action-cost", type=float, default=0.2)
+    parser.add_argument("--action-cost", type=float, default=0.1)
     parser.add_argument("--gamma", type=float, default=0.99)
 
     # Model parameters
@@ -38,10 +38,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Simulation and replay buffer parameters
     parser.add_argument("--not-bootstrap", action="store_true")
     parser.add_argument("--max-memory", type=int, default=10000)
-    parser.add_argument("--sim-max-memory", type=int, default=100000)
+    parser.add_argument("--sim-max-memory", type=int, default=10000)
     parser.add_argument("--sim-num-steps", type=int, default=400)
-    parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=4)
-    parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=4)
+    parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=8)
+    parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
 
     # Value function parameters
@@ -52,7 +52,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Agent parameters
     parser.add_argument("--agent-name", type=str, default="mpc")
-    parser.add_argument("--exploration", type=str, default="greedy")
+    parser.add_argument("--exploration", type=str, default="thompson")
 
     # MPC parameters
     parser.add_argument("--mpc-solver", type=str, choices=["cem"], default="cem")

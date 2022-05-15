@@ -1,7 +1,7 @@
 from typing import Callable
 
 import torch
-from rllib.agent import ModelBasedAgent
+from lib.agents.model_based_agent import ModelBasedAgent
 from rllib.policy import MPCPolicy
 
 
@@ -37,6 +37,7 @@ class MPCAgent(ModelBasedAgent):
             bootstrap=True,
             policy_opt_num_iter=0,
             max_memory=10000,
+            sim_num_steps=400,
             initial_distribution=initial_distribution,
             exploration_scheme=exploration_scheme,
             gamma=gamma,

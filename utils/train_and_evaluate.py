@@ -11,8 +11,10 @@ def train_and_evaluate_agent(environment, agent, args):
     :param args:
     :return:
     """
+    agent.logger.save_hparams(args.toDict())
     with gpytorch.settings.fast_computations(), gpytorch.settings.fast_pred_var(), (
-            gpytorch.settings.fast_pred_samples()), (gpytorch.settings.memory_efficient()):
+            gpytorch.settings.fast_pred_samples()
+    ), (gpytorch.settings.memory_efficient()):
         train_agent(
             agent,
             environment,

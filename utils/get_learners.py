@@ -104,7 +104,6 @@ def get_mpc_policy(
             scale=1 / 8,
             action_scale=action_scale,
             num_iter=args.mpc_num_iter,
-            num_particles=args.mpc_num_particles,
             num_elites=args.mpc_num_elites,
             alpha=args.mpc_alpha,
             terminal_reward=terminal_reward,

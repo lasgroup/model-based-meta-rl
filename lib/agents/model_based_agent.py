@@ -54,9 +54,9 @@ class ModelBasedAgent(AbstractAgent):
             optimizer: torch.optim.Optimizer = None,
             sim_num_steps: int = 20,
             sim_initial_states_num_trajectories: int = 8,
-            sim_initial_dist_num_trajectories: int = 0,
+            sim_initial_dist_num_trajectories: int = 8,
             sim_memory_num_trajectories: int = 0,
-            sim_max_memory: int = 100000,
+            sim_max_memory: int = 10000,
             sim_refresh_interval: int = 1,
             sim_num_subsample: int = 1,
             initial_distribution: torch.distributions.Distribution = None,
@@ -67,7 +67,7 @@ class ModelBasedAgent(AbstractAgent):
             tensorboard=False,
             comment=""
     ):
-
+        self.algorithm = algorithm
         super().__init__(
             train_frequency=0,
             num_rollouts=0,
@@ -134,7 +134,7 @@ class ModelBasedAgent(AbstractAgent):
         self.new_episode = True
         self.exploration_scheme = exploration_scheme
 
-        if exploration_scheme == "thompson_sampling":
+        if exploration_scheme == "thompson":
             self.dynamical_model.set_prediction_strategy("posterior")
 
         logger_layout = get_logger_layout(num_heads)
@@ -176,7 +176,7 @@ class ModelBasedAgent(AbstractAgent):
         """
         super().start_episode()
         self.new_episode = True
-        if self.exploration_scheme == "thompson_sampling":
+        if self.exploration_scheme == "thompson":
             self.dynamical_model.sample_posterior()
 
     def end_episode(self):
@@ -279,7 +279,7 @@ class ModelBasedAgent(AbstractAgent):
 
         :return:
         """
-        print(colorize("Optimizing policy with simulated data from the model"))
+        print(colorize("Optimizing policy with simulated data from the model", "yellow"))
 
         self.dynamical_model.eval()
         self.sim_dataset.reset()
