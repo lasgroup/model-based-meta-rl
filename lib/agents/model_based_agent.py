@@ -153,7 +153,7 @@ class ModelBasedAgent(AbstractAgent):
             self.pi = tensor_to_distribution(self.policy(state), **self.policy.dist_params)
             action = self.plan(state).detach()
 
-        action_scale = self.policy.action_scale.numpy()
+        action_scale = self.policy.action_scale.detach()
 
         return action.clip(-action_scale, +action_scale)
 
@@ -243,43 +243,12 @@ class ModelBasedAgent(AbstractAgent):
                 epsilon=-1.0,
             )
 
-    def _log_simulated_trajectory(self):
-        average_return = self.sim_trajectory.reward.sum(0).mean().item()
-        average_scale = (
-            torch.diagonal(self.sim_trajectory.next_state_scale_tril, dim1=-1, dim2=-2)
-                .square()
-                .sum(-1)
-                .sum(0)
-                .mean()
-                .sqrt()
-                .item()
-        ) if self.sim_trajectory.next_state_scale_tril.ndim > 1 else torch.nan
-        self.logger.update(sim_entropy=self.sim_trajectory.entropy.mean().item())
-        self.logger.update(sim_return=average_return)
-        self.logger.update(sim_scale=average_scale)
-        self.logger.update(sim_max_state=self.sim_trajectory.state.abs().max().item())
-        self.logger.update(sim_max_action=self.sim_trajectory.action.abs().max().item())
-        try:
-            r_ctrl = self.reward_model.reward_ctrl.mean().detach().item()
-            r_state = self.reward_model.reward_state.mean().detach().item()
-            self.logger.update(sim_reward_ctrl=r_ctrl)
-            self.logger.update(sim_reward_state=r_state)
-        except AttributeError:
-            pass
-        try:
-            r_o = self.reward_model.reward_dist_to_obj
-            r_g = self.reward_model.reward_dist_to_goal
-            self.logger.update(sim_reward_dist_to_obj=r_o.mean().detach().item())
-            self.logger.update(sim_reward_dist_to_goal=r_g.mean().detach().item())
-        except AttributeError:
-            pass
-
     def simulate_and_learn_policy(self):
         """
 
         :return:
         """
-        print(colorize("Optimizing policy with simulated data from the model", "yellow"))
+        print(colorize("\nOptimizing policy with simulated data from the model", "yellow"))
 
         self.dynamical_model.eval()
         self.sim_dataset.reset()
@@ -328,7 +297,7 @@ class ModelBasedAgent(AbstractAgent):
         trajectory = rollout_model(
             dynamical_model=self.dynamical_model,
             reward_model=self.reward_model,
-            policy=self.policy,
+            policy=self.algorithm.policy,
             initial_state=initial_states,
             max_steps=self.sim_num_steps,
             termination_model=self.termination_model,
@@ -344,16 +313,25 @@ class ModelBasedAgent(AbstractAgent):
         for _ in range(self.policy_opt_gradient_steps):
 
             def closure():
-                states = Observation(
-                    state=self.sim_dataset.sample_batch(self.policy_opt_batch_size)
-                )
+                states = self.sim_dataset.sample_batch(self.policy_opt_batch_size)
+                # TODO can be done by sampling from sim_trajectory
+                with torch.no_grad():
+                    trajectory = rollout_model(
+                        dynamical_model=self.dynamical_model,
+                        reward_model=self.reward_model,
+                        policy=self.algorithm.old_policy,
+                        initial_state=states,
+                        max_steps=self.sim_num_steps,
+                        termination_model=self.termination_model,
+                    )
+                    # trajectory = stack_list_of_tuples(trajectory)
                 self.optimizer.zero_grad()
-                losses = self.algorithm(states)
+                losses = self.algorithm(trajectory)
                 losses.combined_loss.backward()
                 return losses
 
             if self.train_steps % self.policy_update_frequency == 0:
-                cm = contextlib.nullcontext
+                cm = contextlib.nullcontext()
             else:
                 cm = DisableGradient(self.policy)
 
@@ -373,3 +351,34 @@ class ModelBasedAgent(AbstractAgent):
                 break
 
             self.algorithm.reset()
+
+    def _log_simulated_trajectory(self):
+        average_return = self.sim_trajectory.reward.sum(0).mean().item()
+        average_scale = (
+            torch.diagonal(self.sim_trajectory.next_state_scale_tril, dim1=-1, dim2=-2)
+                .square()
+                .sum(-1)
+                .sum(0)
+                .mean()
+                .sqrt()
+                .item()
+        ) if self.sim_trajectory.next_state_scale_tril.ndim > 1 else torch.nan
+        self.logger.update(sim_entropy=self.sim_trajectory.entropy.mean().item())
+        self.logger.update(sim_return=average_return)
+        self.logger.update(sim_scale=average_scale)
+        self.logger.update(sim_max_state=self.sim_trajectory.state.abs().max().item())
+        self.logger.update(sim_max_action=self.sim_trajectory.action.abs().max().item())
+        try:
+            r_ctrl = self.reward_model.reward_ctrl.mean().detach().item()
+            r_state = self.reward_model.reward_state.mean().detach().item()
+            self.logger.update(sim_reward_ctrl=r_ctrl)
+            self.logger.update(sim_reward_state=r_state)
+        except AttributeError:
+            pass
+        try:
+            r_o = self.reward_model.reward_dist_to_obj
+            r_g = self.reward_model.reward_dist_to_goal
+            self.logger.update(sim_reward_dist_to_obj=r_o.mean().detach().item())
+            self.logger.update(sim_reward_dist_to_goal=r_g.mean().detach().item())
+        except AttributeError:
+            pass

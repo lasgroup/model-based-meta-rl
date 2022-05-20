@@ -8,11 +8,15 @@ def get_argument_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser()
 
+    # Agent parameters
+    parser.add_argument("--agent-name", type=str, default="mpc_policy")
+    parser.add_argument("--exploration", type=str, default="thompson")
+
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--environment_max_steps", type=int, default=400)
     parser.add_argument("--train-episodes", type=int, default=20)
-    parser.add_argument("--test-episodes", type=int, default=1)
+    parser.add_argument("--test-episodes", type=int, default=2)
 
     # Environment parameters
     parser.add_argument("--pendulum-mass", type=float, default=0.3)
@@ -50,9 +54,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--value-function-non-linearity", type=str, default="ReLU")
     parser.add_argument("--value-function-tau", type=float, default=0)
 
-    # Agent parameters
-    parser.add_argument("--agent-name", type=str, default="mpc")
-    parser.add_argument("--exploration", type=str, default="thompson")
+    # Value function parameters
+    parser.add_argument("--policy-layers", type=int, nargs="*", default=[64, 64])
+    parser.add_argument("--policy-unbiased-head", action="store_false")  # TODO: Should be store_true
+    parser.add_argument("--policy-non-linearity", type=str, default="ReLU")
+    parser.add_argument("--policy-tau", type=float, default=0)
+    parser.add_argument("--policy-deterministic", action="store_true")
 
     # MPC parameters
     parser.add_argument("--mpc-solver", type=str, choices=["cem"], default="cem")
@@ -63,6 +70,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mpc-not-warm-start", type=bool, default=False)
     parser.add_argument("--mpc-default-action", type=str,
                         choices=["zero", "constant", "mean"], default="zero")
+
+    # PPO parameters
+    parser.add_argument("--ppo-opt-lr", type=float, default=5e-4)
+    parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
 
     # Planning parameters
 

@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from torch import nn
 
-from utils.get_agents import get_mpc_agent
+from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 
 from rllib.model import AbstractModel
 from rllib.reward.utilities import tolerance
@@ -67,10 +67,10 @@ class PendulumStateTransform(nn.Module):
         return states_
 
 
-def get_environment_and_agent(args: argparse.Namespace) -> (AbstractEnvironment, AbstractAgent):
+def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironment, AbstractAgent):
     """
     Creates an environment and agent with the given parameters
-    :param args: environment arguments
+    :param params: environment arguments
     :return: RL environment and agent
     """
     initial_state = torch.tensor([np.pi, 0.0])
@@ -79,14 +79,14 @@ def get_environment_and_agent(args: argparse.Namespace) -> (AbstractEnvironment,
         torch.tensor([-np.pi, -0.005]), torch.tensor([np.pi, +0.005])
     )
 
-    reward_model = PendulumReward(action_cost=args.action_cost)
+    reward_model = PendulumReward(action_cost=params.action_cost)
 
     environment = SystemEnvironment(
         InvertedPendulum(
-            mass=args.pendulum_mass,
-            length=args.pendulum_length,
-            friction=args.pendulum_friction,
-            step_size=args.pendulum_step_size
+            mass=params.pendulum_mass,
+            length=params.pendulum_length,
+            friction=params.pendulum_friction,
+            step_size=params.pendulum_step_size
         ),
         reward=reward_model,
         initial_state=initial_state,
@@ -101,14 +101,29 @@ def get_environment_and_agent(args: argparse.Namespace) -> (AbstractEnvironment,
 
     input_transform = PendulumStateTransform()
 
-    if args.agent_name == "mpc":
+    if params.agent_name == "mpc":
         agent = get_mpc_agent(
             environment=environment,
-            reward=reward_model,
+            reward_model=reward_model,
             transformations=transformations,
-            args=args,
+            params=params,
             input_transform=input_transform,
             initial_distribution=exploratory_distribution
+        )
+    elif params.agent_name == "mpc_policy":
+        agent = get_mpc_policy_agent(
+            environment=environment,
+            reward_model=reward_model,
+            transformations=transformations,
+            params=params,
+            input_transform=input_transform,
+            initial_distribution=exploratory_distribution
+        )
+    elif params.agent_name == "ppo":
+        agent = get_ppo_agent(
+            environment=environment,
+            params=params,
+            input_transform=input_transform
         )
     else:
         raise NotImplementedError

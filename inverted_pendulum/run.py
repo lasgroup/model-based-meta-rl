@@ -11,12 +11,13 @@ from utils.train_and_evaluate import train_and_evaluate_agent
 if __name__ == "__main__":
 
     parser = get_argument_parser()
-    args = DotMap(vars(parser.parse_args()))
+    params = DotMap(vars(parser.parse_args()))
 
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    torch.manual_seed(params.seed)
+    np.random.seed(params.seed)
+    torch.set_num_threads(1)
 
-    environment, agent = get_environment_and_agent(args)
+    environment, agent = get_environment_and_agent(params)
 
-    train_and_evaluate_agent(environment, agent, args)
+    train_and_evaluate_agent(environment, agent, params)
 
