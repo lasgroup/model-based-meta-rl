@@ -72,7 +72,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         choices=["zero", "constant", "mean"], default="zero")
 
     # PPO parameters
-    parser.add_argument("--ppo-opt-lr", type=float, default=5e-4)
+    parser.add_argument("--ppo-opt-lr", type=float, default=1e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
 
     # Planning parameters

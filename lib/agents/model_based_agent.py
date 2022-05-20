@@ -314,7 +314,7 @@ class ModelBasedAgent(AbstractAgent):
 
             def closure():
                 states = self.sim_dataset.sample_batch(self.policy_opt_batch_size)
-                # TODO can be done by sampling from sim_trajectory
+                # TODO: can be done by sampling from sim_trajectory
                 with torch.no_grad():
                     trajectory = rollout_model(
                         dynamical_model=self.dynamical_model,
@@ -350,7 +350,7 @@ class ModelBasedAgent(AbstractAgent):
             if self.early_stop(losses, **self.algorithm.info()):
                 break
 
-            self.algorithm.reset()
+        self.algorithm.reset()
 
     def _log_simulated_trajectory(self):
         average_return = self.sim_trajectory.reward.sum(0).mean().item()

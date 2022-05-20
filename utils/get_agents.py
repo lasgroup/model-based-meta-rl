@@ -6,6 +6,7 @@ import argparse
 from rllib.agent import PPOAgent
 from rllib.algorithms.ppo import PPO
 from torch import nn, optim
+from torch.nn.modules import loss
 
 from lib.agents.mpc_agent import MPCAgent
 from lib.agents.mpc_policy_agent import MPCPolicyAgent
@@ -145,7 +146,7 @@ def get_mpc_policy_agent(
     algorithm = PPO(
         policy=policy,
         critic=value_function,
-        num_policy_samples=16,
+        criterion=loss.MSELoss(reduction="mean"),
         gamma=params.gamma,
         epsilon=0.2,
         clamp_value=False
