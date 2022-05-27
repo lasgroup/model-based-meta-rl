@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from torch import nn
 
+from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 
 from rllib.model import AbstractModel
@@ -127,5 +128,8 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         )
     else:
         raise NotImplementedError
+
+    if params.exploration == "optimistic":
+        environment = HallucinatedEnvironmentWrapper(environment)
 
     return environment, agent

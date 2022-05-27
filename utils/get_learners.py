@@ -10,6 +10,8 @@ from rllib.algorithms.mpc import CEMShooting
 from rllib.model import AbstractModel, EnsembleModel, TransformedModel
 from rllib.value_function import AbstractValueFunction, NNValueFunction
 
+from lib.hucrl.hallucinated_model import HallucinatedModel
+
 
 def get_model(
         dim_state: int,
@@ -45,8 +47,10 @@ def get_model(
 
     params.update({"model": model.__class__.__name__})
 
-    # TODO: Add wrapper for hallucinated model
-    dynamical_model = TransformedModel(model, transformations)
+    if params.exploration == "optimistic":
+        dynamical_model = HallucinatedModel(model, transformations, beta=params.beta)
+    else:
+        dynamical_model = TransformedModel(model, transformations)
 
     return dynamical_model
 
@@ -93,6 +97,9 @@ def get_nn_policy(
     :param action_scale: Action scale
     :return: NN Policy
     """
+
+    if params.exploration == "optimistic":
+        dim_action = dim_action + dim_state
 
     policy = NNPolicy(
         dim_state=dim_state,
