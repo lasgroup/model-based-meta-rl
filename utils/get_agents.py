@@ -1,4 +1,4 @@
-from typing import Union, Callable, Iterable
+from typing import Union, Callable, Iterable, Tuple
 
 import torch
 import argparse
@@ -26,7 +26,7 @@ def get_mpc_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> AbstractAgent:
+) -> Tuple[MPCAgent, str]:
     """
     Get an MPC based agent
     :param environment: RL environment
@@ -86,7 +86,7 @@ def get_mpc_agent(
         comment=comment,
     )
 
-    return agent
+    return agent, comment
 
 
 def get_mpc_policy_agent(
@@ -97,7 +97,7 @@ def get_mpc_policy_agent(
         termination_model: Callable = None,
         input_transform: nn.Module = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> AbstractAgent:
+) -> Tuple[MPCPolicyAgent, str]:
     """
     Get an MPC based agent
     :param environment: RL environment
@@ -176,14 +176,14 @@ def get_mpc_policy_agent(
         comment=comment,
     )
 
-    return agent
+    return agent, comment
 
 
 def get_ppo_agent(
         environment: AbstractEnvironment,
         params: argparse.Namespace,
         input_transform: nn.Module = None
-) -> AbstractAgent:
+) -> Tuple[PPOAgent, str]:
     """
     Get an MPC based agent
     :param environment: RL environment
@@ -228,4 +228,4 @@ def get_ppo_agent(
         comment=comment
     )
 
-    return agent
+    return agent, comment

@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from torch import nn
 
+from utils.logger import Logger
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 
@@ -103,7 +104,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     input_transform = PendulumStateTransform()
 
     if params.agent_name == "mpc":
-        agent = get_mpc_agent(
+        agent, comment = get_mpc_agent(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
@@ -112,7 +113,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             initial_distribution=exploratory_distribution
         )
     elif params.agent_name == "mpc_policy":
-        agent = get_mpc_policy_agent(
+        agent, comment = get_mpc_policy_agent(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
@@ -121,13 +122,19 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             initial_distribution=exploratory_distribution
         )
     elif params.agent_name == "ppo":
-        agent = get_ppo_agent(
+        agent, comment = get_ppo_agent(
             environment=environment,
             params=params,
             input_transform=input_transform
         )
     else:
         raise NotImplementedError
+
+    agent.logger = Logger(
+        name=f"InvertedPendulum_{params.agent_name}",
+        comment=comment,
+        use_wandb=True
+    )
 
     if params.exploration == "optimistic":
         environment = HallucinatedEnvironmentWrapper(environment)
