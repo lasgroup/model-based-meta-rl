@@ -3,8 +3,8 @@ import numpy as np
 
 from dotmap import DotMap
 
-from inverted_pendulum.inverted_pendulum_utils import get_environment_and_agent
-from inverted_pendulum.parser import get_argument_parser
+from experiments.inverted_pendulum.inverted_pendulum_utils import get_environment_and_agent
+from experiments.inverted_pendulum.parser import get_argument_parser
 from utils.train_and_evaluate import train_and_evaluate_agent
 
 
