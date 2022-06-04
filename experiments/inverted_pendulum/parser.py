@@ -10,7 +10,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Agent parameters
     parser.add_argument("--agent-name", type=str, default="mpc_policy")
-    parser.add_argument("--exploration", type=str, default="thompson")
+    parser.add_argument("--exploration", type=str, default="optimistic")
+    parser.add_argument("--beta", type=float, default=1.0)
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
@@ -78,4 +79,3 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Planning parameters
 
     return parser
-

@@ -13,8 +13,8 @@ class HallucinatedEnvironmentWrapper:
 
         assert not self._base_env.discrete_action and not self._base_env.discrete_state
 
-        self.hall_shape = (self._base_env.dim_state, )
-        self.dim_action = self._base_env.dim_action + self._base_env.dim_state
+        self.hall_shape = (self._base_env.dim_state[0], )
+        self.dim_action = self._base_env.dim_action[0] + self._base_env.dim_state[0]
         self.action_space = Box(
             low=np.concatenate((self._base_env.action_space.low, -np.ones(self.hall_shape))),
             high=np.concatenate((self._base_env.action_space.high, np.ones(self.hall_shape))),
@@ -24,9 +24,6 @@ class HallucinatedEnvironmentWrapper:
 
     def __getattr__(self, name: str):
         return getattr(self._base_env, name)
-
-    def __setattr__(self, name, value):
-        setattr(self._base_env, name, value)
 
     @property
     def original_dim_action(self) -> Tuple[int]:

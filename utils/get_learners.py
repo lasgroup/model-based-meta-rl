@@ -82,8 +82,8 @@ def get_value_function(
 
 
 def get_nn_policy(
-        dim_state: int,
-        dim_action: int,
+        dim_state: tuple,
+        dim_action: tuple,
         input_transform: nn.Module,
         action_scale: Union[SupportsFloat, np.ndarray],
         params: argparse.Namespace,
@@ -99,7 +99,7 @@ def get_nn_policy(
     """
 
     if params.exploration == "optimistic":
-        dim_action = dim_action + dim_state
+        dim_action = (dim_action[0] + dim_state[0],)
 
     policy = NNPolicy(
         dim_state=dim_state,

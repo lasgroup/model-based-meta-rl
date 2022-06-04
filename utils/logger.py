@@ -46,7 +46,7 @@ class Logger(object):
         log_dir = f"runs/{name}/{comment}"
         if use_wandb:
             wandb.init(
-                project="meta-mbrl",
+                project="Meta-MBRL",
                 name=name,
                 notes=comment
             )
