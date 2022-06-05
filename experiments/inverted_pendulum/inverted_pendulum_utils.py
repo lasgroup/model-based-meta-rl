@@ -131,7 +131,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         raise NotImplementedError
 
     agent.logger = Logger(
-        name=f"InvertedPendulum_{params.agent_name}",
+        name=f"inverted_pendulum_{params.agent_name}",
         comment=comment,
         use_wandb=True
     )

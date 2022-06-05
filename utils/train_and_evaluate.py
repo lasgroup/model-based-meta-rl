@@ -19,7 +19,7 @@ def train_and_evaluate_agent(environment, agent, params):
             agent,
             environment,
             num_episodes=params.train_episodes,
-            max_steps=params.environment_max_steps,
+            max_steps=params.max_steps,
             plot_flag=False,
             callback_frequency=1,
             print_frequency=1,
@@ -36,13 +36,13 @@ def train_and_evaluate_agent(environment, agent, params):
             agent,
             environment,
             num_episodes=params.test_episodes,
-            max_steps=params.environment_max_steps,
-            render=False,
+            max_steps=params.max_steps,
+            render=True,
         )
 
-        returns = np.mean(agent.logger.get("environment_return")[-params.test_episodes:])
-        metrics.update({"test/test_env_returns": returns})
-        returns = np.mean(agent.logger.get("environment_return")[: -params.test_episodes])
-        metrics.update({"test/train_env_returns": returns})
+        returns = np.mean(agent.logger.get("eval_return-0"))
+        metrics.update({"test_returns": returns})
+        returns = np.mean(agent.logger.get("train_return-0"))
+        metrics.update({"train_returns": returns})
 
         agent.logger.log_hparams(params.toDict(), metrics)

@@ -280,9 +280,14 @@ class ModelBasedAgent(AbstractAgent):
         )
 
         if self.sim_initial_states_num_trajectories > 0:
-            initial_states_ = self.initial_distribution.sample(
-                (self.sim_initial_dist_num_trajectories, )
-            )
+            if self.initial_distribution is not None:
+                initial_states_ = self.initial_distribution.sample(
+                    (self.sim_initial_dist_num_trajectories, )
+                )
+            else:
+                initial_states_ = self.initial_states.sample_batch(
+                    self.sim_initial_dist_num_trajectories
+                )
             initial_states = torch.cat((initial_states, initial_states_), dim=0)
 
         if self.sim_memory_num_trajectories > 0:

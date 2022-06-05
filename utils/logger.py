@@ -50,6 +50,8 @@ class Logger(object):
                 name=name,
                 notes=comment
             )
+            wandb.define_metric("test_returns", summary="mean")
+            wandb.define_metric("train_returns", summary="mean")
         self.log_dir = safe_make_dir(log_dir)
         self.episode = 0
         self.keys = set()
@@ -183,8 +185,7 @@ class Logger(object):
         """Log hyper parameters together with a metric dictionary."""
         if self.use_wandb:  # Do not save.
             wandb.config.update(hparams)
-        for key, value in metrics.items():
-            wandb.run.summary[key] = value
+        wandb.log(metrics)
 
     def delete_directory(self):
         """Delete writer directory.

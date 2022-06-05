@@ -25,18 +25,19 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--max_steps", type=int, default=400)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=2)
 
     # Environment parameters
-    parser.add_argument("--pendulum-mass", type=float, default=0.3)
-    parser.add_argument("--pendulum-length", type=float, default=0.5)
-    parser.add_argument("--pendulum-friction", type=float, default=0.005)
-    parser.add_argument("--pendulum-step-size", type=float, default=0.0125)
+    parser.add_argument(
+        "--env-config-file",
+        type=str,
+        default="cart-pole-mujoco.yaml",
+        help="Choose one of the pre-defined environment config files"
+    )
+    parser.add_argument("--env-config-path", type=str, default="config/envs")
 
     # Reward parameters
-    parser.add_argument("--action-cost", type=float, default=0.1)
     parser.add_argument("--gamma", type=float, default=0.99)
 
     # Model parameters
