@@ -2,6 +2,7 @@
 import json
 import os
 import shutil
+import sys
 from collections import defaultdict
 from datetime import datetime
 
@@ -34,16 +35,21 @@ class Logger(object):
         Flag that indicates whether or not to save the results in the tensorboard.
     """
 
-    def __init__(self, name, comment="", use_wandb=True):
+    def __init__(self, name, comment="", filename="sysout", save_statistics=False, use_wandb=True):
         self.statistics = list()
         self.current = dict()
         self.all = defaultdict(list)
         self.use_wandb = use_wandb
+        self.save_statistics = False
 
         now = datetime.now()
         current_time = now.strftime("%b%d_%H-%M-%S")
         comment = comment + "_" + current_time if len(comment) else current_time
         log_dir = f"runs/{name}/{comment}"
+        self.log_dir = safe_make_dir(log_dir)
+        self.console = sys.stdout
+        self.file = open(os.path.join(log_dir, filename), 'w')
+
         if use_wandb:
             wandb.init(
                 project="Meta-MBRL",
@@ -52,9 +58,6 @@ class Logger(object):
             )
             wandb.define_metric("test_returns", summary="mean")
             wandb.define_metric("train_returns", summary="mean")
-        self.log_dir = safe_make_dir(log_dir)
-        self.episode = 0
-        self.keys = set()
 
     def __len__(self):
         """Return the number of episodes."""
@@ -209,3 +212,18 @@ class Logger(object):
             self.load_from_json()  # If json files in log_dir, then load them.
         except FileNotFoundError:
             pass
+
+    def write(self, message):
+        self.console.write(message)
+        self.file.write(message)
+
+    def flush(self):
+        self.console.flush()
+        self.file.flush()
+        self.episode = 0
+        self.keys = set()
+
+    def close(self):
+        if self.save_statistics:
+            self.export_to_json()
+        self.file.close()

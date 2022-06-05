@@ -46,3 +46,4 @@ def train_and_evaluate_agent(environment, agent, params):
         metrics.update({"train_returns": returns})
 
         agent.logger.log_hparams(params.toDict(), metrics)
+        agent.logger.close()

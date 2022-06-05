@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 import torch
 import numpy as np
@@ -64,8 +65,11 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     agent.logger = Logger(
         name=params.env_config_file.replace("-", "_").replace(".yaml", "").replace("mujoco", "") + params.agent_name,
         comment=comment,
+        save_statistics=params.save_statistics,
         use_wandb=True
     )
+    if params.log_to_file:
+        sys.stdout = agent.logger
 
     if params.exploration == "optimistic":
         environment = HallucinatedEnvironmentWrapper(environment)
