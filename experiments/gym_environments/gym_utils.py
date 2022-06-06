@@ -62,9 +62,13 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     else:
         raise NotImplementedError
 
+    name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
+           f"_{params.agent_name}" \
+           f"_{params.exploration}"
     agent.logger = Logger(
-        name=params.env_config_file.replace("-", "_").replace(".yaml", "").replace("mujoco", "") + params.agent_name,
+        name=name,
         comment=comment,
+        results_dir=params.results_dir,
         save_statistics=params.save_statistics,
         use_wandb=True
     )

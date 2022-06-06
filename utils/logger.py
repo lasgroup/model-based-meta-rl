@@ -35,17 +35,23 @@ class Logger(object):
         Flag that indicates whether or not to save the results in the tensorboard.
     """
 
-    def __init__(self, name, comment="", filename="sysout", save_statistics=False, use_wandb=True):
+    def __init__(self,
+                 name,
+                 comment="",
+                 filename="sysout",
+                 results_dir="runs",
+                 save_statistics=False,
+                 use_wandb=True):
         self.statistics = list()
         self.current = dict()
         self.all = defaultdict(list)
         self.use_wandb = use_wandb
-        self.save_statistics = False
+        self.save_statistics = save_statistics
 
         now = datetime.now()
         current_time = now.strftime("%b%d_%H-%M-%S")
         comment = comment + "_" + current_time if len(comment) else current_time
-        log_dir = f"runs/{name}/{comment}"
+        log_dir = f"{results_dir}/{name}/{comment}"
         self.log_dir = safe_make_dir(log_dir)
         self.console = sys.stdout
         self.file = open(os.path.join(log_dir, filename), 'w')
@@ -54,7 +60,8 @@ class Logger(object):
             wandb.init(
                 project="Meta-MBRL",
                 name=name,
-                notes=comment
+                notes=comment,
+                dir=os.path.join(log_dir, "wandb")
             )
             wandb.define_metric("test_returns", summary="mean")
             wandb.define_metric("train_returns", summary="mean")
@@ -189,6 +196,8 @@ class Logger(object):
         if self.use_wandb:  # Do not save.
             wandb.config.update(hparams)
         wandb.log(metrics)
+        if self.save_statistics:
+            self.export_to_json()
 
     def delete_directory(self):
         """Delete writer directory.
@@ -222,8 +231,3 @@ class Logger(object):
         self.file.flush()
         self.episode = 0
         self.keys = set()
-
-    def close(self):
-        if self.save_statistics:
-            self.export_to_json()
-        self.file.close()

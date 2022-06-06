@@ -21,6 +21,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = "thompson_sampling",
             gamma: float = 1.0,
+            sim_num_steps: int = 400,
             tensorboard=False,
             comment="",
     ):
@@ -48,7 +49,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             policy_update_frequency=1,
             optimizer=policy_optimizer,
             max_memory=10000,
-            sim_num_steps=32,
+            sim_num_steps=sim_num_steps,
             sim_refresh_interval=400,
             initial_distribution=initial_distribution,
             exploration_scheme=exploration_scheme,

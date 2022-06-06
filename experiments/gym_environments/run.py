@@ -17,6 +17,7 @@ if __name__ == "__main__":
     params = vars(parser.parse_args())
     with open(
         os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
             params["env_config_path"],
             params["env_config_file"],
         ),

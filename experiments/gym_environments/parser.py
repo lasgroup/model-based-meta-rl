@@ -19,7 +19,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--exploration",
         type=str,
         default="optimistic",
-        choices=["optimistic, greedy, thompson"]
+        choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
 
@@ -27,6 +27,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=2)
+
+    # Logger Parameters
+    parser.add_argument("--results-dir", type=str, default="results")
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
 
@@ -38,6 +41,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument("--env-config-path", type=str, default="config/envs")
+    parser.add_argument("--render", type=bool, default=True)
+    parser.add_argument("--max-steps", type=int, default=400)
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)

@@ -37,7 +37,7 @@ def train_and_evaluate_agent(environment, agent, params):
             environment,
             num_episodes=params.test_episodes,
             max_steps=params.max_steps,
-            render=True,
+            render=params.render,
         )
 
         returns = np.mean(agent.logger.get("eval_return-0"))
