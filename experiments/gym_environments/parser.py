@@ -32,7 +32,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--results-dir", type=str, default="results")
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
-    parser.add_argument("--offline_logger", type=bool, default=False)
+    parser.add_argument("--offline-logger", type=bool, default=False)
 
     # Environment parameters
     parser.add_argument(
@@ -42,7 +42,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument("--env-config-path", type=str, default="config/envs")
-    parser.add_argument("--render", type=bool, default=True)
+    parser.add_argument("--render", type=bool, default=False)
     parser.add_argument("--max-steps", type=int, default=400)
 
     # Reward parameters
