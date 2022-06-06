@@ -41,7 +41,9 @@ class Logger(object):
                  filename="sysout",
                  results_dir="runs",
                  save_statistics=False,
-                 use_wandb=True):
+                 use_wandb=True,
+                 offline_mode=False
+                 ):
         self.statistics = list()
         self.current = dict()
         self.all = defaultdict(list)
@@ -49,9 +51,9 @@ class Logger(object):
         self.save_statistics = save_statistics
 
         now = datetime.now()
-        current_time = now.strftime("%b%d_%H-%M-%S")
+        current_time = now.strftime("%b%d_%H_%M_%S")
         comment = comment + "_" + current_time if len(comment) else current_time
-        log_dir = f"{results_dir}/{name}/{comment}"
+        log_dir = f"{results_dir}/{name}/{comment.replace(' ','_')}"
         self.log_dir = safe_make_dir(log_dir)
         self.console = sys.stdout
         self.file = open(os.path.join(log_dir, filename), 'w')
@@ -61,7 +63,8 @@ class Logger(object):
                 project="Meta-MBRL",
                 name=name,
                 notes=comment,
-                dir=os.path.join(log_dir, "wandb")
+                dir=log_dir,
+                mode="offline" if offline_mode else "online"
             )
             wandb.define_metric("test_returns", summary="mean")
             wandb.define_metric("train_returns", summary="mean")

@@ -231,15 +231,16 @@ class ModelBasedAgent(AbstractAgent):
         if self.model_learn_num_iter > 0:
             print(colorize("Training Dynamics Model", "yellow"))
 
-            train_model(
-                self.dynamical_model.base_model,
-                train_set=self.dataset,
-                max_iter=self.model_learn_num_iter,
-                optimizer=self.model_optimizer,
-                logger=self.logger,
-                batch_size=self.model_learn_batch_size,
-                epsilon=-1.0,
-            )
+            if len(self.dataset) >= self.model_learn_batch_size:
+                train_model(
+                    self.dynamical_model.base_model,
+                    train_set=self.dataset,
+                    max_iter=self.model_learn_num_iter,
+                    optimizer=self.model_optimizer,
+                    logger=self.logger,
+                    batch_size=self.model_learn_batch_size,
+                    epsilon=-1.0,
+                )
 
     def simulate_and_learn_policy(self):
         """

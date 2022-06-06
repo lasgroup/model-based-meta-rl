@@ -75,7 +75,7 @@ def get_mpc_agent(
 
     # Define Agent
     model_name = dynamical_model.base_model.name
-    comment = f"{model_name} {params.exploration.capitalize()} {params.action_cost}"
+    comment = f"{model_name} {params.exploration.capitalize()}"
 
     agent = MPCAgent(
         policy,
@@ -162,7 +162,7 @@ def get_mpc_policy_agent(
 
     # Define Agent
     model_name = dynamical_model.base_model.name
-    comment = f"{model_name} {params.exploration.capitalize()} {params.action_cost}"
+    comment = f"{model_name} {params.exploration.capitalize()}"
 
     agent = MPCPolicyAgent(
         dynamical_model=dynamical_model,
@@ -218,7 +218,7 @@ def get_ppo_agent(
 
     # Define Agent
     agent_name = PPOAgent.name
-    comment = f"{agent_name} {params.exploration.capitalize()} {params.action_cost}"
+    comment = f"{agent_name} {params.exploration.capitalize()}"
 
     agent = PPOAgent(
         policy=policy,

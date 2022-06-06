@@ -29,12 +29,10 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
 
     reward_model = environment.env.reward_model()
 
+    # TODO: Add more transformations
     transformations = [
         MeanFunction(DeltaState()),
-        StateNormalizer(dim=environment.dim_state),
         ActionScaler(scale=environment.action_scale),
-        RewardNormalizer(dim=environment.dim_reward),
-        NextStateNormalizer(dim=environment.dim_state),
     ]
 
     if params.agent_name == "mpc":
@@ -70,7 +68,8 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         comment=comment,
         results_dir=params.results_dir,
         save_statistics=params.save_statistics,
-        use_wandb=True
+        use_wandb=True,
+        offline_mode=params.offline_logger
     )
     if params.log_to_file:
         sys.stdout = agent.logger

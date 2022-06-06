@@ -136,7 +136,8 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         comment=comment,
         save_statistics=params.save_statistics,
         results_dir="results",
-        use_wandb=True
+        use_wandb=True,
+        offline_mode=params.offline_logger
     )
     if params.log_to_file:
         sys.stdout = agent.logger

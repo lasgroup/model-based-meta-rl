@@ -11,7 +11,7 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ["ant.yaml", "cart-pole-mujoco.yaml", "half-cheetah.yaml", "pusher.yaml", "reacher2d.yaml"],
+    "env-config-file": ["cart-pole-mujoco.yaml"],
     "agent-name": ["ppo", "mpc", "mpc_policy"],
     "exploration": ["optimistic", "thompson", "greedy"]
 })
@@ -29,7 +29,7 @@ def main(args):
     for idx in possible_configs:
         # transfer flags from the args
         flags = copy.deepcopy(args.__dict__)
-        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long"]:
+        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long", "render", "offline_logger"]:
             flags.pop(key)
         for i, param in enumerate(search_configs.keys()):
             flags[param] = search_configs[param][idx[i]]
@@ -74,6 +74,7 @@ if __name__ == '__main__':
     parser.add_argument("--test-episodes", type=int, default=50)
     parser.add_argument("--save-statistics", type=bool, default=True)
     parser.add_argument("--render", type=bool, default=False)
+    parser.add_argument("--offline-logger")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")

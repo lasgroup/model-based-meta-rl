@@ -31,6 +31,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
 
+    # Logger Parameters
+    parser.add_argument("--results-dir", type=str, default="results")
+    parser.add_argument("--log-to-file", type=bool, default=True)
+    parser.add_argument("--save-statistics", action="store_true")
+    parser.add_argument("--offline_logger", type=bool, default=False)
+
     # Environment parameters
     parser.add_argument("--pendulum-mass", type=float, default=0.3)
     parser.add_argument("--pendulum-length", type=float, default=0.5)
