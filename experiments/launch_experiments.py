@@ -16,7 +16,6 @@ search_configs = OrderedDict({
     "exploration": ["optimistic", "thompson", "greedy"]
 })
 
-
 def main(args):
     rds = np.random.RandomState(args.seed)
     init_seeds = list(rds.randint(0, 10 ** 6, size=(100,)))
@@ -29,7 +28,7 @@ def main(args):
     for idx in possible_configs:
         # transfer flags from the args
         flags = copy.deepcopy(args.__dict__)
-        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long", "render", "offline_logger"]:
+        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long"]:
             flags.pop(key)
         for i, param in enumerate(search_configs.keys()):
             flags[param] = search_configs[param][idx[i]]
@@ -62,16 +61,16 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    # Experiment Name
+    # Experiment Parameters
     parser.add_argument("--exp-name", type=str, default="InitialTest")
     parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
     parser.add_argument("--dry", type=bool, default=True)
     parser.add_argument("--long", type=bool, default=True)
+    parser.add_argument("--seed", type=int, default=1)
 
     # Training Parameters
-    parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--train-episodes", type=int, default=1000)
-    parser.add_argument("--test-episodes", type=int, default=50)
+    parser.add_argument("--train-episodes", type=int, default=500)
+    parser.add_argument("--test-episodes", type=int, default=20)
     parser.add_argument("--save-statistics", type=bool, default=True)
     parser.add_argument("--render", type=bool, default=False)
     parser.add_argument("--offline-logger")
