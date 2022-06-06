@@ -29,7 +29,7 @@ def main(args):
     for idx in possible_configs:
         # transfer flags from the args
         flags = copy.deepcopy(args.__dict__)
-        for key in ["seed", "exp_name", "num_seeds_per_hparam"]:
+        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long"]:
             flags.pop(key)
         for i, param in enumerate(search_configs.keys()):
             flags[param] = search_configs[param][idx[i]]
@@ -54,8 +54,8 @@ def main(args):
         command_list,
         mode='euler',
         promt=True,
-        dry=True,
-        long=True
+        dry=args.dry,
+        long=args.long
     )
 
 
@@ -65,6 +65,8 @@ if __name__ == '__main__':
     # Experiment Name
     parser.add_argument("--exp-name", type=str, default="InitialTest")
     parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
+    parser.add_argument("--dry", type=bool, default=True)
+    parser.add_argument("--long", type=bool, default=True)
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
