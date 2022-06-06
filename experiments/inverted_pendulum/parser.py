@@ -28,21 +28,19 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=2)
-    parser.add_argument("--log-to-file", type=bool, default=True)
-    parser.add_argument("--save-statistics", action="store_true")
 
     # Logger Parameters
     parser.add_argument("--results-dir", type=str, default="results")
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
-    parser.add_argument("--offline-logger", type=bool, default=False)
+    parser.add_argument("--offline-logger", action="store_true")
 
     # Environment parameters
     parser.add_argument("--pendulum-mass", type=float, default=0.3)
     parser.add_argument("--pendulum-length", type=float, default=0.5)
     parser.add_argument("--pendulum-friction", type=float, default=0.005)
     parser.add_argument("--pendulum-step-size", type=float, default=0.0125)
-    parser.add_argument("--render", type=bool, default=False)
+    parser.add_argument("--render", action="store_true")
 
     # Reward parameters
     parser.add_argument("--action-cost", type=float, default=0.1)

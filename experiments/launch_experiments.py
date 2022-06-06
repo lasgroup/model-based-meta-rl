@@ -64,19 +64,21 @@ if __name__ == '__main__':
     # Experiment Parameters
     parser.add_argument("--exp-name", type=str, default="InitialTest")
     parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
-    parser.add_argument("--dry", type=bool, default=True)
-    parser.add_argument("--long", type=bool, default=True)
+    parser.add_argument("--dry", action="store_true")
+    parser.add_argument("--long", action="store_true")
     parser.add_argument("--seed", type=int, default=1)
 
     # Training Parameters
     parser.add_argument("--train-episodes", type=int, default=500)
     parser.add_argument("--test-episodes", type=int, default=20)
-    parser.add_argument("--save-statistics", type=bool, default=True)
-    parser.add_argument("--render", type=str, default="False")  # Parse bool without action as strings
-    parser.add_argument("--offline-logger")
+    parser.add_argument("--save-statistics", action="store_true")
+    parser.add_argument("--render", action="store_true")
+    parser.add_argument("--offline-logger", action="store_true")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")
 
     args = parser.parse_args()
     main(args)
+
+# python experiments/launch_experiments.py --exp-name Initialest --dry --long --save-statistics --offline-logger
