@@ -137,10 +137,6 @@ class ModelBasedAgent(AbstractAgent):
         if exploration_scheme == "thompson":
             self.dynamical_model.set_prediction_strategy("posterior")
 
-        logger_layout = get_logger_layout(num_heads)
-        if self.logger.writer is not None:
-            self.logger.writer.add_custom_scalars(logger_layout)
-
     def act(self, state: torch.Tensor) -> torch.Tensor:
         """
         :param state:
