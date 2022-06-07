@@ -15,7 +15,6 @@ class MPCAgent(ModelBasedAgent):
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = "thompson_sampling",
             gamma: float = 1.0,
-            sim_num_steps: int = 400,
             tensorboard=False,
             comment="",
     ):
@@ -38,7 +37,7 @@ class MPCAgent(ModelBasedAgent):
             bootstrap=True,
             policy_opt_num_iter=0,
             max_memory=10000,
-            sim_num_steps=sim_num_steps,
+            sim_num_steps=32,
             initial_distribution=initial_distribution,
             exploration_scheme=exploration_scheme,
             gamma=gamma,

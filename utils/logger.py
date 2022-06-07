@@ -58,6 +58,8 @@ class Logger(object):
         self.console = sys.stdout
         self.file = open(os.path.join(log_dir, filename), 'w')
 
+        if offline_mode:
+            os.environ["WANDB_API_KEY"] = os.getenv("WANDB_API_KEY")
         if use_wandb:
             wandb.init(
                 project="Meta-MBRL",

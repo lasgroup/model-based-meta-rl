@@ -83,7 +83,6 @@ def get_mpc_agent(
         exploration_scheme=params.exploration,
         initial_distribution=initial_distribution,
         gamma=params.gamma,
-        sim_num_steps=params.max_steps,
         comment=comment,
     )
 
@@ -174,7 +173,6 @@ def get_mpc_policy_agent(
         exploration_scheme=params.exploration,
         initial_distribution=initial_distribution,
         gamma=params.gamma,
-        sim_num_steps=params.max_steps,
         comment=comment,
     )
 
