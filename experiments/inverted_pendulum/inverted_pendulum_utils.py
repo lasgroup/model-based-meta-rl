@@ -48,7 +48,6 @@ class PendulumReward(AbstractModel):
         return cost.unsqueeze(-1), torch.zeros(1)
 
 
-# TODO: From H-UCRL
 class PendulumStateTransform(nn.Module):
     """Transform pendulum states to cos, sin, angular_velocity."""
 
@@ -96,7 +95,6 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         termination_model=None,
     )
 
-    # TODO: Check where these transformations are used.
     transformations = [
         ActionScaler(scale=environment.action_scale),
         MeanFunction(DeltaState())

@@ -15,10 +15,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="mpc_policy",
         choices=["mpc", "mpc_policy", "ppo"]
     )
+    # TODO: Check where exploration is used
     parser.add_argument(
         "--exploration",
         type=str,
-        default="thompson",
+        default="optimistic",
         choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
@@ -38,7 +39,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="cart-pole-mujoco.yaml",
+        default="ant.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument("--env-config-path", type=str, default="config/envs")

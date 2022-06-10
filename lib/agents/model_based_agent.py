@@ -55,7 +55,7 @@ class ModelBasedAgent(AbstractAgent):
             sim_num_steps: int = 20,
             sim_initial_states_num_trajectories: int = 8,
             sim_initial_dist_num_trajectories: int = 8,
-            sim_memory_num_trajectories: int = 0,
+            sim_memory_num_trajectories: int = 16,
             sim_max_memory: int = 10000,
             sim_refresh_interval: int = 1,
             sim_num_subsample: int = 1,
@@ -162,9 +162,11 @@ class ModelBasedAgent(AbstractAgent):
         :return:
         """
         super().observe(observation)
-        self.dataset.append(observation)
+        if self.training:
+            self.dataset.append(observation)
         if self.new_episode:
-            self.initial_states.append(observation.state.unsqueeze(0))
+            if self.training:
+                self.initial_states.append(observation.state.unsqueeze(0))
             self.new_episode = False
 
     def start_episode(self):
@@ -289,6 +291,7 @@ class ModelBasedAgent(AbstractAgent):
 
         if self.sim_memory_num_trajectories > 0:
             obs, *_ = self.dataset.sample_batch(self.sim_memory_num_trajectories)
+            # TODO: alternate: remove transforms dataset and inverse from here, Inverse transforms are required now
             for transform in self.dataset.transformations:
                 obs = transform.inverse(obs)
             initial_states_ = obs.state[:, 0, :]

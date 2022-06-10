@@ -41,6 +41,7 @@ class Logger(object):
                  filename="sysout",
                  results_dir="runs",
                  save_statistics=False,
+                 log_episodes=False,
                  use_wandb=True,
                  offline_mode=False
                  ):
@@ -49,6 +50,10 @@ class Logger(object):
         self.all = defaultdict(list)
         self.use_wandb = use_wandb
         self.save_statistics = save_statistics
+        self.log_episodes = log_episodes
+
+        self.episode = 0
+        self.keys = set()
 
         now = datetime.now()
         current_time = now.strftime("%b%d_%H_%M_%S")
@@ -135,11 +140,11 @@ class Logger(object):
 
             self.all[key].append(value)
 
-            # if self.use_wandb is not None:
-            #     wandb.log(
-            #         {f"episode_{self.episode}/{key}": self.current[key][1]},
-            #         step=self.current[key][0],
-            #     )
+            if self.use_wandb is not None and self.log_episodes:
+                wandb.log(
+                    {f"episode_{self.episode}/{key}": self.current[key][1]},
+                    step=self.current[key][0],
+                )
 
     def end_episode(self, **kwargs):
         """Finalize collected data and add final fixed values.
@@ -234,5 +239,3 @@ class Logger(object):
     def flush(self):
         self.console.flush()
         self.file.flush()
-        self.episode = 0
-        self.keys = set()
