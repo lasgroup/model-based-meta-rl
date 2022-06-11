@@ -4,6 +4,7 @@ from collections import OrderedDict
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
 import experiments.gym_environments.run
+from datetime import datetime
 import argparse
 import numpy as np
 import copy
@@ -11,10 +12,11 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ["cart-pole-mujoco.yaml"],
+    "env-config-file": ["cart-pole-mujoco.yaml", "ant.yaml", "half-cheetah.yaml", "pusher.yaml", "reacher2d.yaml"],
     "agent-name": ["ppo", "mpc", "mpc_policy"],
     "exploration": ["optimistic", "thompson", "greedy"]
 })
+
 
 def main(args):
     rds = np.random.RandomState(args.seed)
@@ -33,19 +35,21 @@ def main(args):
         for i, param in enumerate(search_configs.keys()):
             flags[param] = search_configs[param][idx[i]]
 
-        flags_hash = hash_dict(flags)
         exp_name = f"{flags['env-config-file'].replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
                    f"_{flags['agent-name']}" \
                    f"_{flags['exploration']}"
-        exp_path = os.path.join(exp_base_path, exp_name)
-        flags['results-dir'] = os.path.join(exp_path, flags_hash)
+        current_time = datetime.now().strftime("%b%d_%H_%M_%S")
+        exp_path = os.path.join(exp_base_path, f"{exp_name}_{current_time}")
 
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
 
         for j in range(args.num_seeds_per_hparam):
             seed = init_seeds[j]
-            cmd = generate_base_command(experiments.gym_environments.run, flags=dict(**flags, **{'seed': seed}))
+            flags_ = dict(**flags, **{'seed': seed})
+            flags_hash = hash_dict(flags_)
+            flags_['log-dir'] = os.path.join(exp_path, flags_hash)
+            cmd = generate_base_command(experiments.gym_environments.run, flags=flags_)
             command_list.append(cmd)
 
     # submit jobs
@@ -62,7 +66,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Experiment Parameters
-    parser.add_argument("--exp-name", type=str, default="InitialTest")
+    parser.add_argument("--exp-name", type=str, default="initial_test")
     parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
     parser.add_argument("--dry", action="store_true")
     parser.add_argument("--long", action="store_true")
@@ -81,4 +85,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name Initialest --dry --long --save-statistics --offline-logger
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --save-statistics --offline-logger

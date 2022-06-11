@@ -39,7 +39,7 @@ class Logger(object):
                  name,
                  comment="",
                  filename="sysout",
-                 results_dir="runs",
+                 log_dir=None,
                  save_statistics=False,
                  log_episodes=False,
                  use_wandb=True,
@@ -58,7 +58,8 @@ class Logger(object):
         now = datetime.now()
         current_time = now.strftime("%b%d_%H_%M_%S")
         comment = comment + "_" + current_time if len(comment) else current_time
-        log_dir = f"{results_dir}/{name}/{comment.replace(' ','_')}"
+        if log_dir is None:
+            log_dir = f"runs/{name}/{comment.replace(' ','_')}"
         self.log_dir = safe_make_dir(log_dir)
         self.console = sys.stdout
         self.file = open(os.path.join(log_dir, filename), 'w')

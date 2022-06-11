@@ -30,7 +30,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--test-episodes", type=int, default=2)
 
     # Logger Parameters
-    parser.add_argument("--results-dir", type=str, default="results")
+    parser.add_argument("--log-dir", type=str, default=None)
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")

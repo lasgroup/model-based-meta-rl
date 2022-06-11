@@ -66,7 +66,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     agent.logger = Logger(
         name=name,
         comment=comment,
-        results_dir=params.results_dir,
+        log_dir=params.log_dir,
         save_statistics=params.save_statistics,
         use_wandb=True,
         offline_mode=params.offline_logger
