@@ -1,4 +1,4 @@
--e git+https://github.com/sebascuri/rllib.git@master#egg=rllib
+-e git+https://github.com/arbhardwaj98/rllib.git@master#egg=rllib
 torch~=1.11.0
 numpy>=1.20.0
 gpytorch~=1.1.1
