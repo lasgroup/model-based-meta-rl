@@ -34,12 +34,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")
+    parser.add_argument("--use-wandb", action="store_true")
 
     # Environment parameters
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="ant.yaml",
+        default="cart-pole-mujoco.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument("--env-config-path", type=str, default="config/envs")
@@ -48,6 +49,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)
+    parser.add_argument("--use-action-cost", action="store_true")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")

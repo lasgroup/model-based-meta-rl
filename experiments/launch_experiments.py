@@ -77,6 +77,8 @@ if __name__ == '__main__':
     parser.add_argument("--test-episodes", type=int, default=20)
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--render", action="store_true")
+    parser.add_argument("--use-wandb", action="store_true")
+    parser.add_argument("--use-action-cost", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")
 
     # Model parameters
@@ -85,4 +87,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --dry --long --save-statistics --offline-logger
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --save-statistics --use-wandb --offline-logger

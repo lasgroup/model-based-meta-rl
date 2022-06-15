@@ -24,7 +24,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     environment = GymEnvironment(
         env_name=params["name"],
         params=params,
-        ctrl_cost_weight=params["action_cost"]
+        ctrl_cost_weight=params["action_cost"] if params["use_action_cost"] else 0.0
     )
 
     reward_model = environment.env.reward_model()
@@ -68,7 +68,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         comment=comment,
         log_dir=params.log_dir,
         save_statistics=params.save_statistics,
-        use_wandb=True,
+        use_wandb=params.use_wandb,
         offline_mode=params.offline_logger
     )
     if params.log_to_file:
