@@ -1,11 +1,9 @@
 import argparse
 import sys
 
-import torch
-import numpy as np
 from utils.logger import Logger
 
-from lib.environments.gym_environment import GymEnvironment
+from lib.environments.wrappers.gym_environment import GymEnvironment
 from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 

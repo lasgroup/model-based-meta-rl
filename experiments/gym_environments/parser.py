@@ -1,5 +1,5 @@
 import argparse
-from lib.environments.mujoco import ENV_CONFIG_PATH
+from lib.environments.mujocoMB import ENV_CONFIG_PATH
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
