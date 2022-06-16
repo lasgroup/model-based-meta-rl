@@ -1,11 +1,9 @@
 import argparse
 import sys
 
-import torch
-import numpy as np
 from utils.logger import Logger
 
-from lib.environments.point_envs.point_env_2d import PointEnv2D
+from lib.environments.point_envs.envs.point_env_2d import PointEnv2D
 from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 

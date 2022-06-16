@@ -1,5 +1,5 @@
 import os
-ENV_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config/envs")
+ENV_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config/")
 
 from rllib.environment.mujoco.ant import MBAntEnv
 from rllib.environment.mujoco.cart_pole import MBCartPoleEnv
