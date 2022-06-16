@@ -1,5 +1,4 @@
 import argparse
-from lib.environments.mujoco import ENV_CONFIG_PATH
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -27,8 +26,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--train-episodes", type=int, default=20)
-    parser.add_argument("--test-episodes", type=int, default=2)
+    parser.add_argument("--train-episodes", type=int, default=200)
+    parser.add_argument("--test-episodes", type=int, default=20)
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
@@ -38,15 +37,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-wandb", action="store_true")
 
     # Environment parameters
-    parser.add_argument(
-        "--env-config-file",
-        type=str,
-        default="cart-pole-mujoco.yaml",
-        help="Choose one of the pre-defined environment config files"
-    )
-    parser.add_argument("--env-config-path", type=str, default=ENV_CONFIG_PATH)
     parser.add_argument("--render", action="store_true")
-    parser.add_argument("--max-steps", type=int, default=400)
+    parser.add_argument("--max-steps", type=int, default=100)
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)

@@ -36,7 +36,6 @@ torch.cuda.is_available = lambda: False
 
 parser = get_argument_parser()
 params = vars(parser.parse_args())
-params.update({"env_config_path": "../../../experiments/gym_environments/config/envs"})
 with open(
     os.path.join(
         os.path.dirname(os.path.realpath(__file__)),

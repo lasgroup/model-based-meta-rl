@@ -31,12 +31,12 @@ class GymEnvironment(AbstractEnvironment):
         if num_states > -1:
             num_states += 1  # Add a terminal state.
 
-        super().__init__(
+        super(GymEnvironment, self).__init__(
             dim_state=dim_state,
             dim_action=dim_action,
             observation_space=self.env.observation_space,
             action_space=self.env.action_space,
-            dim_observation=self.env.observation_space,
+            dim_observation=self.env.observation_space.shape,
             num_states=num_states,
             num_observations=num_states,
             num_actions=num_actions

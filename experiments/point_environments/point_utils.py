@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from utils.logger import Logger
 
-from lib.environments.gym_environment import GymEnvironment
+from lib.environments.point_envs.point_env_2d import PointEnv2D
 from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 
@@ -21,13 +21,9 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     :param params: environment arguments
     :return: RL environment and agent
     """
-    environment = GymEnvironment(
-        env_name=params["name"],
-        params=params,
-        ctrl_cost_weight=params["action_cost"] if params["use_action_cost"] else 0.0
-    )
+    environment = PointEnv2D()
 
-    reward_model = environment.env.reward_model()
+    reward_model = environment.reward_model()
 
     # TODO: Add more transformations
     transformations = [
@@ -60,7 +56,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     else:
         raise NotImplementedError
 
-    name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
+    name = f"PointEnv2D" \
            f"_{params.agent_name}" \
            f"_{params.exploration}"
     agent.logger = Logger(

@@ -206,7 +206,7 @@ class Logger(object):
         """Log hyper parameters together with a metric dictionary."""
         if self.use_wandb:  # Do not save.
             wandb.config.update(hparams)
-        wandb.log(metrics)
+            wandb.log(metrics)
         if self.save_statistics:
             self.export_to_json()
 
