@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
-import experiments.gym_environments.run
+import experiments.lib_environments.run
 from datetime import datetime
 import argparse
 import numpy as np
@@ -73,6 +73,12 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int, default=1)
 
     # Training Parameters
+    parser.add_argument(
+        "--env-group",
+        type=str,
+        default="mujocoMB_envs",
+        choices=["gym_envs", "mujocoMB_envs", "point_envs"]
+    )
     parser.add_argument("--train-episodes", type=int, default=500)
     parser.add_argument("--test-episodes", type=int, default=20)
     parser.add_argument("--save-statistics", action="store_true")

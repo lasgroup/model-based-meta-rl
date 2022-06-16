@@ -1,16 +1,15 @@
-import argparse
 import sys
+import argparse
 
 from utils.logger import Logger
-
 from lib.environments.wrappers.gym_environment import GymEnvironment
-from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
+from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
 
 from rllib.agent.abstract_agent import AbstractAgent
+from rllib.environment.abstract_environment import AbstractEnvironment
 from rllib.dataset.transforms import ActionScaler, DeltaState, MeanFunction, StateNormalizer, RewardNormalizer, \
     NextStateNormalizer
-from rllib.environment.abstract_environment import AbstractEnvironment
 
 
 def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironment, AbstractAgent):
@@ -19,13 +18,21 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     :param params: environment arguments
     :return: RL environment and agent
     """
-    environment = GymEnvironment(
-        env_name=params["name"],
-        params=params,
-        ctrl_cost_weight=params["action_cost"] if params["use_action_cost"] else 0.0
-    )
+    if params.env_group == "mujocoMB_env":
+        environment = GymEnvironment(
+            env_name=params["name"],
+            params=params,
+            ctrl_cost_weight=params["action_cost"] if params["use_action_cost"] else 0.0
+        )
+        reward_model = environment.env.reward_model()
 
-    reward_model = environment.env.reward_model()
+    if params.env_group == "point_envs":
+        from lib.environments.point_envs import PointEnv2D
+        environment = PointEnv2D()
+        reward_model = environment.reward_model()
+
+    else:
+        raise NotImplementedError
 
     # TODO: Add more transformations
     transformations = [

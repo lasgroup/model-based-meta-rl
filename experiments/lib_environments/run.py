@@ -6,8 +6,9 @@ import numpy as np
 
 from dotmap import DotMap
 
-from experiments.gym_environments.gym_utils import get_environment_and_agent
-from experiments.gym_environments.parser import get_argument_parser
+from lib.environments import ENVIRONMENTS_PATH
+from experiments.lib_environments.run_utils import get_environment_and_agent
+from experiments.lib_environments.parser import get_argument_parser
 from utils.train_and_evaluate import train_and_evaluate_agent
 
 
@@ -17,8 +18,9 @@ if __name__ == "__main__":
     params = vars(parser.parse_args())
     with open(
         os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            params["env_config_path"],
+            ENVIRONMENTS_PATH,
+            params["env_group"],
+            "config",
             params["env_config_file"],
         ),
         "r"

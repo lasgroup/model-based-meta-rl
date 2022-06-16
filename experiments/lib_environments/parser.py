@@ -1,5 +1,4 @@
 import argparse
-from lib.environments.mujocoMB import ENV_CONFIG_PATH
 
 
 def get_argument_parser() -> argparse.ArgumentParser:
@@ -8,6 +7,22 @@ def get_argument_parser() -> argparse.ArgumentParser:
     :return: parser: argument parser
     """
     parser = argparse.ArgumentParser()
+
+    # Environment parameters
+    parser.add_argument(
+        "--env-config-file",
+        type=str,
+        default="point_env_2d.yaml",
+        help="Choose one of the pre-defined environment config files"
+    )
+    parser.add_argument(
+        "--env-group",
+        type=str,
+        default="point_envs",
+        choices=["gym_envs", "mujocoMB_envs", "point_envs"]
+    )
+    parser.add_argument("--render", action="store_true")
+    parser.add_argument("--max-steps", type=int, default=400)
 
     # Agent parameters
     parser.add_argument(
@@ -30,27 +45,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=2)
 
+    # Reward parameters
+    parser.add_argument("--gamma", type=float, default=0.99)
+    parser.add_argument("--use-action-cost", action="store_true")
+
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
     parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")
     parser.add_argument("--use-wandb", action="store_true")
-
-    # Environment parameters
-    parser.add_argument(
-        "--env-config-file",
-        type=str,
-        default="cart-pole-mujoco.yaml",
-        help="Choose one of the pre-defined environment config files"
-    )
-    parser.add_argument("--env-config-path", type=str, default=ENV_CONFIG_PATH)
-    parser.add_argument("--render", action="store_true")
-    parser.add_argument("--max-steps", type=int, default=400)
-
-    # Reward parameters
-    parser.add_argument("--gamma", type=float, default=0.99)
-    parser.add_argument("--use-action-cost", action="store_true")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")

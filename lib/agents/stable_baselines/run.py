@@ -8,8 +8,8 @@ import numpy as np
 from dotmap import DotMap
 
 from utils.train_and_evaluate import train_and_evaluate_agent
-from experiments.gym_environments.parser import get_argument_parser
-from experiments.gym_environments.gym_utils import get_environment_and_agent
+from experiments.lib_environments.parser import get_argument_parser
+from experiments.lib_environments.run_utils import get_environment_and_agent
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
