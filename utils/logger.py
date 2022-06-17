@@ -9,6 +9,7 @@ from datetime import datetime
 import numpy as np
 import torch
 import wandb
+from numpy import bool_
 
 
 def safe_make_dir(dir_name):
@@ -130,6 +131,8 @@ class Logger(object):
                 value = float(value)
             if isinstance(value, np.int64):
                 value = int(value)
+            if isinstance(value, bool_):
+                value = int(bool(value))
 
             if key not in self.current:
                 self.current[key] = (1, value)

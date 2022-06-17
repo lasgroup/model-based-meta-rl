@@ -49,6 +49,8 @@ class GymEnvironment(AbstractEnvironment):
             next_state = self.num_states - 1
         self._time += 1
         if isinstance(reward, torch.Tensor):
+            if reward.ndim == 0:
+                reward = reward.unsqueeze(0)
             if reward.shape[-1] != self.dim_reward[0]:
                 reward = reward.unsqueeze(-1).repeat_interleave(self.dim_reward[0], -1)
         else:

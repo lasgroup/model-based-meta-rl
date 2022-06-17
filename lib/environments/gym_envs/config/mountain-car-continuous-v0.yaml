@@ -1,2 +1,4 @@
 name: 'MountainCarContinuous-v0'
 max_steps: 1000
+use_action_cost: False
+reward_model: 'MountainCarContinuousReward'

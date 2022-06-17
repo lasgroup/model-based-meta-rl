@@ -105,7 +105,7 @@ class PointEnv2DReward(StateActionReward):
     Reward model for the 2D point environment.
     """
 
-    dim_action = (1,)
+    dim_action = (2,)
 
     def __init__(self, ctrl_cost_weight=0):
         super().__init__(ctrl_cost_weight=ctrl_cost_weight)

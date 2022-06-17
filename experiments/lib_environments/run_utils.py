@@ -18,15 +18,23 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     :param params: environment arguments
     :return: RL environment and agent
     """
-    if params.env_group == "mujocoMB_env":
+    if params.env_group == "mujocoMB_envs":
         environment = GymEnvironment(
-            env_name=params["name"],
+            env_name=params.name,
             params=params,
-            ctrl_cost_weight=params["action_cost"] if params["use_action_cost"] else 0.0
+            ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0
         )
         reward_model = environment.env.reward_model()
 
-    if params.env_group == "point_envs":
+    elif params.env_group == "gym_envs":
+        import lib.environments.gym_envs
+        environment = GymEnvironment(
+            env_name=params.name,
+            params=params
+        )
+        reward_model = eval(f"lib.environments.gym_envs.{params.reward_model}")()
+
+    elif params.env_group == "point_envs":
         from lib.environments.point_envs import PointEnv2D
         environment = PointEnv2D()
         reward_model = environment.reward_model()

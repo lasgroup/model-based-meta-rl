@@ -1,2 +1,4 @@
 name: 'Pendulum-v1'
 max_steps: 200
+use_action_cost: False
+reward_model: 'PendulumReward'
