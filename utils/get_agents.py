@@ -3,7 +3,7 @@ from typing import Union, Callable, Iterable, Tuple
 import torch
 import argparse
 
-from rllib.agent import PPOAgent
+from rllib.agent import PPOAgent, SACAgent
 from rllib.algorithms.ppo import PPO
 from torch import nn, optim
 from torch.nn.modules import loss
@@ -40,11 +40,15 @@ def get_mpc_agent(
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
 
     # Define dynamics model
     dynamical_model = get_model(
         dim_state=dim_state,
         dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         transformations=transformations,
         input_transform=input_transform,
         params=params
@@ -59,7 +63,14 @@ def get_mpc_agent(
 
     # Define value function.
     # TODO: Use as terminal reward  and train value function in ModelBasedAgent
-    value_function = get_value_function(dim_state, params, input_transform)
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
 
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
@@ -111,11 +122,15 @@ def get_mpc_policy_agent(
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
 
     # Define dynamics model
     dynamical_model = get_model(
         dim_state=dim_state,
         dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         transformations=transformations,
         input_transform=input_transform,
         params=params
@@ -130,12 +145,21 @@ def get_mpc_policy_agent(
 
     # Define value function.
     # TODO: Use as terminal reward  and train value function in ModelBasedAgent
-    value_function = get_value_function(dim_state, params, input_transform)
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
 
     # Define policy
     policy = get_nn_policy(
         dim_state=dim_state,
         dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         input_transform=input_transform,
         action_scale=environment.action_scale,
         params=params,
@@ -193,15 +217,26 @@ def get_ppo_agent(
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
 
     # Define value function.
-    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
-    value_function = get_value_function(dim_state, params, input_transform)
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
 
     # Define policy
     policy = get_nn_policy(
         dim_state=dim_state,
         dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         input_transform=input_transform,
         action_scale=environment.action_scale,
         params=params,
@@ -222,6 +257,7 @@ def get_ppo_agent(
         policy=policy,
         critic=value_function,
         optimizer=policy_optimizer,
+        num_iter=128,
         batch_size=32,
         epsilon=0.2,
         gamma=params.gamma,

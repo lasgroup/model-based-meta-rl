@@ -40,9 +40,9 @@ def train_and_evaluate_agent(environment, agent, params):
             render=params.render,
         )
 
-        returns = np.mean(agent.logger.get("eval_return-0"))
-        metrics.update({"test_returns": returns})
         returns = np.mean(agent.logger.get("train_return-0"))
         metrics.update({"train_returns": returns})
+        returns = np.mean(agent.logger.get("eval_return-0"))
+        metrics.update({"test_returns": returns})
 
         agent.logger.log_hparams(params.toDict(), metrics)

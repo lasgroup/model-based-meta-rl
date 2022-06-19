@@ -14,8 +14,10 @@ from lib.hucrl.hallucinated_model import HallucinatedModel
 
 
 def get_model(
-        dim_state: int,
-        dim_action: int,
+        dim_state: tuple,
+        dim_action: tuple,
+        num_states: int,
+        num_actions: int,
         params: argparse.Namespace,
         transformations: Iterable[AbstractTransform] = None,
         input_transform: nn.Module = None
@@ -24,6 +26,8 @@ def get_model(
     Returns a learnable dynamics model for the environment
     :param dim_state: State dimensionality
     :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
     :param params: model parameters
     :param transformations: State and action transformations
     :param input_transform: Input transformation
@@ -35,6 +39,8 @@ def get_model(
         model = EnsembleModel(
             dim_state=dim_state,
             dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
             num_heads=params.model_num_heads,
             layers=params.model_layers,
             biased_head=not params.model_unbiased_head,
@@ -56,19 +62,28 @@ def get_model(
 
 
 def get_value_function(
-        dim_state: int,
+        dim_state: tuple,
+        dim_action: tuple,
+        num_states: int,
+        num_actions: int,
         params: argparse.Namespace,
         input_transform: nn.Module = None
 ) -> AbstractValueFunction:
     """
     Returns a learnable state-value function
     :param dim_state: State dimensionality
+    :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
     :param params: Value function parameters
     :param input_transform: Input transformation
     :return: A learnable value function for the state
     """
     value_function = NNValueFunction(
         dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         layers=params.value_function_layers,
         biased_head=not params.value_function_unbiased_head,
         non_linearity=params.value_function_non_linearity,
@@ -84,6 +99,8 @@ def get_value_function(
 def get_nn_policy(
         dim_state: tuple,
         dim_action: tuple,
+        num_states: int,
+        num_actions: int,
         input_transform: nn.Module,
         action_scale: Union[SupportsFloat, np.ndarray],
         params: argparse.Namespace,
@@ -92,6 +109,8 @@ def get_nn_policy(
     Returns a learnable NN policy
     :param dim_state: State dimensionality
     :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
     :param input_transform: Input transformation
     :param params: Policy arguments
     :param action_scale: Action scale
@@ -104,6 +123,8 @@ def get_nn_policy(
     policy = NNPolicy(
         dim_state=dim_state,
         dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
         input_transform=input_transform,
         action_scale=action_scale,
         tau=params.policy_tau,
