@@ -4,7 +4,7 @@ import argparse
 from utils.logger import Logger
 from lib.environments.wrappers.gym_environment import GymEnvironment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
-from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent
+from utils.get_agents import get_mpc_agent, get_mpc_policy_agent, get_ppo_agent, get_sac_agent
 
 from rllib.agent.abstract_agent import AbstractAgent
 from rllib.environment.abstract_environment import AbstractEnvironment
@@ -66,6 +66,12 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         )
     elif params.agent_name == "ppo":
         agent, comment = get_ppo_agent(
+            environment=environment,
+            params=params,
+            input_transform=None
+        )
+    elif params.agent_name == "sac":
+        agent, comment = get_sac_agent(
             environment=environment,
             params=params,
             input_transform=None

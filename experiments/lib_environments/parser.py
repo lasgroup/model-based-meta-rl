@@ -29,7 +29,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--agent-name",
         type=str,
         default="mpc_policy",
-        choices=["mpc", "mpc_policy", "ppo"]
+        choices=["mpc", "mpc_policy", "ppo", "sac"]
     )
     # TODO: Check where exploration is used
     parser.add_argument(
@@ -81,6 +81,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--value-function-unbiased-head", action="store_true")
     parser.add_argument("--value-function-non-linearity", type=str, default="Tanh")
     parser.add_argument("--value-function-tau", type=float, default=0)
+    parser.add_argument("--value-function-num-heads", type=int, default=2)
 
     # Value function parameters
     parser.add_argument("--policy-layers", type=int, nargs="*", default=[256, 256])
@@ -102,6 +103,10 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
+
+    # SAC parameters
+    parser.add_argument("--sac-opt-lr", type=float, default=3e-4)
+    parser.add_argument("--sac-opt-weight-decay", type=float, default=0)
 
     # Planning parameters
 

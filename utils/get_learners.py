@@ -8,7 +8,8 @@ from rllib.policy import MPCPolicy, NNPolicy
 from rllib.dataset.transforms import AbstractTransform
 from rllib.algorithms.mpc import CEMShooting
 from rllib.model import AbstractModel, EnsembleModel, TransformedModel
-from rllib.value_function import AbstractValueFunction, NNValueFunction
+from rllib.value_function import AbstractValueFunction, NNValueFunction, AbstractQFunction, NNEnsembleQFunction, \
+    NNQFunction
 
 from lib.hucrl.hallucinated_model import HallucinatedModel
 
@@ -94,6 +95,42 @@ def get_value_function(
     params.update({"value_function": value_function.__class__.__name__})
 
     return value_function
+
+
+def get_q_function(
+        dim_state: tuple,
+        dim_action: tuple,
+        num_states: int,
+        num_actions: int,
+        params: argparse.Namespace,
+        input_transform: nn.Module = None
+) -> NNQFunction:
+    """
+    Returns a learnable Q value function
+    :param dim_state: State dimensionality
+    :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
+    :param params: Q function parameters (Same as value function parameters)
+    :param input_transform: Input transformation
+    :return: A learnable q function for the state-action pair
+    """
+    q_function = NNEnsembleQFunction(
+        num_heads=params.value_function_num_heads,
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        layers=params.value_function_layers,
+        biased_head=not params.value_function_unbiased_head,
+        non_linearity=params.value_function_non_linearity,
+        input_transform=input_transform,
+        tau=params.value_function_tau,
+    )
+
+    params.update({"q_function": q_function.__class__.__name__})
+
+    return q_function
 
 
 def get_nn_policy(

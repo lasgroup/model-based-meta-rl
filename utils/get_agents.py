@@ -10,11 +10,10 @@ from torch.nn.modules import loss
 
 from lib.agents.mpc_agent import MPCAgent
 from lib.agents.mpc_policy_agent import MPCPolicyAgent
-from utils.get_learners import get_model, get_value_function, get_mpc_policy, get_nn_policy
+from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy
 
 from rllib.model import AbstractModel
 from rllib.dataset.transforms import AbstractTransform
-from rllib.agent.abstract_agent import AbstractAgent
 from rllib.environment.abstract_environment import AbstractEnvironment
 
 
@@ -209,11 +208,11 @@ def get_ppo_agent(
         input_transform: nn.Module = None
 ) -> Tuple[PPOAgent, str]:
     """
-    Get an MPC based agent
+    Get an Proximal Policy Optimization (PPO) agent
     :param environment: RL environment
     :param params: Agent arguments
     :param input_transform: Input transformation
-    :return: An MPC based agent
+    :return: An PPO based agent
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
@@ -221,7 +220,6 @@ def get_ppo_agent(
     num_actions = environment.num_actions
 
     # Define value function.
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -250,8 +248,7 @@ def get_ppo_agent(
     )
 
     # Define Agent
-    agent_name = PPOAgent.name
-    comment = f"{agent_name} {params.exploration.capitalize()}"
+    comment = f"{params.agent_name} {params.exploration.capitalize()}"
 
     agent = PPOAgent(
         policy=policy,
@@ -260,6 +257,66 @@ def get_ppo_agent(
         num_iter=128,
         batch_size=32,
         epsilon=0.2,
+        gamma=params.gamma,
+        comment=comment
+    )
+
+    return agent, comment
+
+
+def get_sac_agent(
+        environment: AbstractEnvironment,
+        params: argparse.Namespace,
+        input_transform: nn.Module = None
+) -> Tuple[SACAgent, str]:
+    """
+    Get a Soft Actor-Critic (SAC) agent
+    :param environment: RL environment
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :return: A SAC agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define value function.
+    q_function = get_q_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+
+    # Define policy
+    policy = get_nn_policy(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        input_transform=input_transform,
+        action_scale=environment.action_scale,
+        params=params,
+    )
+
+    # Define model optimizer
+    policy_optimizer = optim.Adam(
+        list(policy.parameters()) + list(q_function.parameters()),
+        lr=params.sac_opt_lr,
+        weight_decay=params.sac_opt_weight_decay,
+    )
+
+    # Define Agent
+    comment = f"{params.agent_name} {params.exploration.capitalize()}"
+
+    agent = SACAgent(
+        policy=policy,
+        critic=q_function,
+        optimizer=policy_optimizer,
+        num_iter=128,
         gamma=params.gamma,
         comment=comment
     )

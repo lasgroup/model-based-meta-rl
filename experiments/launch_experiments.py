@@ -49,7 +49,7 @@ def main(args):
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            cmd = generate_base_command(experiments.gym_environments.run, flags=flags_)
+            cmd = generate_base_command(experiments.lib_environments.run, flags=flags_)
             command_list.append(cmd)
 
     # submit jobs
