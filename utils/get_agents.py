@@ -5,6 +5,7 @@ import argparse
 
 from rllib.agent import PPOAgent, SACAgent
 from rllib.algorithms.ppo import PPO
+from rllib.algorithms.sac import SAC
 from torch import nn, optim
 from torch.nn.modules import loss
 
@@ -142,17 +143,6 @@ def get_mpc_policy_agent(
         weight_decay=params.model_opt_weight_decay,
     )
 
-    # Define value function.
-    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
-    value_function = get_value_function(
-        dim_state=dim_state,
-        dim_action=dim_action,
-        num_states=num_states,
-        num_actions=num_actions,
-        params=params,
-        input_transform=input_transform
-    )
-
     # Define policy
     policy = get_nn_policy(
         dim_state=dim_state,
@@ -164,20 +154,51 @@ def get_mpc_policy_agent(
         params=params,
     )
 
-    # TODO write own PPO with base Abstract Algorithm
     # Define actor-critic algorithm
-    algorithm = PPO(
-        policy=policy,
-        critic=value_function,
-        criterion=loss.MSELoss(reduction="mean"),
-        gamma=params.gamma,
-        epsilon=0.2,
-        clamp_value=False
-    )
+    if params.mpc_policy == "ppo":
+        # Define value function.
+        # TODO: Use as terminal reward  and train value function in ModelBasedAgent
+        critic = get_value_function(
+            dim_state=dim_state,
+            dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
+            params=params,
+            input_transform=input_transform
+        )
+
+        # TODO write own PPO with base Abstract Algorithm
+        algorithm = PPO(
+            policy=policy,
+            critic=critic,
+            criterion=loss.MSELoss(reduction="mean"),
+            gamma=params.gamma,
+            epsilon=0.2,
+            clamp_value=False
+        )
+    elif params.mpc_policy == "sac":
+        # Define q function.
+        critic = get_q_function(
+            dim_state=dim_state,
+            dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
+            params=params,
+            input_transform=input_transform
+        )
+
+        algorithm = SAC(
+            policy=policy,
+            critic=critic,
+            criterion=loss.MSELoss(reduction="mean"),
+            gamma=params.gamma
+        )
+    else:
+        raise NotImplementedError
 
     # Define model optimizer
     policy_optimizer = optim.Adam(
-        list(policy.parameters()) + list(value_function.parameters()),
+        list(policy.parameters()) + list(critic.parameters()),
         lr=params.ppo_opt_lr,
         weight_decay=params.ppo_opt_weight_decay,
     )
@@ -281,7 +302,7 @@ def get_sac_agent(
     num_states = environment.num_states
     num_actions = environment.num_actions
 
-    # Define value function.
+    # Define q function.
     q_function = get_q_function(
         dim_state=dim_state,
         dim_action=dim_action,

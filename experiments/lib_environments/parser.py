@@ -92,6 +92,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # MPC parameters
     parser.add_argument("--mpc-solver", type=str, choices=["cem"], default="cem")
+    parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
     parser.add_argument("--mpc-num-particles", type=int, default=16)
     parser.add_argument("--mpc-num-elites", type=int, default=1)
