@@ -11,7 +11,7 @@ from lib.environments import ENVIRONMENTS_PATH
 from experiments.lib_environments.parser import get_argument_parser
 from experiments.lib_environments.run_utils import get_environment_and_agent
 
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.logger import configure
 
 from utils.logger import Logger
@@ -57,7 +57,12 @@ rllib_logger = Logger(
         offline_mode=params.offline_logger
     )
 
-model = PPO("MlpPolicy", environment, verbose=1)
+if params.agent_name == "ppo":
+    model = PPO("MlpPolicy", environment, verbose=1)
+elif params.agent_name == "sac":
+    model = SAC("MlpPolicy", environment, verbose=1)
+else:
+    raise NotImplementedError
 model.set_logger(sb3_logger)
 model.learn(total_timesteps=5000)
 
