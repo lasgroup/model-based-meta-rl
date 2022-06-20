@@ -7,39 +7,25 @@ import numpy as np
 
 from dotmap import DotMap
 
-from utils.train_and_evaluate import train_and_evaluate_agent
+from lib.environments import ENVIRONMENTS_PATH
 from experiments.lib_environments.parser import get_argument_parser
 from experiments.lib_environments.run_utils import get_environment_and_agent
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.logger import configure
+
+from utils.logger import Logger
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 torch.cuda.is_available = lambda: False
-
-# # Parallel environments
-# env = make_vec_env("CartPole-v1", n_envs=4)
-#
-# model = PPO("MlpPolicy", env, verbose=1)
-# model.learn(total_timesteps=25000)
-#
-# # model.save("ppo_cartpole")
-# # del model  # remove to demonstrate saving and loading
-# # model = PPO.load("ppo_cartpole")
-#
-# env = make_vec_env("CartPole-v1", n_envs=1)
-# obs = env.reset()
-# for i in range(400):
-#     action, _states = model.predict(obs)
-#     obs, rewards, dones, info = env.step(action)
-#     env.render()
 
 parser = get_argument_parser()
 params = vars(parser.parse_args())
 with open(
     os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        params["env_config_path"],
+        ENVIRONMENTS_PATH,
+        params["env_group"],
+        "config",
         params["env_config_file"],
     ),
     "r"
@@ -54,15 +40,44 @@ torch.set_num_threads(1)
 
 environment, _ = get_environment_and_agent(params)
 
+params.agent_name = f"sb3_{params.agent_name}"
+# set up logger
+
+sb3_logger = configure(params.log_dir, ["stdout", "csv", "tensorboard"])
+
+name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
+       f"_{params.agent_name}" \
+       f"_{params.exploration}"
+rllib_logger = Logger(
+        name=name,
+        comment=f"{params.agent_name} {params.exploration.capitalize()}",
+        log_dir=params.log_dir,
+        save_statistics=params.save_statistics,
+        use_wandb=params.use_wandb,
+        offline_mode=params.offline_logger
+    )
+
 model = PPO("MlpPolicy", environment, verbose=1)
-model.learn(total_timesteps=200000)
+model.set_logger(sb3_logger)
+model.learn(total_timesteps=5000)
 
-obs = environment.reset()
-eps_return = 0
-for i in range(200):
-    action, _states = model.predict(obs)
-    obs, rewards, dones, info = environment.step(action)
-    eps_return += rewards
-    environment.render()
+returns = []
+for eps in range(20):
 
-print(eps_return)
+    obs = environment.reset()
+    eps_return = 0
+
+    for t in range(params.max_steps):
+        action, _states = model.predict(obs)
+        obs, rewards, dones, info = environment.step(action)
+        eps_return += rewards
+        # environment.render()
+
+    print(eps_return)
+    returns.append(eps_return)
+    rllib_logger.end_episode(**{"eval-return-0": eps_return})
+
+metrics = dict()
+returns = np.mean(np.array(returns))
+metrics.update({"test_returns": returns})
+rllib_logger.log_hparams(params.toDict(), metrics)
