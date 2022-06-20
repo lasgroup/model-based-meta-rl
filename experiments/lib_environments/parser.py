@@ -22,7 +22,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["gym_envs", "mujocoMB_envs", "point_envs"]
     )
     parser.add_argument("--render", action="store_true")
-    parser.add_argument("--max-steps", type=int, default=400)
+    parser.add_argument("--max-steps", type=int, default=200)
 
     # Agent parameters
     parser.add_argument(
@@ -97,6 +97,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mpc-num-particles", type=int, default=16)
     parser.add_argument("--mpc-num-elites", type=int, default=1)
     parser.add_argument("--mpc-alpha", type=float, default=0)
+    parser.add_argument("--mpc-terminal-reward", type=bool, default=False)
     parser.add_argument("--mpc-not-warm-start", type=bool, default=False)
     parser.add_argument("--mpc-default-action", type=str,
                         choices=["zero", "constant", "mean"], default="zero")
@@ -108,6 +109,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # SAC parameters
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)
     parser.add_argument("--sac-opt-weight-decay", type=float, default=0)
+    parser.add_argument("--sac-memory-len", type=int, default=100000)
 
     # Planning parameters
 

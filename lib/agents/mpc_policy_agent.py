@@ -3,6 +3,7 @@ from typing import Callable
 import torch
 from rllib.algorithms.abstract_algorithm import AbstractAlgorithm
 from rllib.model import AbstractModel
+from rllib.value_function import AbstractValueFunction
 
 from lib.agents.model_based_agent import ModelBasedAgent
 
@@ -16,6 +17,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             reward_model: AbstractModel,
             termination_model: Callable,
             algorithm: AbstractAlgorithm,
+            terminal_reward: AbstractValueFunction = None,
             model_optimizer: torch.optim.Optimizer = None,
             policy_optimizer: torch.optim.Optimizer = None,
             initial_distribution: torch.distributions.Distribution = None,
@@ -26,6 +28,8 @@ class MPCPolicyAgent(ModelBasedAgent):
     ):
 
         self.algorithm = algorithm
+        if isinstance(self.algorithm.critic_target, AbstractValueFunction):
+            terminal_reward = self.algorithm.critic_target
 
         super().__init__(
             dynamical_model=dynamical_model,
@@ -33,7 +37,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             termination_model=termination_model,
             model_optimizer=model_optimizer,
             algorithm=self.algorithm,
-            value_function=self.algorithm.critic_target,
+            value_function=terminal_reward,
             policy=self.algorithm.policy,
             plan_horizon=8,  # Calling the mpc policy already plans.
             plan_samples=16,

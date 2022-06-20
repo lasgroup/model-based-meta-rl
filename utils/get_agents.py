@@ -6,6 +6,7 @@ import argparse
 from rllib.agent import PPOAgent, SACAgent
 from rllib.algorithms.ppo import PPO
 from rllib.algorithms.sac import SAC
+from rllib.dataset import ExperienceReplay
 from torch import nn, optim
 from torch.nn.modules import loss
 
@@ -71,7 +72,7 @@ def get_mpc_agent(
         params=params,
         input_transform=input_transform
     )
-
+    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy
@@ -157,7 +158,6 @@ def get_mpc_policy_agent(
     # Define actor-critic algorithm
     if params.mpc_policy == "ppo":
         # Define value function.
-        # TODO: Use as terminal reward  and train value function in ModelBasedAgent
         critic = get_value_function(
             dim_state=dim_state,
             dim_action=dim_action,
@@ -330,6 +330,8 @@ def get_sac_agent(
         weight_decay=params.sac_opt_weight_decay,
     )
 
+    memory = ExperienceReplay(max_len=params.sac_memory_len)
+
     # Define Agent
     comment = f"{params.agent_name} {params.exploration.capitalize()}"
 
@@ -337,6 +339,7 @@ def get_sac_agent(
         policy=policy,
         critic=q_function,
         optimizer=policy_optimizer,
+        memory=memory,
         num_iter=128,
         gamma=params.gamma,
         comment=comment
