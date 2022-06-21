@@ -98,7 +98,8 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                    f'-W {23 if long else 3}:59 ' + \
                    f'-R "rusage[mem={mem}]" ' + \
                    f'-n {num_cpus} ' + \
-                   f'-R "span[hosts={n_hosts}]" '
+                   f'-R "span[hosts={n_hosts}]" ' + \
+                   f'-o lsf_outputs/ '
 
         if num_gpus > 0:
             bsub_cmd += f'-R "rusage[ngpus_excl_p={num_gpus}]" '

@@ -4,6 +4,7 @@ from collections import OrderedDict
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
 import experiments.lib_environments.run
+import lib.agents.stable_baselines.run
 from datetime import datetime
 import argparse
 import numpy as np
@@ -93,4 +94,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --dry --long --save-statistics --use-wandb --offline-logger
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger
