@@ -115,6 +115,9 @@ def get_q_function(
     :param input_transform: Input transformation
     :return: A learnable q function for the state-action pair
     """
+    if params.exploration == "optimistic":
+        dim_action = (dim_action[0] + dim_state[0],)
+
     q_function = NNEnsembleQFunction(
         num_heads=params.value_function_num_heads,
         dim_state=dim_state,
