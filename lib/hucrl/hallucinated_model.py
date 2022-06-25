@@ -28,6 +28,7 @@ class HallucinatedModel(TransformedModel):
         if optimism_vars.shape[-1] == 0:
             return mean, tril
 
+        # Uses average variance of the ensemble outputs, epistemic uncertainty
         return (
             mean + self.beta * (tril @ optimism_vars.unsqueeze(-1)).squeeze(-1),
             torch.zeros_like(tril),

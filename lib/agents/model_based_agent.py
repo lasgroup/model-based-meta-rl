@@ -1,4 +1,3 @@
-import argparse
 import contextlib
 from dataclasses import asdict
 from typing import Callable
@@ -21,7 +20,7 @@ from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
 from tqdm import tqdm
 
-from utils.utils import get_logger_layout
+from utils.utils import sample_trajectories
 
 
 class ModelBasedAgent(AbstractAgent):
@@ -53,9 +52,9 @@ class ModelBasedAgent(AbstractAgent):
             policy_update_frequency: int = 1,
             optimizer: torch.optim.Optimizer = None,
             sim_num_steps: int = 20,
-            sim_initial_states_num_trajectories: int = 8,
-            sim_initial_dist_num_trajectories: int = 8,
-            sim_memory_num_trajectories: int = 16,
+            sim_initial_states_num_trajectories: int = 32,
+            sim_initial_dist_num_trajectories: int = 0,
+            sim_memory_num_trajectories: int = 224,
             sim_max_memory: int = 10000,
             sim_refresh_interval: int = 1,
             sim_num_subsample: int = 1,
@@ -107,9 +106,6 @@ class ModelBasedAgent(AbstractAgent):
             transformations=dynamical_model.transformations,
             num_bootstraps=num_heads,
             bootstrap=bootstrap,
-        )
-        self.sim_dataset = StateExperienceReplay(
-            max_len=sim_max_memory, dim_state=dynamical_model.dim_state
         )
         self.initial_states = StateExperienceReplay(
             max_len=sim_max_memory, dim_state=self.dynamical_model.dim_state
@@ -252,7 +248,6 @@ class ModelBasedAgent(AbstractAgent):
         print(colorize("\nOptimizing policy with simulated data from the model", "yellow"))
 
         self.dynamical_model.eval()
-        self.sim_dataset.reset()
 
         with DisableGradient(self.dynamical_model), gpytorch.settings.fast_pred_var():
             for i in tqdm(range(self.policy_opt_num_iter)):
@@ -263,12 +258,6 @@ class ModelBasedAgent(AbstractAgent):
 
                 self.learn_policy()
 
-                if (
-                    self.sim_refresh_interval > 0 and
-                        (i + 1) % self.sim_refresh_interval == 0
-                ):
-                    self.sim_dataset.reset()
-
     def simulate_model(self):
         """
 
@@ -278,7 +267,7 @@ class ModelBasedAgent(AbstractAgent):
             self.sim_initial_states_num_trajectories
         )
 
-        if self.sim_initial_states_num_trajectories > 0:
+        if self.sim_initial_dist_num_trajectories > 0:
             if self.initial_distribution is not None:
                 initial_states_ = self.initial_distribution.sample(
                     (self.sim_initial_dist_num_trajectories, )
@@ -301,18 +290,16 @@ class ModelBasedAgent(AbstractAgent):
 
         self.policy.reset()
 
-        trajectory = rollout_model(
-            dynamical_model=self.dynamical_model,
-            reward_model=self.reward_model,
-            policy=self.algorithm.policy,
-            initial_state=initial_states,
-            max_steps=self.sim_num_steps,
-            termination_model=self.termination_model,
-        )
+        with torch.no_grad():
+            trajectory = rollout_model(
+                dynamical_model=self.dynamical_model,
+                reward_model=self.reward_model,
+                policy=self.algorithm.policy,
+                initial_state=initial_states,
+                max_steps=self.sim_num_steps,
+                termination_model=self.termination_model,
+            )
         self.sim_trajectory = stack_list_of_tuples(trajectory)
-
-        states = self.sim_trajectory.state.reshape(-1, *self.dynamical_model.dim_state)
-        self.sim_dataset.append(states[:: self.sim_num_subsample])
 
     def learn_policy(self):
 
@@ -320,20 +307,9 @@ class ModelBasedAgent(AbstractAgent):
         for _ in range(self.policy_opt_gradient_steps):
 
             def closure():
-                states = self.sim_dataset.sample_batch(self.policy_opt_batch_size)
-                # TODO: can be done by sampling from sim_trajectory
-                with torch.no_grad():
-                    trajectory = rollout_model(
-                        dynamical_model=self.dynamical_model,
-                        reward_model=self.reward_model,
-                        policy=self.algorithm.old_policy,
-                        initial_state=states,
-                        max_steps=self.sim_num_steps,
-                        termination_model=self.termination_model,
-                    )
-                    # trajectory = stack_list_of_tuples(trajectory)
+                trajectories = sample_trajectories(self.sim_trajectory, self.policy_opt_batch_size)
                 self.optimizer.zero_grad()
-                losses = self.algorithm(trajectory)
+                losses = self.algorithm(trajectories)
                 losses.combined_loss.backward()
                 return losses
 
