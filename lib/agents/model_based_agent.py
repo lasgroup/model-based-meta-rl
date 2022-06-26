@@ -204,6 +204,7 @@ class ModelBasedAgent(AbstractAgent):
         idx = torch.topk(value.squeeze(), k=self.plan_elites, largest=True)[1]
 
         # Return first action and the mean over the elite samples.
+        # Try best action instead of mean of elites.
         return trajectory.action[idx, 0].mean(0)
 
     def learn(self):

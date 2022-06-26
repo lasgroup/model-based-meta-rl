@@ -12,6 +12,7 @@ from rllib.value_function import AbstractValueFunction, NNValueFunction, Abstrac
     NNQFunction
 
 from lib.hucrl.hallucinated_model import HallucinatedModel
+from lib.solvers.icem_shooting import ICEMShooting
 
 
 def get_model(
@@ -202,10 +203,27 @@ def get_mpc_policy(
         solver = CEMShooting(
             dynamical_model=dynamical_model,
             reward_model=reward,
-            horizon=params.mpc_horizon,
             gamma=params.gamma,
             scale=1 / 8,
             action_scale=action_scale,
+            num_model_steps=params.mpc_horizon,
+            num_iter=params.mpc_num_iter,
+            num_elites=params.mpc_num_elites,
+            alpha=params.mpc_alpha,
+            terminal_reward=terminal_reward,
+            termination_model=termination_model,
+            warm_start=not params.mpc_not_warm_start,
+            default_action=params.mpc_default_action,
+            num_cpu=1,
+        )
+    elif params.mpc_solver == "icem":
+        solver = ICEMShooting(
+            dynamical_model=dynamical_model,
+            reward_model=reward,
+            gamma=params.gamma,
+            scale=0.5,
+            action_scale=action_scale,
+            num_model_steps=params.mpc_horizon,
             num_iter=params.mpc_num_iter,
             num_elites=params.mpc_num_elites,
             alpha=params.mpc_alpha,

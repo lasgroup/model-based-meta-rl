@@ -71,7 +71,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--not-bootstrap", action="store_true")
     parser.add_argument("--max-memory", type=int, default=10000)
     parser.add_argument("--sim-max-memory", type=int, default=10000)
-    parser.add_argument("--sim-num-steps", type=int, default=400)
+    parser.add_argument("--sim-num-steps", type=int, default=16)
     parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
@@ -91,16 +91,17 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--policy-deterministic", action="store_true")
 
     # MPC parameters
-    parser.add_argument("--mpc-solver", type=str, choices=["cem"], default="cem")
+    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="icem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
-    parser.add_argument("--mpc-num-particles", type=int, default=16)
-    parser.add_argument("--mpc-num-elites", type=int, default=1)
-    parser.add_argument("--mpc-alpha", type=float, default=0)
+    parser.add_argument("--mpc-num-particles", type=int, default=400)
+    parser.add_argument("--mpc-num-elites", type=int, default=10)
+    parser.add_argument("--mpc_horizon", type=int, default=16)
+    parser.add_argument("--mpc-alpha", type=float, default=0.1)
     parser.add_argument("--mpc-terminal-reward", type=bool, default=False)
     parser.add_argument("--mpc-not-warm-start", type=bool, default=False)
     parser.add_argument("--mpc-default-action", type=str,
-                        choices=["zero", "constant", "mean"], default="zero")
+                        choices=["zero", "constant", "mean"], default="constant")
 
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
