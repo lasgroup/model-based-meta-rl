@@ -22,6 +22,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             policy_optimizer: torch.optim.Optimizer = None,
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = "thompson_sampling",
+            use_validation_set: bool = False,
             gamma: float = 1.0,
             tensorboard=False,
             comment="",
@@ -39,6 +40,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             algorithm=self.algorithm,
             value_function=terminal_reward,
             policy=self.algorithm.policy,
+            use_validation_set=use_validation_set,
             plan_horizon=8,  # Calling the mpc policy already plans.
             plan_samples=16,
             plan_elites=1,

@@ -66,6 +66,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-opt-weight-decay", type=float, default=0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=32)
+    parser.add_argument("--use-validation-set", action="store_true")
 
     # Simulation and replay buffer parameters
     parser.add_argument("--not-bootstrap", action="store_true")

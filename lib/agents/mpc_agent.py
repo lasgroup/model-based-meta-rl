@@ -15,6 +15,7 @@ class MPCAgent(ModelBasedAgent):
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = "thompson_sampling",
             gamma: float = 1.0,
+            use_validation_set: bool = False,
             tensorboard=False,
             comment="",
     ):
@@ -29,6 +30,7 @@ class MPCAgent(ModelBasedAgent):
             algorithm=self.algorithm,
             value_function=mpc_policy.solver.terminal_reward,
             policy=mpc_policy,
+            use_validation_set=use_validation_set,
             plan_horizon=0,  # Calling the mpc policy already plans.
             plan_samples=0,
             plan_elites=0,

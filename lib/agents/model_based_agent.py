@@ -2,14 +2,16 @@ import contextlib
 from dataclasses import asdict
 from typing import Callable
 
-import gpytorch
 import torch
+import gpytorch
+import numpy as np
+from tqdm import tqdm
 from gym.utils import colorize
 
 from rllib.agent.abstract_agent import AbstractAgent
 from rllib.algorithms.abstract_algorithm import AbstractAlgorithm
-from rllib.dataset import BootstrapExperienceReplay, StateExperienceReplay, Observation, stack_list_of_tuples, \
-    average_dataclass
+from rllib.dataset import BootstrapExperienceReplay, StateExperienceReplay
+from rllib.dataset import Observation, stack_list_of_tuples, average_dataclass
 from rllib.model import TransformedModel, AbstractModel
 from rllib.policy import AbstractPolicy
 from rllib.util.rollout import rollout_model
@@ -18,7 +20,6 @@ from rllib.util.utilities import tensor_to_distribution
 from rllib.util.neural_networks.utilities import DisableGradient
 from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
-from tqdm import tqdm
 
 from utils.utils import sample_trajectories
 
@@ -40,6 +41,8 @@ class ModelBasedAgent(AbstractAgent):
             policy: AbstractPolicy,
             model_learn_num_iter: int = 0,
             model_learn_batch_size: int = 32,
+            use_validation_set: bool = False,
+            validation_fraction: float = 0.2,
             plan_horizon: int = 8,
             plan_samples: int = 16,
             plan_elites: int = 1,
@@ -107,6 +110,12 @@ class ModelBasedAgent(AbstractAgent):
             num_bootstraps=num_heads,
             bootstrap=bootstrap,
         )
+        self.val_dataset = BootstrapExperienceReplay(
+            max_len=max_memory if use_validation_set else 0,
+            transformations=dynamical_model.transformations,
+            num_bootstraps=num_heads,
+            bootstrap=False,
+        )
         self.initial_states = StateExperienceReplay(
             max_len=sim_max_memory, dim_state=self.dynamical_model.dim_state
         )
@@ -126,6 +135,7 @@ class ModelBasedAgent(AbstractAgent):
         self.sim_memory_num_trajectories = sim_memory_num_trajectories
         self.sim_refresh_interval = sim_refresh_interval
         self.sim_num_subsample = sim_num_subsample
+        self.validation_fraction = validation_fraction if use_validation_set else 0.0
         self.initial_distribution = initial_distribution
         self.new_episode = True
         self.exploration_scheme = exploration_scheme
@@ -159,7 +169,10 @@ class ModelBasedAgent(AbstractAgent):
         """
         super().observe(observation)
         if self.training:
-            self.dataset.append(observation)
+            if np.random.rand() < self.validation_fraction:  # Add some transitions to validation set
+                self.val_dataset.append(observation)
+            else:
+                self.dataset.append(observation)
         if self.new_episode:
             if self.training:
                 self.initial_states.append(observation.state.unsqueeze(0))
@@ -231,9 +244,11 @@ class ModelBasedAgent(AbstractAgent):
             print(colorize("Training Dynamics Model", "yellow"))
 
             if len(self.dataset) >= self.model_learn_batch_size:
+                val_set = self.val_dataset if len(self.val_dataset) > self.model_learn_batch_size else None
                 train_model(
                     self.dynamical_model.base_model,
                     train_set=self.dataset,
+                    validation_set=val_set,
                     max_iter=self.model_learn_num_iter,
                     optimizer=self.model_optimizer,
                     logger=self.logger,
@@ -271,7 +286,7 @@ class ModelBasedAgent(AbstractAgent):
         if self.sim_initial_dist_num_trajectories > 0:
             if self.initial_distribution is not None:
                 initial_states_ = self.initial_distribution.sample(
-                    (self.sim_initial_dist_num_trajectories, )
+                    (self.sim_initial_dist_num_trajectories,)
                 )
             else:
                 initial_states_ = self.initial_states.sample_batch(
