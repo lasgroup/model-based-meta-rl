@@ -280,6 +280,7 @@ def get_ppo_agent(
         num_iter=128,
         batch_size=32,
         epsilon=0.2,
+        eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
         gamma=params.gamma,
         comment=comment
     )
