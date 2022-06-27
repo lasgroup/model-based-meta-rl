@@ -63,7 +63,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-unbiased-head", action="store_true")
     parser.add_argument("--model-non-linearity", type=str, default="Tanh")
     parser.add_argument("--model-opt-lr", type=float, default=3e-4)
-    parser.add_argument("--model-opt-weight-decay", type=float, default=0)
+    parser.add_argument("--model-opt-weight-decay", type=float, default=0.01)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=32)
     parser.add_argument("--use-validation-set", action="store_true")

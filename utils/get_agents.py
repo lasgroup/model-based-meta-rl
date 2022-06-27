@@ -56,7 +56,7 @@ def get_mpc_agent(
     )
 
     # Define model optimizer
-    model_optimizer = optim.Adam(
+    model_optimizer = optim.AdamW(
         dynamical_model.parameters(),
         lr=params.model_opt_lr,
         weight_decay=params.model_opt_weight_decay,
@@ -139,7 +139,7 @@ def get_mpc_policy_agent(
     )
 
     # Define model optimizer
-    model_optimizer = optim.Adam(
+    model_optimizer = optim.AdamW(
         dynamical_model.parameters(),
         lr=params.model_opt_lr,
         weight_decay=params.model_opt_weight_decay,
