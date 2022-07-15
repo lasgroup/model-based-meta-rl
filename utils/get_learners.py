@@ -11,8 +11,10 @@ from rllib.model import AbstractModel, EnsembleModel, TransformedModel
 from rllib.value_function import AbstractValueFunction, NNValueFunction, AbstractQFunction, NNEnsembleQFunction, \
     NNQFunction
 
-from lib.hucrl.hallucinated_model import HallucinatedModel
+from lib.policies.rnn_policy import RNNPolicy
 from lib.solvers.icem_shooting import ICEMShooting
+from lib.hucrl.hallucinated_model import HallucinatedModel
+from lib.value_function.rnn_value_function import RNNValueFunction
 
 
 def get_model(
@@ -98,6 +100,42 @@ def get_value_function(
     return value_function
 
 
+def get_recurrent_value_function(
+        dim_state: tuple,
+        dim_action: tuple,
+        num_states: int,
+        num_actions: int,
+        params: argparse.Namespace,
+        input_transform: nn.Module = None
+) -> RNNValueFunction:
+    """
+    Returns a learnable recurrent state-value function
+    :param dim_state: State dimensionality
+    :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
+    :param params: Value function parameters
+    :param input_transform: Input transformation
+    :return: A learnable value function for the state
+    """
+    value_function = RNNValueFunction(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        embedding_layers=(200, 200),
+        layers=(200, 200),
+        biased_head=not params.value_function_unbiased_head,
+        non_linearity="ReLU",
+        input_transform=input_transform,
+        tau=params.value_function_tau,
+    )
+
+    params.update({"value_function": value_function.__class__.__name__})
+
+    return value_function
+
+
 def get_q_function(
         dim_state: tuple,
         dim_action: tuple,
@@ -172,6 +210,51 @@ def get_nn_policy(
         layers=params.policy_layers,
         biased_head=not params.policy_unbiased_head,
         non_linearity=params.policy_non_linearity,
+        deterministic=params.policy_deterministic,
+        squashed_output=True
+    )
+
+    params.update({"policy": policy.__class__.__name__})
+
+    return policy
+
+
+def get_rnn_policy(
+        dim_state: tuple,
+        dim_action: tuple,
+        num_states: int,
+        num_actions: int,
+        input_transform: nn.Module,
+        action_scale: Union[SupportsFloat, np.ndarray],
+        params: argparse.Namespace,
+) -> RNNPolicy:
+    """
+    Returns a learnable RNN policy
+    :param dim_state: State dimensionality
+    :param dim_action: Action dimensionality
+    :param num_states: Number of states
+    :param num_actions: Number of actions
+    :param input_transform: Input transformation
+    :param params: Policy arguments
+    :param action_scale: Action scale
+    :return: RNN Policy
+    """
+
+    if params.exploration == "optimistic":
+        dim_action = (dim_action[0] + dim_state[0],)
+
+    policy = RNNPolicy(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        input_transform=input_transform,
+        action_scale=action_scale,
+        tau=params.policy_tau,
+        embedding_layers=(200, 200),
+        layers=(200, 200),
+        biased_head=not params.policy_unbiased_head,
+        non_linearity="ReLU",
         deterministic=params.policy_deterministic,
         squashed_output=True
     )

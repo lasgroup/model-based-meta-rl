@@ -12,7 +12,9 @@ from torch.nn.modules import loss
 
 from lib.agents.mpc_agent import MPCAgent
 from lib.agents.mpc_policy_agent import MPCPolicyAgent
-from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy
+from lib.meta_rl.agents.rl_squared_agent import RLSquaredAgent
+from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
+    get_recurrent_value_function, get_rnn_policy
 
 from rllib.model import AbstractModel
 from rllib.dataset.transforms import AbstractTransform
@@ -346,6 +348,153 @@ def get_sac_agent(
         num_iter=128,
         gamma=params.gamma,
         comment=comment
+    )
+
+    return agent, comment
+
+
+def get_rl2_agent(
+        environment: AbstractEnvironment,
+        params: argparse.Namespace,
+        input_transform: nn.Module = None
+) -> Tuple[PPOAgent, str]:
+    """
+    Get an Reinforcement Learning Squared (RL^2) agent
+    :param environment: Meta RL environment
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :return: An RL^2 based agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define value function.
+    value_function = get_recurrent_value_function(
+        dim_state=(dim_state[0] + dim_action[0] + 2, ),
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+
+    # Define policy
+    policy = get_rnn_policy(
+        dim_state=(dim_state[0] + dim_action[0] + 2, ),
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        input_transform=input_transform,
+        action_scale=environment.action_scale,
+        params=params,
+    )
+
+    # Define model optimizer
+    policy_optimizer = optim.Adam(
+        list(policy.parameters()) + list(value_function.parameters()),
+        lr=params.ppo_opt_lr,
+        weight_decay=params.ppo_opt_weight_decay,
+    )
+
+    # Define Agent
+    comment = f"{params.agent_name} {params.exploration.capitalize()}"
+
+    agent = RLSquaredAgent(
+        policy=policy,
+        critic=value_function,
+        optimizer=policy_optimizer,
+        trial_len=params.trial_len,
+        num_iter=64,
+        batch_size=32,
+        epsilon=0.2,
+        eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
+        gamma=params.gamma,
+        comment=comment
+    )
+
+    return agent, comment
+
+
+def get_l2a_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[MPCAgent, str]:
+    """
+    Get an MPC based agent
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :param termination_model: Early termination check
+    :param initial_distribution: Distribution for initial exploration
+    :return: An MPC based agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define dynamics model
+    dynamical_model = get_model(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        transformations=transformations,
+        input_transform=input_transform,
+        params=params
+    )
+
+    # Define model optimizer
+    model_optimizer = optim.AdamW(
+        dynamical_model.parameters(),
+        lr=params.model_opt_lr,
+        weight_decay=params.model_opt_weight_decay,
+    )
+
+    # Define value function.
+    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
+    terminal_reward = value_function if params.mpc_terminal_reward else None
+
+    # Define policy
+    policy = get_mpc_policy(
+        dynamical_model=dynamical_model,
+        reward=reward_model,
+        params=params,
+        action_scale=environment.action_scale,
+        terminal_reward=terminal_reward,
+        termination_model=termination_model
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    agent = MPCAgent(
+        policy,
+        model_optimizer=model_optimizer,
+        exploration_scheme=params.exploration,
+        use_validation_set=params.use_validation_set,
+        initial_distribution=initial_distribution,
+        gamma=params.gamma,
+        comment=comment,
     )
 
     return agent, comment
