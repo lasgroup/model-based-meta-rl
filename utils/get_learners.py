@@ -7,7 +7,7 @@ from torch import nn
 from rllib.policy import MPCPolicy, NNPolicy
 from rllib.dataset.transforms import AbstractTransform
 from rllib.algorithms.mpc import CEMShooting
-from rllib.model import AbstractModel, EnsembleModel, TransformedModel
+from rllib.model import AbstractModel, EnsembleModel, TransformedModel, NNModel
 from rllib.value_function import AbstractValueFunction, NNValueFunction, AbstractQFunction, NNEnsembleQFunction, \
     NNQFunction
 
@@ -51,6 +51,19 @@ def get_model(
             non_linearity=params.model_non_linearity,
             input_transform=input_transform,
             deterministic=params.model_kind == "DeterministicEnsemble",
+        )
+    elif params.model_kind in ["ProbabilisticNN", "DeterministicNN"]:
+        model = NNModel(
+            dim_state=dim_state,
+            dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
+            layers=params.model_layers,
+            biased_head=not params.model_unbiased_head,
+            non_linearity=params.model_non_linearity,
+            input_transform=input_transform,
+            heteroscedastic=params.model_heteroscedastic,
+            deterministic=params.model_kind == "DeterministicNN",
         )
     else:
         raise NotImplementedError

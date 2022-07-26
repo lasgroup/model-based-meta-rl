@@ -137,6 +137,17 @@ class RLSquaredAgent(PPOAgent):
         self.algorithm.critic_target.reset()
         self.algorithm.policy_target.reset()
 
+    def train(self, val=True):
+        """Set the agent in training mode"""
+        self.meta_environment.train(val)
+        super().train(val)
+
+    def eval(self, val=True):
+        """Set the agent in evaluation mode."""
+        self.meta_environment.eval(val)
+        super().eval(val)
+
+
     @property
     def train_trials(self):
         """Return number of training episodes."""

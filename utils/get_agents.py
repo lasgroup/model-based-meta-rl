@@ -10,9 +10,8 @@ from rllib.dataset import ExperienceReplay
 from torch import nn, optim
 from torch.nn.modules import loss
 
-from lib.agents.mpc_agent import MPCAgent
-from lib.agents.mpc_policy_agent import MPCPolicyAgent
-from lib.meta_rl.agents.rl_squared_agent import RLSquaredAgent
+from lib.agents import MPCAgent, MPCPolicyAgent
+from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent
 from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
     get_recurrent_value_function, get_rnn_policy
 
@@ -405,7 +404,7 @@ def get_rl2_agent(
         policy=policy,
         critic=value_function,
         optimizer=policy_optimizer,
-        trial_len=params.trial_len,
+        trial_len=params.rl2_trial_len,
         num_iter=64,
         batch_size=32,
         epsilon=0.2,
@@ -417,7 +416,7 @@ def get_rl2_agent(
     return agent, comment
 
 
-def get_l2a_agent(
+def get_grbal_agent(
         environment: AbstractEnvironment,
         reward_model: AbstractModel,
         transformations: Iterable[AbstractTransform],
@@ -425,9 +424,9 @@ def get_l2a_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> Tuple[MPCAgent, str]:
+) -> Tuple[GrBALAgent, str]:
     """
-    Get an MPC based agent
+    Get a Gradient-based Adaptive Learner agent
     :param environment: RL environment
     :param reward_model: Reward model
     :param transformations: State and action transformations
@@ -435,7 +434,7 @@ def get_l2a_agent(
     :param input_transform: Input transformation
     :param termination_model: Early termination check
     :param initial_distribution: Distribution for initial exploration
-    :return: An MPC based agent
+    :return: An GrBAL agent
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
@@ -461,7 +460,7 @@ def get_l2a_agent(
     )
 
     # Define value function.
-    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -470,7 +469,7 @@ def get_l2a_agent(
         params=params,
         input_transform=input_transform
     )
-    # TODO: Use as terminal reward  and train value function in ModelBasedAgent
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy
@@ -487,10 +486,12 @@ def get_l2a_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
-    agent = MPCAgent(
-        policy,
+    agent = GrBALAgent(
+        mpc_policy=policy,
         model_optimizer=model_optimizer,
-        exploration_scheme=params.exploration,
+        past_segment_len=params.grbal_past_segment_len,
+        future_segment_len=params.grbal_future_segment_len,
+        model_learn_batch_size=params.model_learn_batch_size,
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
         gamma=params.gamma,

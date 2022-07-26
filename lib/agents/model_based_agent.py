@@ -21,7 +21,7 @@ from rllib.util.neural_networks.utilities import DisableGradient
 from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
 
-from utils.utils import sample_trajectories
+from lib.datasets.utilities import sample_transitions
 
 
 class ModelBasedAgent(AbstractAgent):
@@ -167,12 +167,12 @@ class ModelBasedAgent(AbstractAgent):
         :param observation:
         :return:
         """
-        super().observe(observation)
+        super().observe(observation.clone())
         if self.training:
             if np.random.rand() < self.validation_fraction:  # Add some transitions to validation set
                 self.val_dataset.append(observation)
             else:
-                self.dataset.append(observation)
+                self.dataset.append(observation)  # TODO: This applies transformations to the observation, is then appended by initial_states
         if self.new_episode:
             if self.training:
                 self.initial_states.append(observation.state.unsqueeze(0))
@@ -323,7 +323,7 @@ class ModelBasedAgent(AbstractAgent):
         for _ in range(self.policy_opt_gradient_steps):
 
             def closure():
-                trajectories = sample_trajectories(self.sim_trajectory, self.policy_opt_batch_size)
+                trajectories = sample_transitions(self.sim_trajectory, self.policy_opt_batch_size)
                 self.optimizer.zero_grad()
                 losses = self.algorithm(trajectories)
                 losses.combined_loss.backward()

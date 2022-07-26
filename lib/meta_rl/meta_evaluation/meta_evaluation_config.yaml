@@ -1,0 +1,17 @@
+seed: 1
+
+num_train_tasks: 500
+num_test_tasks: 20
+
+num_samples: 10000
+num_context_samples: 10
+
+num_train_iter: 50000
+batch_size: 138
+num_task_samples: 25
+
+outer_lr: 0.001
+inner_lr: 0.01
+weight_decay: 0.0001
+
+num_gradient_steps: 10

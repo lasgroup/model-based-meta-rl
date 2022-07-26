@@ -9,7 +9,7 @@ from gym.spaces import Box
 from rllib.reward.state_action_reward import StateActionReward
 from lib.environments.wrappers.random_environment import RandomEnvironment
 
-SCALE_RANGE = [0.95, 1.05]
+SCALE_RANGE = [0.75, 1.25]
 ROTATION_RANGE = [-np.pi/4, np.pi/4]
 
 
@@ -75,8 +75,10 @@ class RandomPointEnv2D(RandomEnvironment):
             info : a dictionary containing other diagnostic information from the previous action
         """
         prev_state = self._state
-        delta = self._transition_axis @ (self._transition_scale * torch.clip(torch.tensor(action), -0.1, 0.1))
-        self._state = prev_state + delta
+        if not isinstance(action, torch.Tensor):
+            action = torch.tensor(action)
+        delta = self._transition_axis @ (self._transition_scale * torch.clip(action, -0.1, 0.1)).reshape(-1, 1)
+        self._state = prev_state + delta.reshape(-1)
         reward = self.reward(prev_state, action, self._state)
         done = self.done(self._state)
         next_observation = self._state.clone()

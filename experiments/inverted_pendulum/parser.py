@@ -53,6 +53,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-layers", type=int, nargs="*", default=[256, 256])
     parser.add_argument("--model-non-linearity", type=str, default="Tanh")
     parser.add_argument("--model-unbiased-head", action="store_true")
+    parser.add_argument("--model-heteroscedastic", type=bool, default=True)
     parser.add_argument("--model-opt-lr", type=float, default=1e-3)
     parser.add_argument("--model-opt-weight-decay", type=float, default=0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)

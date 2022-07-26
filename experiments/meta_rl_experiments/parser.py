@@ -28,8 +28,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="rl2",
-        choices=["rl2", "l2a"]
+        default="grbal",
+        choices=["rl2", "grbal"]
     )
     # TODO: Check where exploration is used
     parser.add_argument(
@@ -42,7 +42,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--train-episodes", type=int, default=1000)
+    parser.add_argument("--train-episodes", type=int, default=200)
     parser.add_argument("--test-episodes", type=int, default=2)
 
     # Reward parameters
@@ -50,7 +50,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-action-cost", action="store_true")
 
     # Meta Learning Parameters
-    parser.add_argument("--num_env_instances", type=int, default=1000)
+    parser.add_argument("--num_train_env_instances", type=int, default=200)
+    parser.add_argument("--num_test_env_instances", type=int, default=20)
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
@@ -60,15 +61,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-wandb", action="store_true")
 
     # Model parameters
-    parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")
+    parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")
     parser.add_argument("--model-num-heads", type=int, default=5)
-    parser.add_argument("--model-layers", type=int, nargs="*", default=[200, 200, 200, 200])
+    parser.add_argument("--model-layers", type=int, nargs="*", default=[512, 512, 512])
     parser.add_argument("--model-unbiased-head", action="store_true")
-    parser.add_argument("--model-non-linearity", type=str, default="Tanh")
+    parser.add_argument("--model-heteroscedastic", type=bool, default=True)
+    parser.add_argument("--model-non-linearity", type=str, default="ReLU")
     parser.add_argument("--model-opt-lr", type=float, default=3e-4)
-    parser.add_argument("--model-opt-weight-decay", type=float, default=0.01)
+    parser.add_argument("--model-opt-weight-decay", type=float, default=0.0003)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
-    parser.add_argument("--model-learn-batch-size", type=int, default=32)
+    parser.add_argument("--model-learn-batch-size", type=int, default=250)
     parser.add_argument("--use-validation-set", action="store_true")
 
     # Simulation and replay buffer parameters
@@ -100,20 +102,24 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mpc-num-iter", type=int, default=5)
     parser.add_argument("--mpc-num-particles", type=int, default=400)
     parser.add_argument("--mpc-num-elites", type=int, default=10)
-    parser.add_argument("--mpc_horizon", type=int, default=16)
+    parser.add_argument("--mpc-horizon", type=int, default=12)
     parser.add_argument("--mpc-alpha", type=float, default=0.1)
     parser.add_argument("--mpc-terminal-reward", type=bool, default=False)
     parser.add_argument("--mpc-not-warm-start", type=bool, default=False)
     parser.add_argument("--mpc-default-action", type=str,
                         choices=["zero", "constant", "mean"], default="constant")
 
+    # RL2 parameters
+    parser.add_argument("--rl2-trial-len", type=int, default=2)
+
+    # GrBAL parameters
+    parser.add_argument("--grbal-past-segment-len", type=int, default=32)
+    parser.add_argument("--grbal-future-segment-len", type=int, default=32)
+
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
     parser.add_argument("--ppo-eta", type=float, default=0.01)
-
-    # RL2 parameters
-    parser.add_argument("--trial-len", type=int, default=2)
 
     # SAC parameters
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)

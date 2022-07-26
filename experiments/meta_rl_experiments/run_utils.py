@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from utils.logger import Logger
-from utils.get_agents import get_rl2_agent, get_l2a_agent
+from utils.get_agents import get_rl2_agent, get_grbal_agent
 from lib.environments.wrappers.gym_environment import GymEnvironment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
@@ -56,8 +56,8 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
-    elif params.agent_name == "l2a":
-        agent, comment = get_l2a_agent(
+    elif params.agent_name == "grbal":
+        agent, comment = get_grbal_agent(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
