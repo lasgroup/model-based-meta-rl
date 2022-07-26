@@ -50,8 +50,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-action-cost", action="store_true")
 
     # Meta Learning Parameters
-    parser.add_argument("--num_train_env_instances", type=int, default=200)
-    parser.add_argument("--num_test_env_instances", type=int, default=20)
+    parser.add_argument("--num-train-env-instances", type=int, default=200)
+    parser.add_argument("--num-test-env-instances", type=int, default=20)
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
@@ -70,7 +70,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-opt-lr", type=float, default=3e-4)
     parser.add_argument("--model-opt-weight-decay", type=float, default=0.0003)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
-    parser.add_argument("--model-learn-batch-size", type=int, default=250)
+    parser.add_argument("--model-learn-batch-size", type=int, default=100)
     parser.add_argument("--use-validation-set", action="store_true")
 
     # Simulation and replay buffer parameters
