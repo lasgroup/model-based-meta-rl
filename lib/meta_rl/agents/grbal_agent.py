@@ -30,7 +30,7 @@ class GrBALAgent(MPCAgent):
             past_segment_len: int = 16,
             future_segment_len: int = 16,
             inner_lr: float = 0.01,
-            model_learn_batch_size: int = 200,
+            model_learn_batch_size: int = 500,
             max_memory: int = 1000000,
             *args,
             **kwargs
@@ -46,7 +46,7 @@ class GrBALAgent(MPCAgent):
 
         self.pre_update_model = MAML(deep_copy_module(self.dynamical_model.base_model), lr=inner_lr)
         self.meta_optimizer = type(self.model_optimizer)(
-            self.pre_update_model.module.parameters(),
+            self.pre_update_model.parameters(),
             **self.model_optimizer.defaults
         )
 
@@ -126,7 +126,7 @@ class GrBALAgent(MPCAgent):
                 task_model,
                 get_trajectory_segment(trajectory, -self.future_segment_len, None),
                 dynamical_model=None
-            ).mean()
+            ).mean() / self.model_learn_batch_size
         loss.backward()
         self.meta_optimizer.step()
         self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})

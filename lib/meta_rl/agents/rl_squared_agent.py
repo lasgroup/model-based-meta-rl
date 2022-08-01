@@ -21,7 +21,7 @@ class RLSquaredAgent(PPOAgent):
             self,
             meta_environment: MetaEnvironmentWrapper = None,
             trial_len: int = 2,
-            num_iter: int = 20,
+            num_iter: int = 32,
             num_rollouts: int = 1,
             *args,
             **kwargs
@@ -146,7 +146,6 @@ class RLSquaredAgent(PPOAgent):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
         super().eval(val)
-
 
     @property
     def train_trials(self):

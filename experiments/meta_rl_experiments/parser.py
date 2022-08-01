@@ -63,14 +63,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")
     parser.add_argument("--model-num-heads", type=int, default=5)
-    parser.add_argument("--model-layers", type=int, nargs="*", default=[512, 512, 512])
+    parser.add_argument("--model-layers", type=int, nargs="*", default=[200, 200])
     parser.add_argument("--model-unbiased-head", action="store_true")
     parser.add_argument("--model-heteroscedastic", type=bool, default=True)
     parser.add_argument("--model-non-linearity", type=str, default="ReLU")
-    parser.add_argument("--model-opt-lr", type=float, default=3e-4)
-    parser.add_argument("--model-opt-weight-decay", type=float, default=0.0003)
+    parser.add_argument("--model-opt-lr", type=float, default=1e-3)
+    parser.add_argument("--model-opt-weight-decay", type=float, default=0.0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
-    parser.add_argument("--model-learn-batch-size", type=int, default=100)
+    parser.add_argument("--model-learn-batch-size", type=int, default=500)
     parser.add_argument("--use-validation-set", action="store_true")
 
     # Simulation and replay buffer parameters
@@ -83,14 +83,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
 
     # Value function parameters
-    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[256, 256])
+    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[100])
     parser.add_argument("--value-function-unbiased-head", action="store_true")
     parser.add_argument("--value-function-non-linearity", type=str, default="Tanh")
     parser.add_argument("--value-function-tau", type=float, default=0)
     parser.add_argument("--value-function-num-heads", type=int, default=2)
 
     # Value function parameters
-    parser.add_argument("--policy-layers", type=int, nargs="*", default=[256, 256])
+    parser.add_argument("--policy-layers", type=int, nargs="*", default=[100])
     parser.add_argument("--policy-unbiased-head", action="store_true")
     parser.add_argument("--policy-non-linearity", type=str, default="Tanh")
     parser.add_argument("--policy-tau", type=float, default=0)
@@ -113,8 +113,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rl2-trial-len", type=int, default=2)
 
     # GrBAL parameters
-    parser.add_argument("--grbal-past-segment-len", type=int, default=32)
-    parser.add_argument("--grbal-future-segment-len", type=int, default=32)
+    parser.add_argument("--grbal-past-segment-len", type=int, default=16)
+    parser.add_argument("--grbal-future-segment-len", type=int, default=16)
 
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
