@@ -7,7 +7,7 @@ from torch import nn
 from dotmap import DotMap
 
 from lib.meta_rl.algorithms.maml import MAML
-from lib.meta_rl.meta_evaluation.demo_task import DemoMetaLearningDataset
+from lib.meta_rl.meta_datasets.demo_task import DemoMetaLearningDataset
 
 
 def get_fc_nn(layers, in_dim=1, out_dim=1, activation="tanh"):
@@ -57,14 +57,14 @@ def train_and_evaluate(model, dataset, params):
         for task in range(params.num_task_samples):
             task_model = model.clone()
             error = loss_func(
-                task_model(task_samples_x[task, :params.num_context_samples]),
-                task_samples_y[task, :params.num_context_samples]
+                task_model(task_samples_x[task, :dataset.num_context_samples]),
+                task_samples_y[task, :dataset.num_context_samples]
             )
             task_model.adapt(error)
             training_dict["pre_update_error"] += error.clone().detach() / params.num_task_samples
             loss += loss_func(
-                task_model(task_samples_x[task, params.num_context_samples:]),
-                task_samples_y[task, params.num_context_samples:]
+                task_model(task_samples_x[task, dataset.num_context_samples:]),
+                task_samples_y[task, dataset.num_context_samples:]
             ) / params.num_task_samples
 
         training_dict["post_update_error"] = loss.clone().detach().item()
@@ -74,7 +74,7 @@ def train_and_evaluate(model, dataset, params):
 
     eval_dict = {"Task": [], "pre_update_error": [], "post_update_error": []}
     for gradient_steps in range(1, params.num_gradient_steps+1):
-        for task in range(params.num_test_tasks):
+        for task in range(dataset.num_test_tasks):
             if gradient_steps == params.num_gradient_steps:
                 ax = plot_model(model, 'g')
             optimizer.zero_grad()
@@ -119,6 +119,6 @@ if __name__ == "__main__":
     model = get_fc_nn([40, 40], in_dim=1, out_dim=1, activation="relu")
     model = MAML(model, lr=params.inner_lr)
 
-    dataset = DemoMetaLearningDataset(params)
+    dataset = DemoMetaLearningDataset()
 
     train_and_evaluate(model, dataset, params)

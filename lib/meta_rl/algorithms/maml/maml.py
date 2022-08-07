@@ -7,7 +7,7 @@ import traceback
 from torch import nn
 from torch.autograd import grad
 
-from lib.meta_rl.algorithms.utilities import clone_module, update_module
+from lib.meta_rl.algorithms.maml.utilities import clone_module, update_module
 
 
 class MAML(nn.Module):

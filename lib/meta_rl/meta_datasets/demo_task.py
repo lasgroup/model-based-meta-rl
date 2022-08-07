@@ -18,15 +18,19 @@ def _func(x: torch.Tensor, phase=None, amplitude=None):
 
 class DemoMetaLearningDataset:
 
-    def __init__(self, params):
-        self.num_train_tasks = params.num_train_tasks
-        self.num_test_tasks = params.num_test_tasks
+    def __init__(self, num_train_tasks=500, num_test_tasks=20, num_samples=10000,
+                 num_context_samples=10, observation_noise_std=0.1):
 
-        self.num_samples = params.num_samples
-        self.num_context_samples = params.num_context_samples
+        self.num_train_tasks = num_train_tasks
+        self.num_test_tasks = num_test_tasks
 
-        self.train_task_params = torch.rand(params.num_train_tasks, 2)
-        self.test_task_params = torch.rand(params.num_test_tasks, 2)
+        self.num_samples = num_samples
+        self.num_context_samples = num_context_samples
+
+        self.observation_noise_std = observation_noise_std
+
+        self.train_task_params = torch.rand(num_train_tasks, 2)
+        self.test_task_params = torch.rand(num_test_tasks, 2)
 
         self.train_data = self.generate_data(self.num_train_tasks, self.num_samples, self.train_task_params)
         self.test_data = self.generate_data(self.num_test_tasks, self.num_samples, self.test_task_params)
@@ -36,6 +40,7 @@ class DemoMetaLearningDataset:
         phase_samples = (PHASE_RANGE[1] - PHASE_RANGE[0]) * params[:, 1] + PHASE_RANGE[0]
         input_samples = (INPUT_RANGE[1] - INPUT_RANGE[0]) * torch.rand(tasks, num_samples) + INPUT_RANGE[0]
         output = _func(input_samples, phase_samples, amplitude_samples)
+        output = output + torch.randn(output.shape) * self.observation_noise_std
         return torch.stack((input_samples, output), dim=-1)
 
     def get_samples_from_task(self, batch_size, task_id):
