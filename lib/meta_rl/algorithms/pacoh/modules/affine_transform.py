@@ -24,13 +24,13 @@ class AffineTransform:
             if isinstance(base_dist, torch.distributions.Normal):
                 transformed_dist = torch.distributions.Normal(
                     loc=((self.scale_mat @ base_dist.loc) + self.loc_tensor),
-                    scale=torch.exp(torch.log(base_dist.scale) + torch.log(self.scale_tensor))
+                    scale=(base_dist.scale.log() + self.scale_tensor.log()).exp()
                 )
             elif isinstance(base_dist, torch.distributions.MixtureSameFamily):
                 assert isinstance(base_dist.component_distribution, torch.distributions.Normal)
                 transformed_component_distribution = torch.distributions.Normal(
                     loc=(self.scale_mat @ base_dist.component_distribution.loc + self.loc_tensor),
-                    scale=torch.exp(torch.log(base_dist.component_distribution.scale) + torch.log(self.scale_tensor))
+                    scale=(base_dist.component_distribution.scale.log() + self.scale_tensor.log()).exp()
                 )
                 transformed_dist = torch.distributions.MixtureSameFamily(
                     base_dist.mixture_distribution, transformed_component_distribution

@@ -48,9 +48,9 @@ class BayesianNeuralNetworkSVGD(RegressionModel):
                                        likelihood_prior_mean=likelihood_prior_mean,
                                        likelihood_prior_std=likelihood_prior_std)
             self.meta_learned_prior_mode = False
-        else:  # TODO: Check this part
+        else:
             self.prior = meta_learned_prior
-            assert meta_learned_prior.get_variables_stacked_per_model().shape[-1] == \
+            assert meta_learned_prior.get_parameters_stacked_per_prior().shape[-1] == \
                    2 * (self.nn_param_size + self.likelihood_param_size)
             assert n_particles % self.prior.n_batched_priors == 0, "n_particles must be multiple of n_batched_priors"
             self.meta_learned_prior_mode = True

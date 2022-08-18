@@ -59,9 +59,9 @@ class LinearVectorized(VectorizedModel):
 
         self.reset_parameters(nonlinearity)
 
-    def reset_parameters(self, non_linearity):
-        self.weight = _kaiming_uniform_batched(self.weight, fan=self.input_dim, a=math.sqrt(5), nonlinearity=non_linearity)
-        if self.bias is not None:
+    def reset_parameters(self, non_linearity, zero_bias=False):
+        self.weight = _kaiming_uniform_batched(self.weight, fan_in=self.input_dim, fan_out=self.output_dim, a=math.sqrt(5), nonlinearity=non_linearity)
+        if self.bias is not None and not zero_bias:
             fan_in = self.output_dim
             bound = 1 / math.sqrt(fan_in)
             nn.init.uniform_(self.bias, -bound, bound)
@@ -78,7 +78,7 @@ class LinearVectorized(VectorizedModel):
 
             if x.ndim == 2:
                 # introduce new dimension 0
-                x = torch.reshape(x, (1, x.shape[0], x.shape[1]))
+                x = x.reshape((1, x.shape[0], x.shape[1]))
                 # tile dimension 0 to model_batch size
                 x = x.repeat(model_batch_size, 1, 1)
             else:
@@ -118,6 +118,7 @@ class NeuralNetworkVectorized(VectorizedModel):
         self.nonlinearlity = nonlinearlity
         self.n_layers = len(layer_sizes)
         self.layers_sizes = layer_sizes
+        self.n_batched_models = n_batched_models
 
         prev_size = input_dim
         for i, size in enumerate(layer_sizes):
@@ -178,10 +179,16 @@ class NeuralNetworkVectorized(VectorizedModel):
         return self.forward(*args, **kwargs)
 
 
-def _kaiming_uniform_batched(tensor, fan, a=0.0, nonlinearity='tanh'):
+def _kaiming_uniform_batched(tensor, fan_in, fan_out, a=0.0, nonlinearity='tanh', initalization='glorot'):
     """ Initialization Helper """
-    gain = nn.init.calculate_gain(nonlinearity, a)
-    std = gain / math.sqrt(fan)
-    bound = math.sqrt(3.0) * std  # Calculate uniform bounds from standard deviation
+    if initalization == 'glorot':
+        std = 1.0 / math.sqrt(fan_in + fan_out)
+        bound = math.sqrt(6.0) * std  # Calculate uniform bounds from standard deviation
+    elif initalization == 'kaimin':
+        gain = nn.init.calculate_gain(nonlinearity, a)
+        std = gain / math.sqrt(fan_in)
+        bound = math.sqrt(3.0) * std  # Calculate uniform bounds from standard deviation
+    else:
+        raise NotImplementedError
     with torch.no_grad():
         return tensor.uniform_(-bound, bound)

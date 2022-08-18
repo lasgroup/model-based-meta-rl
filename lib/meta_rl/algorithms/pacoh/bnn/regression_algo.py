@@ -73,10 +73,10 @@ class RegressionModel:
 
     def _compute_normalization_stats(self, x_train, y_train, normalization_stats=None):
         if normalization_stats is None:
-            self.x_mean = torch.mean(x_train, dim=0)
-            self.x_std = torch.std(x_train, dim=0)
-            self.y_mean = torch.mean(y_train, dim=0)
-            self.y_std = torch.std(y_train, dim=0)
+            self.x_mean = x_train.mean(dim=0)
+            self.x_std = x_train.std(dim=0)
+            self.y_mean = y_train.mean(dim=0)
+            self.y_std = y_train.std(dim=0)
         else:
             self.x_mean = normalization_stats['x_mean']
             self.x_std = normalization_stats['x_std']
@@ -133,13 +133,13 @@ class RegressionModel:
     @staticmethod
     def _handle_input_data(x, y=None, convert_to_tensor=True, dtype=torch.float32):
         if x.ndim == 1:
-            x = torch.unsqueeze(x, dim=-1)
+            x = x.unsqueeze(dim=-1)
 
         assert x.ndim == 2
 
         if y is not None:
             if y.ndim == 1:
-                y = torch.unsqueeze(y, dim=-1)
+                y = y.unsqueeze(dim=-1)
             assert x.shape[0] == y.shape[0]
             assert y.ndim == 2
 
@@ -157,7 +157,7 @@ class RegressionModel:
         n_particles = params.shape[0]
         nn_params = params[:, :self.nn_param_size]
         if self.likelihood_param_size > 0:
-            likelihood_std = torch.exp(params[:, -self.likelihood_param_size:])
+            likelihood_std = params[:, -self.likelihood_param_size:].exp()
         else:
             likelihood_std = torch.ones((n_particles, self.output_dim)) * self.likelihood_std
 

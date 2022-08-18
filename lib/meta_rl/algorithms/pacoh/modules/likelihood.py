@@ -15,7 +15,7 @@ class GaussianLikelihood(torch.nn.Module):
 
     @property
     def std(self):
-        return torch.exp(self.log_std)
+        return self.log_std.exp()
 
     def log_prob(self, y_pred, y_true, std=None):
         if std is None:
@@ -58,9 +58,9 @@ class GaussianLikelihood(torch.nn.Module):
 
         num_points = torch.tensor(cdf_vals.numel()).type(torch.float32)
         conf_levels = torch.linspace(0.05, 0.95, 20)
-        emp_freq_per_conf_level = torch.sum((cdf_vals <= conf_levels).type(torch.float32), dim=0) / num_points
+        emp_freq_per_conf_level = (cdf_vals <= conf_levels).type(torch.float32).sum(dim=0) / num_points
 
-        calib_err = torch.abs((emp_freq_per_conf_level - conf_levels)).mean()
+        calib_err = (emp_freq_per_conf_level - conf_levels).abs().mean()
         return calib_err
 
     def get_pred_mixture_dist(self, y_pred, std=None):
@@ -91,7 +91,7 @@ class GaussianLikelihood(torch.nn.Module):
 
         """
         assert y_pred_mean.shape == y_true.shape
-        return torch.sqrt((torch.square(y_pred_mean - y_true).mean()))
+        return (y_pred_mean - y_true).square().mean().sqrt()
 
 
 """ helper function """
