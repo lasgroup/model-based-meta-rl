@@ -1,1 +1,1 @@
-from maml import MAML
+from .maml import MAML
