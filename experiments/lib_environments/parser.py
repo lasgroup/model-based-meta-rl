@@ -12,13 +12,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="pendulum-v1.yaml",
+        default="point_env_2d.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
         "--env-group",
         type=str,
-        default="gym_envs",
+        default="point_envs",
         choices=["gym_envs", "mujocoMB_envs", "point_envs"]
     )
     parser.add_argument("--render", action="store_true")
@@ -28,7 +28,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="mpc_policy",
+        default="mpc",
         choices=["mpc", "mpc_policy", "ppo", "sac"]
     )
     # TODO: Check where exploration is used
@@ -57,7 +57,12 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-wandb", action="store_true")
 
     # Model parameters
-    parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")
+    parser.add_argument(
+        "--model-kind",
+        type=str,
+        default="BayesianNN",
+        choices=["ProbabilisticEnsemble", "BayesianNN"]
+    )
     parser.add_argument("--model-num-heads", type=int, default=5)
     parser.add_argument("--model-layers", type=int, nargs="*", default=[200, 200, 200, 200])
     parser.add_argument("--model-unbiased-head", action="store_true")
@@ -93,7 +98,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--policy-deterministic", action="store_true")
 
     # MPC parameters
-    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="icem")
+    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="cem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
     parser.add_argument("--mpc-num-particles", type=int, default=400)

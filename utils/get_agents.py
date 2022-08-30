@@ -57,11 +57,18 @@ def get_mpc_agent(
     )
 
     # Define model optimizer
-    model_optimizer = optim.AdamW(
-        dynamical_model.parameters(),
-        lr=params.model_opt_lr,
-        weight_decay=params.model_opt_weight_decay,
-    )
+    try:
+        model_optimizer = optim.AdamW(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = model_optimizer = optim.AdamW(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
 
     # Define value function.
     # TODO: Use as terminal reward  and train value function in ModelBasedAgent
@@ -169,7 +176,6 @@ def get_mpc_policy_agent(
             input_transform=input_transform
         )
 
-        # TODO write own PPO with base Abstract Algorithm
         algorithm = PPO(
             policy=policy,
             critic=critic,

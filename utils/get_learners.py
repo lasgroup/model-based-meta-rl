@@ -11,6 +11,7 @@ from rllib.model import AbstractModel, EnsembleModel, TransformedModel, NNModel
 from rllib.value_function import AbstractValueFunction, NNValueFunction, AbstractQFunction, NNEnsembleQFunction, \
     NNQFunction
 
+from lib.model.bayesian_model import BayesianNNModel
 from lib.policies.rnn_policy import RNNPolicy
 from lib.solvers.icem_shooting import ICEMShooting
 from lib.hucrl.hallucinated_model import HallucinatedModel
@@ -64,6 +65,18 @@ def get_model(
             input_transform=input_transform,
             heteroscedastic=params.model_heteroscedastic,
             deterministic=params.model_kind == "DeterministicNN",
+        )
+    elif params.model_kind in ["BayesianNN"]:
+        model = BayesianNNModel(
+            dim_state=dim_state,
+            dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
+            layers=params.model_layers,
+            biased_head=not params.model_unbiased_head,
+            non_linearity=params.model_non_linearity,
+            input_transform=input_transform,
+            deterministic=False,
         )
     else:
         raise NotImplementedError

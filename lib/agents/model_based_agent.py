@@ -15,13 +15,15 @@ from rllib.dataset import Observation, stack_list_of_tuples, average_dataclass
 from rllib.model import TransformedModel, AbstractModel
 from rllib.policy import AbstractPolicy
 from rllib.util.rollout import rollout_model
-from rllib.util.training.model_learning import train_model
 from rllib.util.utilities import tensor_to_distribution
 from rllib.util.neural_networks.utilities import DisableGradient
 from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
+from rllib.util.training.model_learning import train_model as train_model
 
 from lib.datasets.utilities import sample_transitions
+from lib.model.bayesian_model import BayesianNNModel
+from lib.model.bayesian_model_learning import train_model as bayesian_train_model
 
 
 class ModelBasedAgent(AbstractAgent):
@@ -87,8 +89,13 @@ class ModelBasedAgent(AbstractAgent):
         self.reward_model = reward_model
         self.termination_model = termination_model
         self.algorithm = algorithm
-        self.model_optimizer = model_optimizer
         self.value_function = value_function
+
+        if isinstance(self.dynamical_model.base_model, BayesianNNModel):
+            model_optimizer = type(model_optimizer)(
+                [self.dynamical_model.base_model.particles], **model_optimizer.defaults
+            )
+        self.model_optimizer = model_optimizer
 
         self.model_learn_num_iter = model_learn_num_iter
         self.model_learn_batch_size = model_learn_batch_size
@@ -243,9 +250,14 @@ class ModelBasedAgent(AbstractAgent):
         if self.model_learn_num_iter > 0:
             print(colorize("Training Dynamics Model", "yellow"))
 
+            if isinstance(self.dynamical_model.base_model, BayesianNNModel):
+                train_fn = bayesian_train_model
+            else:
+                train_fn = train_model
+
             if len(self.dataset) >= self.model_learn_batch_size:
                 val_set = self.val_dataset if len(self.val_dataset) > self.model_learn_batch_size else None
-                train_model(
+                train_fn(
                     self.dynamical_model.base_model,
                     train_set=self.dataset,
                     validation_set=val_set,
