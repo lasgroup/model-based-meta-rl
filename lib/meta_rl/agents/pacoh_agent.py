@@ -1,3 +1,4 @@
+import os
 import copy
 import math
 import time
@@ -6,6 +7,7 @@ from collections import deque
 import numpy as np
 import torch
 
+from utils.utils import get_project_path
 from rllib.dataset import stack_list_of_tuples
 
 from lib.agents import MPCAgent
@@ -22,7 +24,7 @@ from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussian
 # TODO:
 """
 Make it work with H-UCRL
-Save and Load trajectory replay
+Eval (RMSE, MLL), Logging
 Check whether meta_fit works
 Check whether task_fit works
 Plot trajectories and axis
@@ -63,6 +65,8 @@ class PACOHAgent(MPCAgent):
             meta_batch_size=10,
             per_task_batch_size=32,
             eval_num_context_samples=16,
+            env_name="",
+            trajectory_replay_load_path=None,
             *args,
             **kwargs
     ):
@@ -73,11 +77,18 @@ class PACOHAgent(MPCAgent):
         )
 
         self.meta_environment = meta_environment
+        self.env_name = env_name
 
         self.dataset = TrajectoryReplay(
             max_len=max_memory,
             transformations=self.dynamical_model.transformations
         )
+        if trajectory_replay_load_path is not None:
+            self.load_trajectory_replay(trajectory_replay_load_path)
+            self.save_data = False
+        else:
+            self.save_data = True
+
         self.observation_queue = deque([], eval_num_context_samples)
 
         self.hyper_prior_weight = hyper_prior_weight
@@ -196,6 +207,8 @@ class PACOHAgent(MPCAgent):
         self.meta_environment.eval(val)
         self.meta_fit()
         super().eval(val)
+        if self.save_data:
+            self.save_trajectory_replay()
 
     def fit_task(self):
         eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
@@ -367,3 +380,12 @@ class PACOHAgent(MPCAgent):
 
         assert likelihood_std.shape == (n_particles, self.output_dim)
         return nn_params, likelihood_std
+
+    def save_trajectory_replay(self, project_rel_path="lib/meta_rl/experience_replay"):
+        file_name = self.env_name + "_" + str(self.dataset.num_episodes) + ".pkl"
+        save_path = os.path.join(get_project_path(), project_rel_path, file_name)
+        torch.save(self.dataset, save_path)
+
+    def load_trajectory_replay(self, project_rel_path):
+        load_path = os.path.join(get_project_path(), project_rel_path)
+        self.dataset = torch.load(load_path)

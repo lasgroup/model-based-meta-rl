@@ -109,6 +109,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mpc-default-action", type=str,
                         choices=["zero", "constant", "mean"], default="constant")
 
+    # PACOH parameters
+    parser.add_argument("--collect-meta-data", action="store_true")
+
     # RL2 parameters
     parser.add_argument("--rl2-trial-len", type=int, default=2)
 

@@ -1,5 +1,4 @@
-import numpy as np
-from rllib.dataset import Observation, stack_list_of_tuples
+import pathlib
 
 
 def get_logger_layout(num_heads: int) -> dict:
@@ -27,3 +26,8 @@ def get_logger_layout(num_heads: int) -> dict:
     }
 
     return layout
+
+
+def get_project_path():
+    return pathlib.Path(__file__).absolute().parent.parent.resolve()
+

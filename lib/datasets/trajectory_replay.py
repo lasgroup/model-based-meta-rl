@@ -20,7 +20,7 @@ class TrajectoryReplay(ExperienceReplay):
         super().__init__(*args, **kwargs)
         self.trajectory_starts = []
         self.trajectory_lengths = []
-        self.observation_trajectory = np.empty((self.max_len,), dtype=int)
+        self.observation_trajectory = torch.empty((self.max_len, ), dtype=torch.int)
 
     def append(self, observation):
         self.observation_trajectory[self.ptr] = len(self.trajectory_lengths)

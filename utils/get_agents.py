@@ -1,5 +1,6 @@
 from typing import Union, Callable, Iterable, Tuple
 
+import os
 import torch
 import argparse
 
@@ -601,11 +602,18 @@ def get_pacoh_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
+    trajectory_load_path = os.path.join(
+        "lib/meta_rl/experience_replay",
+        params.env_config_file.strip(".yaml") + "_" + str(params.train_episodes) + ".pkl"
+    ) if not params.collect_meta_data else None
+
     agent = PACOHAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
         initial_distribution=initial_distribution,
         gamma=params.gamma,
+        env_name=params.env_config_file.strip(".yaml"),
+        trajectory_replay_load_path=trajectory_load_path,
         comment=comment,
     )
 
