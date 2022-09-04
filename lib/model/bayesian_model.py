@@ -28,7 +28,7 @@ class BayesianNNModel(NNModel):
     """
     def __init__(
         self,
-        num_particles=10,
+        num_particles=15,
         prediction_strategy="moment_matching",
         deterministic=False,
         *args,
@@ -37,13 +37,16 @@ class BayesianNNModel(NNModel):
         super().__init__(deterministic=False, *args, **kwargs)
         self.num_particles = num_particles
 
+        nn_kwargs = kwargs
+        for model in self.nn:
+            nn_kwargs.update(model.kwargs)
         self.nn = torch.nn.ModuleList(
             [
                 FeedForwardBNN(
                     num_particles=num_particles,
                     prediction_strategy=prediction_strategy,
                     deterministic=deterministic,
-                    **model.kwargs,
+                    **nn_kwargs,
                 )
                 for model in self.nn
             ]
@@ -59,6 +62,36 @@ class BayesianNNModel(NNModel):
             _, scale = self.forward(state, action[..., : self.dim_action[0]])
 
         return scale
+
+    def get_model_config(self):
+        config = {
+            "dim_state": self.dim_state,
+            "dim_action": self.dim_action,
+            "num_states": self.num_states,
+            "num_actions": self.num_actions,
+        }
+        config.update(self.nn[0].kwargs)
+        return config
+
+    def named_parameters(self):
+        return self.nn[0].named_parameters()
+
+    def parameter_shapes(self):
+        return self.nn[0].parameter_shapes()
+
+    def parameters_as_vector(self):
+        return self.nn[0].parameters_as_vector()
+
+    def set_parameters_as_vector(self, value):
+        self.nn[0].set_parameters_as_vector(value)
+
+    @property
+    def num_parameters(self):
+        return self.nn[0].num_parameters
+
+    @property
+    def n_batched_models(self):
+        return self.nn[0].n_batched_models
 
     def get_avg_log_likelihood(self, y_pred, y_target):
         return self.nn[0].get_avg_log_likelihood(y_pred, y_target)

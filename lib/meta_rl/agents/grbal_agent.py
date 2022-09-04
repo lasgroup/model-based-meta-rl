@@ -2,15 +2,15 @@
 from collections import deque
 
 import torch
+
 from rllib.dataset import stack_list_of_tuples
 from rllib.util.neural_networks.utilities import deep_copy_module
-
 from rllib.util.training.utilities import model_loss, get_model_validation_score
 
 from lib.agents.mpc_agent import MPCAgent
 from lib.datasets import TrajectoryReplay
-from lib.datasets.utilities import get_trajectory_segment
 from lib.meta_rl.algorithms.maml import MAML
+from lib.datasets.utilities import get_trajectory_segment
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 
 

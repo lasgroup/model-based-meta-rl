@@ -1,8 +1,11 @@
 """Implementation of a Trajectory Replay Buffer."""
 
 import numpy as np
+import torch
 
+from torch.utils.data import default_collate
 from rllib.dataset import ExperienceReplay
+from rllib.dataset.datatypes import Observation
 
 
 class TrajectoryReplay(ExperienceReplay):
@@ -47,3 +50,18 @@ class TrajectoryReplay(ExperienceReplay):
             return observation
         else:
             return self.sample_segment(segment_len)
+
+    def sample_task_batch(self, batch_size, task_id=None):
+        if task_id is None:
+            task_id = np.random.randint(len(self.trajectory_starts))
+        indices = np.random.choice(self.trajectory_lengths[task_id], batch_size) + self.trajectory_starts[task_id]
+        if self.num_memory_steps == 0:
+            obs = self._get_observation(indices)
+            return obs, torch.tensor(indices), self.weights[indices]
+        else:
+            obs, idx, weight = default_collate([self[i] for i in indices])
+            return Observation(**obs), idx, weight
+
+    @property
+    def num_episodes(self):
+        return len(self.trajectory_starts)

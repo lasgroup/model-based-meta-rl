@@ -28,8 +28,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="grbal",
-        choices=["rl2", "grbal"]
+        default="pacoh",
+        choices=["rl2", "grbal", "pacoh"]
     )
     # TODO: Check where exploration is used
     parser.add_argument(
@@ -42,8 +42,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--train-episodes", type=int, default=200)
-    parser.add_argument("--test-episodes", type=int, default=2)
+    parser.add_argument("--train-episodes", type=int, default=20)
+    parser.add_argument("--test-episodes", type=int, default=10)
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)
@@ -97,7 +97,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--policy-deterministic", action="store_true")
 
     # MPC parameters
-    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="icem")
+    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="cem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
     parser.add_argument("--mpc-num-particles", type=int, default=400)

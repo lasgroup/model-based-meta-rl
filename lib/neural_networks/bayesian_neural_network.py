@@ -53,10 +53,15 @@ class FeedForwardBNN(VectorizedModel):
             "num_particles": num_particles,
             "prediction_strategy": prediction_strategy,
             "include_aleatoric_uncertainty": include_aleatoric_uncertainty,
+            "deterministic": deterministic,
             "non_linearity": non_linearity,
             "biased_head": biased_head,
             "min_scale": min_scale,
             "max_scale": max_scale,
+            "likelihood_std": likelihood_std,
+            "learn_likelihood": learn_likelihood,
+            "prior_weight": prior_weight,
+            "bandwidth": bandwidth
         }
 
         self.prior_weight = prior_weight
@@ -64,7 +69,6 @@ class FeedForwardBNN(VectorizedModel):
         self.sqrt_mode = sqrt_mode
 
         self.n_layers = len(layers)
-        self.layers_sizes = layers
         self.num_particles = num_particles
         self.head_ptr = 0
         self.head_indexes = torch.zeros(1).long()
@@ -72,7 +76,7 @@ class FeedForwardBNN(VectorizedModel):
         self.prediction_strategy = prediction_strategy
         self.include_aleatoric_uncertainty = include_aleatoric_uncertainty
 
-        in_dim, self.non_linearity = self.parse_layers(layers, in_dim, non_linearity)
+        in_dim, self.non_linearity_fn = self.parse_layers(layers, in_dim, non_linearity)
         self.embedding_dim = in_dim + 1 if biased_head else in_dim
         self.output_shape = out_dim[0]
 
@@ -80,7 +84,7 @@ class FeedForwardBNN(VectorizedModel):
             in_dim,
             reduce(lambda x, y: x * y, list(out_dim)),
             num_particles,
-            self.non_linearity
+            self.non_linearity_fn
         )
 
         self._min_scale = torch.log(torch.tensor(min_scale)).item()
@@ -127,18 +131,18 @@ class FeedForwardBNN(VectorizedModel):
     def parse_layers(self, layers, in_dim, non_linearity):
         non_linearity = non_linearity.lower()
         if non_linearity == "relu":
-            non_linearity = torch.relu
+            non_linearity_fn = torch.relu
         elif non_linearity == "tanh":
-            non_linearity = torch.tanh
+            non_linearity_fn = torch.tanh
         else:
             raise NotImplementedError
 
         prev_size = in_dim[0]
         for i, size in enumerate(layers):
-            setattr(self, 'fc_%i' % (i + 1), LinearVectorized(prev_size, size, self.num_particles, non_linearity))
+            setattr(self, 'fc_%i' % (i + 1), LinearVectorized(prev_size, size, self.num_particles, non_linearity_fn))
             prev_size = size
 
-        return prev_size, non_linearity
+        return prev_size, non_linearity_fn
 
     def forward_nn(self, x, nn_params=None):
         if nn_params is None:
@@ -149,7 +153,7 @@ class FeedForwardBNN(VectorizedModel):
         out = x
         for i in range(1, self.n_layers + 1):
             out = getattr(self, 'fc_%i' % i)(out)
-            out = self.non_linearity(out)
+            out = self.non_linearity_fn(out)
         out = self.head(out)
 
         return out
@@ -230,7 +234,7 @@ class FeedForwardBNN(VectorizedModel):
         output = x
         for i in range(1, self.n_layers + 1):
             output = getattr(self, 'fc_%i' % i)(output)
-            output = self.non_linearity(output)
+            output = self.non_linearity_fn(output)
 
         if self.head.bias is not None:
             output = torch.cat((output, torch.ones(output.shape[:-1] + (1,))), dim=-1)
@@ -348,6 +352,10 @@ class FeedForwardBNN(VectorizedModel):
     @property
     def num_parameters(self):
         return self.parameters_as_vector().shape[-1]
+
+    @property
+    def n_batched_models(self):
+        return self.num_particles
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)

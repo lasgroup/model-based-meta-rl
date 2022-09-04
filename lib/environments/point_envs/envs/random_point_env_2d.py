@@ -10,7 +10,7 @@ from rllib.reward.state_action_reward import StateActionReward
 from lib.environments.wrappers.random_environment import RandomEnvironment
 
 SCALE_RANGE = [0.75, 1.25]
-ROTATION_RANGE = [-np.pi/4, np.pi/4]
+ROTATION_RANGE = [-np.pi/1, np.pi/1]
 
 
 class RandomPointEnv2D(RandomEnvironment):

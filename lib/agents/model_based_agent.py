@@ -65,11 +65,11 @@ class ModelBasedAgent(AbstractAgent):
             sim_num_subsample: int = 1,
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = None,
-            gamma=1.0,
-            exploration_steps=0,
-            exploration_episodes=0,
-            tensorboard=False,
-            comment=""
+            gamma: float = 1.0,
+            exploration_steps: int = 0,
+            exploration_episodes: int = 0,
+            tensorboard: bool = False,
+            comment: str = ""
     ):
         self.algorithm = algorithm
         super().__init__(

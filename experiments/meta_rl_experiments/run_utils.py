@@ -2,7 +2,7 @@ import sys
 import argparse
 
 from utils.logger import Logger
-from utils.get_agents import get_rl2_agent, get_grbal_agent
+from utils.get_agents import get_rl2_agent, get_grbal_agent, get_pacoh_agent
 from lib.environments.wrappers.gym_environment import GymEnvironment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
@@ -58,6 +58,14 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         )
     elif params.agent_name == "grbal":
         agent, comment = get_grbal_agent(
+            environment=environment,
+            reward_model=reward_model,
+            transformations=transformations,
+            params=params,
+            input_transform=None
+        )
+    elif params.agent_name == "pacoh":
+        agent, comment = get_pacoh_agent(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,

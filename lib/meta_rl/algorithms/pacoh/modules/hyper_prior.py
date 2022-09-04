@@ -124,9 +124,9 @@ class GaussianHyperPrior(torch.nn.Module):
                 means = torch.ones(sizes[0], dtype=torch.float32) * self.likelihood_log_var_mean_mean
                 stds = torch.ones(sizes[0], dtype=torch.float32) * self.likelihood_log_var_mean_std
 
-                means = torch.cat(means, dim=1)
+                # means = torch.cat(means, dim=1)
                 means = means.type(torch.float32).squeeze()
-                stds = torch.cat(stds, dim=1)
+                # stds = torch.cat(stds, dim=1)
                 stds = stds.type(torch.float32).squeeze()
 
                 if means.ndim == 0:
@@ -142,9 +142,9 @@ class GaussianHyperPrior(torch.nn.Module):
                 # prior for likelihood_parameters_log_var
                 means = torch.ones(sizes[0], dtype=torch.float32) * self.likelihood_log_var_log_var_mean
                 stds = torch.ones(sizes[0], dtype=torch.float32) * self.likelihood_log_var_log_var_std
-                means = torch.cat(means, dim=1)
+                # means = torch.cat(means, dim=1)
                 means = means.type(torch.float32).squeeze()
-                stds = torch.cat(stds, dim=1)
+                # stds = torch.cat(stds, dim=1)
                 stds = stds.type(torch.float32).squeeze()
 
                 if means.ndim == 0:

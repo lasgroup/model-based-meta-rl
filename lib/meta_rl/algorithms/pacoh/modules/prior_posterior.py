@@ -157,7 +157,7 @@ class GaussianPriorPerVariable(VectorizedModel):
             name = f'{self.name}/likelihood_parameters_mean'
             setattr(self, name, torch.tensor(mean, dtype=torch.float32, requires_grad=True))
 
-            log_var = torch.ones(likelihood_param_size, dtype=torch.float32) * torch.log(likelihood_prior_std)
+            log_var = torch.ones(likelihood_param_size, dtype=torch.float32) * math.log(likelihood_prior_std)
             name = f'{self.name}/likelihood_parameters_log_var'
             setattr(self, name, torch.tensor(log_var, dtype=torch.float32, requires_grad=True))
 
