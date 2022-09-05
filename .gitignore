@@ -2,6 +2,7 @@
 **/runs/
 **/wandb/
 **/results/
+**/meta_rl/experience_replay/
 
 src/
 

@@ -24,6 +24,7 @@ from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussian
 # TODO:
 """
 Make it work with H-UCRL
+Normalization
 Eval (RMSE, MLL), Logging
 Check whether meta_fit works
 Check whether task_fit works
@@ -64,7 +65,7 @@ class PACOHAgent(MPCAgent):
             hyper_prior_likelihood_log_var_log_var_mean=-4.,
             meta_batch_size=10,
             per_task_batch_size=32,
-            eval_num_context_samples=16,
+            eval_num_context_samples=100,
             env_name="",
             trajectory_replay_load_path=None,
             *args,
@@ -165,6 +166,8 @@ class PACOHAgent(MPCAgent):
         self.hyper_posterior_particles = self.prior_module.get_parameters_stacked_per_prior().detach().unsqueeze(dim=0)
         self.hyper_posterior_particles.requires_grad = True
 
+        self.eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
+
         self.kernel = RBFKernel(bandwidth=self.eval_model_config["bandwidth"])
 
         optimizer_params = self.model_optimizer.defaults
@@ -191,6 +194,8 @@ class PACOHAgent(MPCAgent):
         self.meta_environment.sample_next_env()
         self.dataset.start_episode()
         super().start_episode()
+        if not self.training:
+            self.eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
 
     def end_episode(self):
         self.dataset.end_episode()
@@ -211,17 +216,16 @@ class PACOHAgent(MPCAgent):
             self.save_trajectory_replay()
 
     def fit_task(self):
-        eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
-        eval_model.train()
+        self.eval_model.train()
         if len(self.observation_queue) > 0:
             past_observations = stack_list_of_tuples([observation for observation in self.observation_queue.copy()])
             for num_iter in range(self.num_iter_meta_test):
                 train_bayesian_nn_step(
-                    model=eval_model,
+                    model=self.eval_model,
                     observation=past_observations,
                     optimizer=self.model_optimizer
                 )
-            self.dynamical_model.base_model.set_parameters_as_vector(eval_model.parameters_as_vector())
+        self.dynamical_model.base_model.set_parameters_as_vector(self.eval_model.parameters_as_vector())
 
     def get_meta_batch(self, dataset=None):
         if dataset is None:

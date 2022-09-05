@@ -67,11 +67,16 @@ def get_model(
             deterministic=params.model_kind == "DeterministicNN",
         )
     elif params.model_kind in ["BayesianNN"]:
+        if params.agent_name == "pacoh":
+            num_particles = params.pacoh_num_hyper_posterior_particles*params.pacoh_num_posterior_particles
+        else:
+            num_particles = params.model_num_heads
         model = BayesianNNModel(
             dim_state=dim_state,
             dim_action=dim_action,
             num_states=num_states,
             num_actions=num_actions,
+            num_particles=num_particles,
             layers=params.model_layers,
             biased_head=not params.model_unbiased_head,
             non_linearity=params.model_non_linearity,
