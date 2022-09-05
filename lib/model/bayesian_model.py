@@ -108,6 +108,14 @@ class BayesianNNModel(NNModel):
         mean = self.nn[0].forward_nn(state_action)
         return mean
 
+    def normalize_state_and_action(self, state, action):
+        state_action = self.state_actions_to_input_data(state, action)
+        normalized_state_action = self.nn[0].normalize_input(state_action)
+        return normalized_state_action[..., :state.shape[-1]], normalized_state_action[..., -action.shape[-1]:]
+
+    def normalize_target(self, output):
+        return self.nn[0].normalize_target(output)
+
     @property
     def sqrt_mode(self):
         return self.nn[0].sqrt_mode

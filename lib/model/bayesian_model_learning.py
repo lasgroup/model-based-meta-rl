@@ -34,10 +34,17 @@ def _grad(model, prediction, target):
 def bayesian_model_grad(model, observation, dynamical_model=None):
     """Get bayesian model loss"""
     state, action = observation.state, observation.action
+
+    normalized_state, normalized_action = model.normalize_state_and_action(
+        state.reshape((-1, state.shape[-1])),
+        action.reshape((-1, action.shape[-1]))
+    )
+    normalized_prediction = model.forward_nn(normalized_state, normalized_action)
+
     target = get_target(model, observation)
-    target = target.reshape((-1, target.shape[-1]))
-    prediction = model.forward_nn(state.reshape((-1, state.shape[-1])), action.reshape((-1, action.shape[-1])))
-    return _grad(model, prediction, target)
+    normalized_target = model.normalize_target(target.reshape((-1, target.shape[-1])))
+
+    return _grad(model, normalized_prediction, normalized_target)
 
 
 def train_bayesian_nn_step(model, observation, optimizer, weight=1.0, dynamical_model=None):

@@ -39,6 +39,7 @@ class FeedForwardBNN(VectorizedModel):
         sqrt_mode=False,
         bandwidth=100.,
         meta_learned_prior=None,
+        normalization_stats=None,
         *args,
         **kwargs
     ):
@@ -89,6 +90,8 @@ class FeedForwardBNN(VectorizedModel):
 
         self._min_scale = torch.log(torch.tensor(min_scale)).item()
         self._max_scale = torch.log(torch.tensor(max_scale)).item()
+
+        self._set_normalization_stats(normalization_stats)
 
         # setup prior
         self.nn_param_size = self.num_parameters
@@ -174,17 +177,19 @@ class FeedForwardBNN(VectorizedModel):
 
         nn_params, likelihood_std = self._split_into_nn_params_and_likelihood_std(self.particles)
 
-        out = x
+        out = self.normalize_input(x)
         if out.ndim > 2:
             out = out.reshape((-1, x.shape[-1]))
         out = self.forward_nn(out, nn_params)
+        out = self.unnormalize_output(out)
         out = out.reshape([self.num_particles] + list(x.shape[:-1]) + [out.shape[-1]])
         out = torch.permute(out, [dim for dim in range(1, out.ndim)] + [0])
 
         if self.deterministic:
             scale = torch.zeros_like(out)
         else:
-            scale = likelihood_std.clamp(self._min_scale, self._max_scale).transpose(0, 1)
+            scale = self._scale_likelihood(likelihood_std)
+            scale = scale.transpose(0, 1)
             scale = torch.tile(scale.unsqueeze(0), (out.shape[0], 1, 1))
 
         if self.prediction_strategy == "moment_matching":
@@ -359,3 +364,36 @@ class FeedForwardBNN(VectorizedModel):
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
+
+    def _set_normalization_stats(self, normalization_stats):
+        if normalization_stats is None:
+            self.x_mean = torch.zeros(self.input_dim)
+            self.x_std = torch.ones(self.input_dim)
+            self.y_mean = torch.zeros(self.output_dim)
+            self.y_std = torch.ones(self.output_dim)
+        else:
+            self.x_mean = normalization_stats['x_mean']
+            self.x_std = normalization_stats['x_std']
+            self.y_mean = normalization_stats['y_mean']
+            self.y_std = normalization_stats['y_std']
+
+        assert self.x_mean.ndim == 1
+        assert self.x_std.ndim == 1
+        assert self.y_mean.ndim == 1
+        assert self.y_std.ndim == 1
+
+    def normalize_input(self, x):
+        assert x.shape[-1] == self.x_mean.shape[-1]
+        return (x - self.x_mean) / self.x_std
+
+    def unnormalize_output(self, y):
+        assert y.shape[-1] == self.y_mean.shape[-1]
+        return y * self.y_std + self.y_mean
+
+    def normalize_target(self, y):
+        assert y.shape[-1] == self.y_mean.shape[-1]
+        return (y - self.y_mean) / self.y_std
+
+    def _scale_likelihood(self, std):
+        assert std.shape[-1] == self.y_mean.shape[-1]
+        return std * self.y_std
