@@ -37,7 +37,7 @@ class FeedForwardBNN(VectorizedModel):
         likelihood_prior_mean=math.log(0.1),
         likelihood_prior_std=1.0,
         sqrt_mode=False,
-        bandwidth=100.,
+        bandwidth=10.0,
         meta_learned_prior=None,
         normalization_stats=None,
         *args,
@@ -91,7 +91,7 @@ class FeedForwardBNN(VectorizedModel):
         self._min_scale = torch.log(torch.tensor(min_scale)).item()
         self._max_scale = torch.log(torch.tensor(max_scale)).item()
 
-        self._set_normalization_stats(normalization_stats)
+        self.set_normalization_stats(normalization_stats)
 
         # setup prior
         self.nn_param_size = self.num_parameters
@@ -365,7 +365,7 @@ class FeedForwardBNN(VectorizedModel):
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
-    def _set_normalization_stats(self, normalization_stats):
+    def set_normalization_stats(self, normalization_stats):
         if normalization_stats is None:
             self.x_mean = torch.zeros(self.input_dim)
             self.x_std = torch.ones(self.input_dim)

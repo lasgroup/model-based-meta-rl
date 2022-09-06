@@ -111,8 +111,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # PACOH parameters
     parser.add_argument("--pacoh-collect-meta-data", action="store_true")
-    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=8000)
-    parser.add_argument("--pacoh-num-iter-meta-test", type=int, default=20)
+    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=25000)
+    parser.add_argument("--pacoh-num-iter-meta-test", type=int, default=50)
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=3)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=10)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=5)

@@ -37,7 +37,7 @@ class BayesianNNModel(NNModel):
         super().__init__(deterministic=False, *args, **kwargs)
         self.num_particles = num_particles
 
-        nn_kwargs = kwargs
+        nn_kwargs = kwargs.copy()
         for model in self.nn:
             nn_kwargs.update(model.kwargs)
         self.nn = torch.nn.ModuleList(
@@ -102,10 +102,10 @@ class BayesianNNModel(NNModel):
     def kernel(self, X1, X2):
         return self.nn[0].kernel(X1, X2)
 
-    def forward_nn(self, state, action, next_state=None):
+    def forward_nn(self, state, action, next_state=None, nn_params=None):
         """Get Next-State distribution."""
         state_action = self.state_actions_to_input_data(state, action)
-        mean = self.nn[0].forward_nn(state_action)
+        mean = self.nn[0].forward_nn(state_action, nn_params)
         return mean
 
     def normalize_state_and_action(self, state, action):
@@ -115,6 +115,9 @@ class BayesianNNModel(NNModel):
 
     def normalize_target(self, output):
         return self.nn[0].normalize_target(output)
+
+    def set_normalization_stats(self, normalization_stats):
+        self.nn[0].set_normalization_stats(normalization_stats)
 
     @property
     def sqrt_mode(self):

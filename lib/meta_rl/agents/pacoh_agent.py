@@ -24,7 +24,7 @@ from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussian
 # TODO:
 """
 Make it work with H-UCRL
-Normalization
+Try more episodes
 Eval (RMSE, MLL), Logging
 Check whether meta_fit works
 Check whether task_fit works
@@ -54,7 +54,7 @@ class PACOHAgent(MPCAgent):
             max_memory: int = 1000000,
             meta_lr: float = 2e-3,
             num_iter_meta_train: int = 20000,
-            num_iter_meta_test=100,
+            num_iter_meta_test=20,
             n_samples_per_prior=10,
             num_hyper_posterior_particles=3,
             num_posterior_particles=5,
@@ -63,9 +63,9 @@ class PACOHAgent(MPCAgent):
             hyper_prior_log_var_mean=-3.0,
             hyper_prior_likelihood_log_var_mean_mean=-8,
             hyper_prior_likelihood_log_var_log_var_mean=-4.,
-            meta_batch_size=10,
-            per_task_batch_size=32,
-            eval_num_context_samples=100,
+            meta_batch_size=4,
+            per_task_batch_size=16,
+            eval_num_context_samples=16,
             env_name="",
             trajectory_replay_load_path=None,
             *args,
@@ -116,7 +116,7 @@ class PACOHAgent(MPCAgent):
         self.mll_pre_factor = self._compute_mll_prefactor()
 
         # setup NN
-        train_model_config = self.eval_model_config
+        train_model_config = self.eval_model_config.copy()
         train_model_config.update({"num_particles": self.n_batched_models_train})
         self.meta_nn_model = BayesianNNModel(**train_model_config)
         # if isinstance(self.meta_nn_model, HallucinatedModel):
@@ -167,12 +167,13 @@ class PACOHAgent(MPCAgent):
         self.hyper_posterior_particles.requires_grad = True
 
         self.eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
+        self.eval_model_optimizer = type(self.model_optimizer)(
+            [self.eval_model.particles],
+            **self.model_optimizer.defaults
+        )
 
         self.kernel = RBFKernel(bandwidth=self.eval_model_config["bandwidth"])
-
-        optimizer_params = self.model_optimizer.defaults
-        optimizer_params.update({'lr': meta_lr})
-        self.meta_optimizer = type(self.model_optimizer)([self.hyper_posterior_particles], **optimizer_params)
+        self.meta_optimizer = torch.optim.Adam([self.hyper_posterior_particles], lr=meta_lr)
 
     def set_meta_environment(self, meta_environment):
         self.meta_environment = meta_environment
@@ -195,7 +196,15 @@ class PACOHAgent(MPCAgent):
         self.dataset.start_episode()
         super().start_episode()
         if not self.training:
-            self.eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
+            self.eval_model = BayesianNNModel(
+                **self.eval_model_config,
+                meta_learned_prior=self.prior_module,
+                normalization_stats=self.get_normalization_stats()
+            )
+            self.eval_model_optimizer = type(self.model_optimizer)(
+                [self.eval_model.particles],
+                **self.model_optimizer.defaults
+            )
 
     def end_episode(self):
         self.dataset.end_episode()
@@ -218,21 +227,23 @@ class PACOHAgent(MPCAgent):
     def fit_task(self):
         self.eval_model.train()
         if len(self.observation_queue) > 0:
-            past_observations = stack_list_of_tuples([observation for observation in self.observation_queue.copy()])
             for num_iter in range(self.num_iter_meta_test):
+                batch_idx = np.random.choice(len(self.observation_queue), self.eval_num_context_samples)
+                eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
                 train_bayesian_nn_step(
                     model=self.eval_model,
-                    observation=past_observations,
-                    optimizer=self.model_optimizer
+                    observation=eval_observations,
+                    optimizer=self.eval_model_optimizer
                 )
         self.dynamical_model.base_model.set_parameters_as_vector(self.eval_model.parameters_as_vector())
+        self.dynamical_model.base_model.set_normalization_stats(self.get_normalization_stats())
 
     def get_meta_batch(self, dataset=None):
         if dataset is None:
             dataset = self.dataset
         task_batches = []
         n_train_samples = []
-        task_ids = np.random.choice(dataset.num_episodes, self.meta_batch_size)
+        task_ids = np.random.choice(dataset.num_episodes, self.meta_batch_size, replace=False)
         for task_id in task_ids:
             observation, _, _ = dataset.sample_task_batch(self.per_task_batch_size, task_id)
             n_train_samples.append(dataset.trajectory_lengths[task_id])
@@ -247,6 +258,7 @@ class PACOHAgent(MPCAgent):
         t = time.time()
 
         self.mll_pre_factor = self._compute_mll_prefactor()
+        self._compute_normalization_stats()
 
         for it in range(self.num_iter_meta_train):
 
@@ -315,6 +327,7 @@ class PACOHAgent(MPCAgent):
 
         # multiply by sqrt of m and apply logsumexp
         neg_log_likelihood = log_likelihood * (n_train_samples[:, None, None]).sqrt()
+        # TODO: This should be plus ln(L)
         mll = neg_log_likelihood.logsumexp(dim=-1) - torch.tensor(self.n_samples_per_prior, dtype=torch.float32).log()
 
         # sum over meta-batch size and adjust for number of tasks
@@ -336,15 +349,16 @@ class PACOHAgent(MPCAgent):
         log_likelihood_list = []
         for i in range(self.meta_batch_size):
             observation = meta_batch[i]
-            state, action = observation.state, observation.action
-            y = observation.next_state
-            y = y.reshape((-1, y.shape[-1]))
+            state, action, next_state = observation.state, observation.action, observation.next_state
+            state, action, next_state = self._normalize_data(state, action, next_state)
+            y = next_state.reshape((-1, next_state.shape[-1]))
 
             # NN forward pass
             pred_fn = self.get_forward_fn(nn_params)
             y_hat = pred_fn.forward_nn(
                 state.reshape((-1, state.shape[-1])),
-                action.reshape((-1, action.shape[-1]))
+                action.reshape((-1, action.shape[-1])),
+                nn_params=nn_params
             )  # (k, b, d)
 
             # compute likelihood
@@ -393,3 +407,40 @@ class PACOHAgent(MPCAgent):
     def load_trajectory_replay(self, project_rel_path):
         load_path = os.path.join(get_project_path(), project_rel_path)
         self.dataset = torch.load(load_path)
+
+    def _compute_normalization_stats(self):
+        train_obs = self.dataset.all_data
+        train_states, train_actions, train_next_states = train_obs.state, train_obs.action, train_obs.next_state
+
+        self.state_mean = train_states.reshape((-1, train_states.shape[-1])).mean(dim=0)
+        self.state_std = train_states.reshape((-1, train_states.shape[-1])).std(dim=0)
+        self.action_mean = train_actions.reshape((-1, train_actions.shape[-1])).mean(dim=0)
+        self.action_std = train_actions.reshape((-1, train_actions.shape[-1])).std(dim=0)
+        self.next_state_mean = train_next_states.reshape((-1, train_next_states.shape[-1])).mean(dim=0)
+        self.next_state_std = train_next_states.reshape((-1, train_next_states.shape[-1])).std(dim=0)
+
+        assert self.state_mean.ndim == 1
+        assert self.state_std.ndim == 1
+        assert self.action_mean.ndim == 1
+        assert self.action_std.ndim == 1
+        assert self.next_state_mean.ndim == 1
+        assert self.next_state_std.ndim == 1
+
+    def _normalize_data(self, state, action, next_state):
+        assert state.shape[-1] == self.state_mean.shape[-1]
+        assert action.shape[-1] == self.action_mean.shape[-1]
+        assert next_state.shape[-1] == self.next_state_mean.shape[-1]
+
+        normalized_state = (state - self.state_mean) / self.state_std
+        normalized_action = (action - self.action_mean) / self.action_std
+        normalized_next_state = (next_state - self.next_state_mean) / self.next_state_std
+
+        return normalized_state, normalized_action, normalized_next_state
+
+    def get_normalization_stats(self):
+        return {
+            "x_mean": torch.cat((self.state_mean, self.action_mean), dim=-1),
+            "x_std": torch.cat((self.state_std, self.action_std), dim=-1),
+            "y_mean": self.next_state_mean,
+            "y_std": self.next_state_std
+        }
