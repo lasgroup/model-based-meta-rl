@@ -119,6 +119,10 @@ class BayesianNNModel(NNModel):
     def set_normalization_stats(self, normalization_stats):
         self.nn[0].set_normalization_stats(normalization_stats)
 
+    def set_particles(self, particles):
+        assert self.particles.shape == particles.shape
+        self.nn[0].particles = particles
+
     @property
     def sqrt_mode(self):
         return self.nn[0].sqrt_mode

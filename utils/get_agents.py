@@ -608,6 +608,8 @@ def get_pacoh_agent(
             params.env_config_file.strip(".yaml") + "_" + str(params.train_episodes) + ".pkl"
         )
         params.train_episodes = 0
+    else:
+        trajectory_load_path = None
 
     agent = PACOHAgent(
         mpc_policy=policy,

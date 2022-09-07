@@ -66,6 +66,7 @@ class PACOHAgent(MPCAgent):
             meta_batch_size=4,
             per_task_batch_size=16,
             eval_num_context_samples=16,
+            use_data_normalization=False,
             env_name="",
             trajectory_replay_load_path=None,
             *args,
@@ -90,7 +91,9 @@ class PACOHAgent(MPCAgent):
         else:
             self.save_data = True
 
-        self.observation_queue = deque([], eval_num_context_samples)
+        self.observation_queue = deque([], 1000)
+
+        self.use_data_normalization = use_data_normalization
 
         self.hyper_prior_weight = hyper_prior_weight
 
@@ -235,7 +238,7 @@ class PACOHAgent(MPCAgent):
                     observation=eval_observations,
                     optimizer=self.eval_model_optimizer
                 )
-        self.dynamical_model.base_model.set_parameters_as_vector(self.eval_model.parameters_as_vector())
+        self.dynamical_model.base_model.set_particles(self.eval_model.particles.detach().clone())
         self.dynamical_model.base_model.set_normalization_stats(self.get_normalization_stats())
 
     def get_meta_batch(self, dataset=None):
@@ -243,6 +246,7 @@ class PACOHAgent(MPCAgent):
             dataset = self.dataset
         task_batches = []
         n_train_samples = []
+        assert dataset.num_episodes > self.meta_batch_size, "Number of training tasks should be larger than meta batch size"
         task_ids = np.random.choice(dataset.num_episodes, self.meta_batch_size, replace=False)
         for task_id in task_ids:
             observation, _, _ = dataset.sample_task_batch(self.per_task_batch_size, task_id)
@@ -419,6 +423,9 @@ class PACOHAgent(MPCAgent):
         self.next_state_mean = train_next_states.reshape((-1, train_next_states.shape[-1])).mean(dim=0)
         self.next_state_std = train_next_states.reshape((-1, train_next_states.shape[-1])).std(dim=0)
 
+        if not self.use_data_normalization:
+            self._set_unit_normalization_stats()
+
         assert self.state_mean.ndim == 1
         assert self.state_std.ndim == 1
         assert self.action_mean.ndim == 1
@@ -444,3 +451,11 @@ class PACOHAgent(MPCAgent):
             "y_mean": self.next_state_mean,
             "y_std": self.next_state_std
         }
+
+    def _set_unit_normalization_stats(self):
+        self.state_mean = torch.zeros_like(self.state_mean)
+        self.state_std = torch.ones_like(self.state_std)
+        self.action_mean = torch.zeros_like(self.action_mean)
+        self.action_std = torch.ones_like(self.action_std)
+        self.next_state_mean = torch.zeros_like(self.next_state_mean)
+        self.next_state_std = torch.ones_like(self.next_state_std)
