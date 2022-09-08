@@ -51,14 +51,17 @@ class TrajectoryReplay(ExperienceReplay):
         else:
             return self.sample_segment(segment_len)
 
-    def sample_task_batch(self, batch_size, task_id=None):
+    def sample_task_batch(self, batch_size, task_id=None, eval_samples=False, num_eval_samples=0):
         if task_id is None:
             task_id = np.random.randint(len(self.trajectory_starts))
-        indices = np.random.choice(
-            self.trajectory_lengths[task_id],
-            batch_size,
-            replace=(batch_size > self.trajectory_lengths[task_id])
-        ) + self.trajectory_starts[task_id]
+        if eval_samples:
+            indices = self.trajectory_lengths[task_id] + self.trajectory_starts[task_id] - np.arange(num_eval_samples) - 1
+        else:
+            indices = np.random.choice(
+                self.trajectory_lengths[task_id]-num_eval_samples,
+                batch_size,
+                replace=(batch_size > self.trajectory_lengths[task_id]-num_eval_samples)
+            ) + self.trajectory_starts[task_id]
         if self.num_memory_steps == 0:
             obs = self._get_observation(indices)
             return obs, torch.tensor(indices), self.weights[indices]

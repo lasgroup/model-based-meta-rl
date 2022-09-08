@@ -605,7 +605,7 @@ def get_pacoh_agent(
     if not params.pacoh_collect_meta_data:
         trajectory_load_path = os.path.join(
             "lib/meta_rl/experience_replay",
-            params.env_config_file.strip(".yaml") + "_" + str(params.train_episodes) + ".pkl"
+            f"{params.env_config_file.strip('.yaml')}_training_{params.train_episodes}.pkl"
         )
         params.train_episodes = 0
     else:
@@ -617,7 +617,7 @@ def get_pacoh_agent(
         initial_distribution=initial_distribution,
         gamma=params.gamma,
         num_iter_meta_train=params.pacoh_num_iter_meta_train,
-        num_iter_meta_test=params.pacoh_num_iter_meta_test,
+        num_iter_eval_train=params.pacoh_num_iter_eval_train,
         n_samples_per_prior=params.pacoh_n_samples_per_prior,
         num_hyper_posterior_particles=params.pacoh_num_hyper_posterior_particles,
         num_posterior_particles=params.pacoh_num_posterior_particles,

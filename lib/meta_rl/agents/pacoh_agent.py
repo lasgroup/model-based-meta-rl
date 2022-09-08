@@ -9,6 +9,7 @@ import torch
 
 from utils.utils import get_project_path
 from rllib.dataset import stack_list_of_tuples
+from rllib.util.training.utilities import get_model_validation_score
 
 from lib.agents import MPCAgent
 from lib.datasets import TrajectoryReplay
@@ -24,10 +25,6 @@ from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussian
 # TODO:
 """
 Make it work with H-UCRL
-Try more episodes
-Eval (RMSE, MLL), Logging
-Check whether meta_fit works
-Check whether task_fit works
 Plot trajectories and axis
 hyperparam tuning:
     num_iter_meta_train
@@ -54,7 +51,8 @@ class PACOHAgent(MPCAgent):
             max_memory: int = 1000000,
             meta_lr: float = 2e-3,
             num_iter_meta_train: int = 20000,
-            num_iter_meta_test=20,
+            num_iter_meta_test: int = 2000,
+            num_iter_eval_train=20,
             n_samples_per_prior=10,
             num_hyper_posterior_particles=3,
             num_posterior_particles=5,
@@ -112,6 +110,7 @@ class PACOHAgent(MPCAgent):
 
         self.num_iter_meta_test = num_iter_meta_test
         self.num_iter_meta_train = num_iter_meta_train
+        self.num_iter_eval_train = num_iter_eval_train
         self.meta_batch_size = meta_batch_size
         self.per_task_batch_size = per_task_batch_size
         self.eval_num_context_samples = eval_num_context_samples
@@ -230,7 +229,7 @@ class PACOHAgent(MPCAgent):
     def fit_task(self):
         self.eval_model.train()
         if len(self.observation_queue) > 0:
-            for num_iter in range(self.num_iter_meta_test):
+            for num_iter in range(self.num_iter_eval_train):
                 batch_idx = np.random.choice(len(self.observation_queue), self.eval_num_context_samples)
                 eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
                 train_bayesian_nn_step(
@@ -246,15 +245,21 @@ class PACOHAgent(MPCAgent):
             dataset = self.dataset
         task_batches = []
         n_train_samples = []
-        assert dataset.num_episodes > self.meta_batch_size, "Number of training tasks should be larger than meta batch size"
+        assert dataset.num_episodes > self.meta_batch_size, "Number of tasks should be larger than meta batch size"
         task_ids = np.random.choice(dataset.num_episodes, self.meta_batch_size, replace=False)
         for task_id in task_ids:
-            observation, _, _ = dataset.sample_task_batch(self.per_task_batch_size, task_id)
-            n_train_samples.append(dataset.trajectory_lengths[task_id])
+            observation, n_train_sample = self.get_meta_batch_task(task_id, dataset)
             task_batches.append(observation)
+            n_train_samples.append(n_train_sample)
         return task_batches, torch.tensor(n_train_samples, dtype=torch.float32)
 
-    def meta_fit(self, log_period=500, eval_period=1000):
+    def get_meta_batch_task(self, task_id, dataset=None, eval_samples=False, num_eval_samples=0):
+        if dataset is None:
+            dataset = self.dataset
+        observation, _, _ = dataset.sample_task_batch(self.per_task_batch_size, task_id, eval_samples, num_eval_samples)
+        return observation, dataset.trajectory_lengths[task_id]
+
+    def meta_fit(self, log_period=500, eval_period=3000):
         """
         Fits the hyper-posterior (PACOH) particles with SVGD
         """
@@ -277,9 +282,10 @@ class PACOHAgent(MPCAgent):
 
                 # # run validation and print results
                 # if it % eval_period == 0 and it > 0:
-                #     eval_metrics_mean, eval_metrics_std = self.meta_eval_datasets(meta_val_data=self.dataset)
+                #     dataset = self.val_dataset if hasattr(self, 'val_dataset') else self.dataset
+                #     eval_metrics_mean, eval_metrics_std = self.meta_eval_dataset(meta_val_dataset=dataset)
                 #     for key in eval_metrics_mean:
-                #         message += '- Val-%s: %.3f +- %.3f' % (key, eval_metrics_mean[key], eval_metrics_std[key])
+                #         message += '- Val-%s: %.3e +- %.3e' % (key, eval_metrics_mean[key], eval_metrics_std[key])
 
                 t = time.time()
 
@@ -288,6 +294,33 @@ class PACOHAgent(MPCAgent):
 
         loss = -log_prob.mean().numpy()
         return loss
+
+    def meta_eval_dataset(self, meta_val_dataset, num_eval_samples=10):
+        task_ids = np.random.choice(meta_val_dataset.num_episodes, self.meta_batch_size, replace=False)
+        mse, sharpness, calibration_score = [], [], []
+        for task_id in task_ids:
+            eval_model = BayesianNNModel(
+                **self.eval_model_config,
+                meta_learned_prior=self.prior_module,
+                normalization_stats=self.get_normalization_stats()
+            )
+            eval_model_optimizer = type(self.model_optimizer)(
+                [eval_model.particles],
+                **self.model_optimizer.defaults
+            )
+            for num_iter in range(self.num_iter_meta_test):
+                meta_task_batch, _ = self.get_meta_batch_task(task_id, meta_val_dataset, False, num_eval_samples)
+                train_bayesian_nn_step(
+                    model=eval_model,
+                    observation=meta_task_batch,
+                    optimizer=eval_model_optimizer
+                )
+            eval_obs, _ = self.get_meta_batch_task(task_id, meta_val_dataset, True, num_eval_samples)
+            _, mse_, sharpness_, calibration_score_ = get_model_validation_score(eval_model, eval_obs)
+            mse.append(mse_)
+            sharpness.append(sharpness_)
+            calibration_score.append(calibration_score_)
+        return self._aggregate_eval_metrics_across_tasks(mse, sharpness, calibration_score)
 
     def step(self, meta_batch, n_train_samples):
         """
@@ -403,14 +436,24 @@ class PACOHAgent(MPCAgent):
         assert likelihood_std.shape == (n_particles, self.output_dim)
         return nn_params, likelihood_std
 
-    def save_trajectory_replay(self, project_rel_path="lib/meta_rl/experience_replay"):
-        file_name = self.env_name + "_" + str(self.dataset.num_episodes) + ".pkl"
+    @staticmethod
+    def _aggregate_eval_metrics_across_tasks(mse, sharpness, calibration_score):
+        eval_metrics_mean, eval_metrics_std = {}, {}
+        for key in ['mse', 'sharpness', 'calibration_score']:
+            eval_metrics_mean[key] = np.mean(eval(key)).item()
+            eval_metrics_std[key] = np.std(eval(key)).item()
+        return eval_metrics_mean, eval_metrics_std
+
+    def save_trajectory_replay(self, project_rel_path="lib/meta_rl/experience_replay", data_type="training"):
+        file_name = f"{self.env_name}_{data_type}_{self.dataset.num_episodes}.pkl"
         save_path = os.path.join(get_project_path(), project_rel_path, file_name)
         torch.save(self.dataset, save_path)
 
     def load_trajectory_replay(self, project_rel_path):
         load_path = os.path.join(get_project_path(), project_rel_path)
         self.dataset = torch.load(load_path)
+        if os.path.exists(load_path.replace('training', 'eval')):
+            self.val_dataset = torch.load(load_path.replace('training', 'eval'))
 
     def _compute_normalization_stats(self):
         train_obs = self.dataset.all_data
