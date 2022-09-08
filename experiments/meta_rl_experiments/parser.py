@@ -35,7 +35,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--exploration",
         type=str,
-        default="greedy",
+        default="optimistic",
         choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
@@ -111,7 +111,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # PACOH parameters
     parser.add_argument("--pacoh-collect-meta-data", action="store_true")
-    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=15000)
+    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=1000)
     parser.add_argument("--pacoh-num_iter_eval_train", type=int, default=50)
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)

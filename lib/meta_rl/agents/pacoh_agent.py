@@ -232,6 +232,7 @@ class PACOHAgent(MPCAgent):
             for num_iter in range(self.num_iter_eval_train):
                 batch_idx = np.random.choice(len(self.observation_queue), self.eval_num_context_samples)
                 eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
+                eval_observations.action = eval_observations.action[..., : self.eval_model.dim_action[0]]
                 train_bayesian_nn_step(
                     model=self.eval_model,
                     observation=eval_observations,
