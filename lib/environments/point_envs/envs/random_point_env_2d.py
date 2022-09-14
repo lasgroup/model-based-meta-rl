@@ -32,9 +32,9 @@ class RandomPointEnv2D(RandomEnvironment):
         )
         self._reward_model = RandomPointEnv2DReward()
         self._time = 0
-        self.set_transition_params(np.random.rand(self.__class__.num_random_params))
+        self.set_task(np.random.rand(self.__class__.num_random_params))
 
-    def set_transition_params(self, random_samples):
+    def set_task(self, random_samples):
         """
         Replaces the transition parameters with the given samples
         :param random_samples:

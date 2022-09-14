@@ -11,5 +11,5 @@ class RandomEnvironment(AbstractEnvironment, ABC):
     def __init__(self, *args, **kwargs):
         super(RandomEnvironment, self).__init__(*args, **kwargs)
 
-    def set_transition_params(self, random_samples):
+    def set_task(self, random_samples):
         pass

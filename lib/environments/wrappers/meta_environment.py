@@ -1,10 +1,11 @@
 """Implementation of a meta-learning environment"""
 
-from typing import Callable
+from typing import Callable, Union
 from dotmap import DotMap
 
 import numpy as np
 
+from rand_param_envs.base import RandomEnv
 from lib.environments.wrappers.random_environment import RandomEnvironment
 
 
@@ -13,7 +14,7 @@ class MetaEnvironmentWrapper:
 
     def __init__(
             self,
-            base_env: RandomEnvironment,
+            base_env: Union[RandomEnvironment, RandomEnv],
             params: DotMap,
             training: bool = True
     ):
@@ -23,8 +24,13 @@ class MetaEnvironmentWrapper:
         self._training = training
         self.num_train_env_instances = params.num_train_env_instances
         self.num_test_env_instances = params.num_test_env_instances
-        self.train_env_params = np.random.rand(self.num_train_env_instances, self._base_env.num_random_params)
-        self.test_env_params = np.random.rand(self.num_test_env_instances, self._base_env.num_random_params)
+
+        if hasattr(base_env, 'num_random_params'):
+            self.train_env_params = np.random.rand(self.num_train_env_instances, self._base_env.num_random_params)
+            self.test_env_params = np.random.rand(self.num_test_env_instances, self._base_env.num_random_params)
+        else:
+            self.train_env_params = self._base_env.sample_tasks(self.num_train_env_instances)
+            self.test_env_params = self._base_env.sample_tasks(self.num_test_env_instances)
 
         self.current_train_env = 0
         self.current_test_env = 0
@@ -33,7 +39,7 @@ class MetaEnvironmentWrapper:
             params = self.train_env_params[self.current_train_env]
         else:
             params = self.test_env_params[self.current_test_env]
-        self._base_env.set_transition_params(params)
+        self._base_env.set_task(params)
 
         self._counters = {"steps": 0, "episodes": 0, "train_trials": 0, "test_trials": 0}
 
@@ -47,7 +53,7 @@ class MetaEnvironmentWrapper:
             self._counters["test_trials"] += 1
             self.current_test_env = np.random.randint(self.num_test_env_instances)
             params = self.test_env_params[self.current_test_env]
-        self._base_env.set_transition_params(params)
+        self._base_env.set_task(params)
 
     def sample_next_env(self):
         """Samples next environment parameters from the initialized environments"""
@@ -59,7 +65,7 @@ class MetaEnvironmentWrapper:
             self._counters["test_trials"] += 1
             self.current_test_env += 1
             params = self.test_env_params[self.current_test_env % self.num_test_env_instances]
-        self._base_env.set_transition_params(params)
+        self._base_env.set_task(params)
 
     def __getattr__(self, name: str):
         return getattr(self._base_env, name)
