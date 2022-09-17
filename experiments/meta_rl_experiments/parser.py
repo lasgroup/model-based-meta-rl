@@ -12,7 +12,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="random-hopper.yaml",
+        default="random-ant.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
