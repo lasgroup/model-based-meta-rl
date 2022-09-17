@@ -1,0 +1,4 @@
+name: RandomMBHopperEnv
+max_steps: 1000
+action_cost: 0.001
+env_random_scale_limit: 3.0

@@ -48,6 +48,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--use-action-cost", action="store_true")
+    parser.add_argument("--use-exact-termination-model", action="store_true")
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)

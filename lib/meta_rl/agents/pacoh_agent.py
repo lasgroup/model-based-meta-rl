@@ -387,7 +387,8 @@ class PACOHAgent(MPCAgent):
         log_likelihood_list = []
         for i in range(self.meta_batch_size):
             observation = meta_batch[i]
-            state, action, next_state = observation.state, observation.action, observation.next_state
+            state, next_state = observation.state, observation.next_state
+            action = observation.action[..., :self.dynamical_model.base_model.dim_action[0]]
             state, action, next_state = self._normalize_data(state, action, next_state)
             y = next_state.reshape((-1, next_state.shape[-1]))
 
@@ -458,7 +459,8 @@ class PACOHAgent(MPCAgent):
 
     def _compute_normalization_stats(self):
         train_obs = self.dataset.all_data
-        train_states, train_actions, train_next_states = train_obs.state, train_obs.action, train_obs.next_state
+        train_states, train_next_states = train_obs.state, train_obs.next_state
+        train_actions = train_obs.action[..., :self.dynamical_model.base_model.dim_action[0]]
 
         self.state_mean = train_states.reshape((-1, train_states.shape[-1])).mean(dim=0)
         self.state_std = train_states.reshape((-1, train_states.shape[-1])).std(dim=0)

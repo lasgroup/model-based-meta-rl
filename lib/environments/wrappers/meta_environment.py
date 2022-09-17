@@ -6,6 +6,8 @@ from dotmap import DotMap
 import numpy as np
 
 from rand_param_envs.base import RandomEnv
+
+from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
 from lib.environments.wrappers.random_environment import RandomEnvironment
 
 
@@ -14,7 +16,7 @@ class MetaEnvironmentWrapper:
 
     def __init__(
             self,
-            base_env: Union[RandomEnvironment, RandomEnv],
+            base_env: Union[RandomEnvironment, RandomEnv, RandomMujocoEnv],
             params: DotMap,
             training: bool = True
     ):

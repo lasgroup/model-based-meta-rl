@@ -6,7 +6,7 @@ from utils.get_agents import get_rl2_agent, get_grbal_agent, get_pacoh_agent
 from lib.environments.wrappers.gym_environment import GymEnvironment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
-
+from lib.environments.wrappers.random_gym_environment import RandomGymEnvironment
 
 from rllib.agent.abstract_agent import AbstractAgent
 from rllib.environment.abstract_environment import AbstractEnvironment
@@ -27,6 +27,10 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0
         )
         reward_model = environment.env.reward_model()
+        if params.use_exact_termination_model:
+            termination_model = environment.env._termination_model().copy()
+        else:
+            termination_model = environment.env.termination_model()
 
     elif params.env_group == "gym_envs":
         import lib.environments.gym_envs
@@ -35,11 +39,25 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             params=params
         )
         reward_model = eval(f"lib.environments.gym_envs.{params.reward_model}")()
+        termination_model = None
 
     elif params.env_group == "point_envs":
         from lib.environments.point_envs import RandomPointEnv2D
         environment = RandomPointEnv2D()
         reward_model = environment.reward_model()
+        termination_model = None
+
+    elif params.env_group == "random_mujocoMB_envs":
+        environment = RandomGymEnvironment(
+            env_name=params.name,
+            params=params,
+            ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0
+        )
+        reward_model = environment.env.reward_model()
+        if params.use_exact_termination_model:
+            termination_model = environment.env._termination_model().copy()
+        else:
+            termination_model = environment.env.termination_model()
 
     else:
         raise NotImplementedError
@@ -61,6 +79,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
+            termination_model=termination_model,
             params=params,
             input_transform=None
         )
@@ -69,6 +88,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
+            termination_model=termination_model,
             params=params,
             input_transform=None
         )

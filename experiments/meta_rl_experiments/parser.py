@@ -12,14 +12,14 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="random_point_env_2d.yaml",
+        default="random-hopper.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
         "--env-group",
         type=str,
-        default="point_envs",
-        choices=["gym_envs", "mujocoMB_envs", "point_envs"]
+        default="random_mujocoMB_envs",
+        choices=["gym_envs", "mujocoMB_envs", "random_mujocoMB_envs", "point_envs"]
     )
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--max-steps", type=int, default=200)
@@ -48,6 +48,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--use-action-cost", action="store_true")
+    parser.add_argument("--use-exact-termination-model", action="store_true")
 
     # Meta Learning Parameters
     parser.add_argument("--num-train-env-instances", type=int, default=200)
