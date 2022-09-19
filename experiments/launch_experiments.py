@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
-import experiments.lib_environments.run
+import experiments.meta_rl_experiments.run
 import lib.agents.stable_baselines.run
 from datetime import datetime
 import argparse
@@ -13,9 +13,9 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ["cart-pole-mujoco.yaml", "ant.yaml", "half-cheetah.yaml", "pusher.yaml", "reacher2d.yaml"],
-    "agent-name": ["ppo", "mpc", "mpc_policy"],
-    "exploration": ["optimistic", "thompson", "greedy"]
+    "env-config-file": ['random-ant.yaml', 'random-half-cheetah.yaml'],
+    "agent-name": ['pacoh'],
+    "exploration": ['optimistic']
 })
 
 
@@ -50,7 +50,7 @@ def main(args):
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            cmd = generate_base_command(experiments.lib_environments.run, flags=flags_)
+            cmd = generate_base_command(experiments.meta_rl_experiments.run, flags=flags_)
             command_list.append(cmd)
 
     # submit jobs
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Experiment Parameters
-    parser.add_argument("--exp-name", type=str, default="initial_test")
+    parser.add_argument("--exp-name", type=str, default="pacoh_defaults")
     parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
     parser.add_argument("--dry", action="store_true")
     parser.add_argument("--long", action="store_true")
@@ -77,21 +77,38 @@ if __name__ == '__main__':
     parser.add_argument(
         "--env-group",
         type=str,
-        default="mujocoMB_envs",
-        choices=["gym_envs", "mujocoMB_envs", "point_envs"]
+        default="random_mujocoMB_envs",
+        choices=["gym_envs", "mujocoMB_envs", "random_mujocoMB_envs", "point_envs"]
     )
-    parser.add_argument("--train-episodes", type=int, default=500)
-    parser.add_argument("--test-episodes", type=int, default=20)
+    parser.add_argument("--train-episodes", type=int, default=1200)
+    parser.add_argument("--test-episodes", type=int, default=40)
+    parser.add_argument("--eval-frequency", type=int, default=0)
+
+    parser.add_argument("--use-action-cost", action="store_true")
+
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--use-wandb", action="store_true")
-    parser.add_argument("--use-action-cost", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")
 
-    # Model parameters
-    parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")
+    parser.add_argument("--model-learn-num-iter", type=int, default=250)
+
+    parser.add_argument("--pacoh-collect-meta-data", action="store_true")
+    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=100000)
+    parser.add_argument("--pacoh-num-iter-eval-train", type=int, default=10)
+    parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
+    parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)
+    parser.add_argument("--pacoh-num-posterior-particles", type=int, default=3)
+
+    # RL2 parameters
+    parser.add_argument("--rl2-trial-len", type=int, default=2)
+
+    # GrBAL parameters
+    parser.add_argument("--grbal-past-segment-len", type=int, default=16)
+    parser.add_argument("--grbal-future-segment-len", type=int, default=16)
+
 
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger --pacoh-collect-meta-data --use-action-cost

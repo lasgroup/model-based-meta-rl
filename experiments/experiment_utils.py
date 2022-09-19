@@ -2,10 +2,12 @@
 
 import sys
 import os
+import stat
 import json
 import glob
 import numpy as np
 import pandas as pd
+import subprocess
 import multiprocessing
 
 from typing import Dict, Optional, Any, List
@@ -15,6 +17,9 @@ from typing import Dict, Optional, Any, List
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULT_DIR = os.path.join(BASE_DIR, 'results')
 
+LONGER = 119
+LONG = 23
+SHORT = 7
 
 class AsyncExecutor:
     """ Async executer """
@@ -95,7 +100,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
     if mode == 'euler_lsf':
         cluster_cmds = []
         bsub_cmd = 'bsub ' + \
-                   f'-W {23 if long else 3}:59 ' + \
+                   f'-W {LONGER if long else SHORT}:59 ' + \
                    f'-R "rusage[mem={mem}]" ' + \
                    f'-n {num_cpus} ' + \
                    f'-R "span[hosts={n_hosts}]" ' + \
@@ -118,19 +123,21 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                 else:
                     os.system(cmd)
 
-    if mode == 'euler_slurm':
+    elif mode == 'euler_slurm':
         cluster_cmds = []
-        bsub_cmd = 'sbatch --wrap ' + \
-                   f'--time={23 if long else 3}:59 ' + \
-                   f'--mem-per-cpu={mem} ' + \
-                   f'-n {num_cpus} ' + \
-                   f'-o slurm_outputs/ '
+
+        os.system('mkdir slurm_outputs')
+        bsub_cmd = '#!/bin/bash\n\n' + \
+                   f'#SBATCH --time={LONGER if long else SHORT}:59:59\n' + \
+                   f'#SBATCH --mem-per-cpu={mem}\n' + \
+                   f'#SBATCH -n {num_cpus}\n' + \
+                   f'#SBATCH -o slurm_outputs/out_{np.random.randint(10000000)}.txt\n'
 
         if num_gpus > 0:
-            bsub_cmd += f'--gpus={num_gpus} '
+            bsub_cmd += f'#SBATCH--gpus={num_gpus}\n'
 
         for python_cmd in command_list:
-            cluster_cmds.append(bsub_cmd + python_cmd)
+            cluster_cmds.append(bsub_cmd + f"\n{python_cmd}\n")
 
         if promt:
             answer = input(f"About to submit {len(cluster_cmds)} compute jobs to the cluster. Proceed? [yes/no]")
@@ -141,7 +148,13 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                 if dry:
                     print(cmd)
                 else:
-                    os.system(cmd)
+                    f = open("temp_script.sh", "w")
+                    f.write(cmd)
+                    f.close()
+                    st = os.stat('temp_script.sh')
+                    os.chmod('temp_script.sh', st.st_mode | stat.S_IEXEC)
+                    os.system('sbatch temp_script.sh')
+                    os.system('rm temp_script.sh')
 
     elif mode == 'local':
         if promt:
