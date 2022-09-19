@@ -92,7 +92,7 @@ def generate_base_command(module, flags: Optional[Dict[str, Any]] = None, unbuff
 def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: int = 0,
                           dry: bool = False, n_hosts: int = 1, mem: int = 6000, long: bool = False,
                           mode: str = 'local', promt: bool = True) -> None:
-    if mode == 'euler':
+    if mode == 'euler_lsf':
         cluster_cmds = []
         bsub_cmd = 'bsub ' + \
                    f'-W {23 if long else 3}:59 ' + \
@@ -103,6 +103,31 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
 
         if num_gpus > 0:
             bsub_cmd += f'-R "rusage[ngpus_excl_p={num_gpus}]" '
+
+        for python_cmd in command_list:
+            cluster_cmds.append(bsub_cmd + python_cmd)
+
+        if promt:
+            answer = input(f"About to submit {len(cluster_cmds)} compute jobs to the cluster. Proceed? [yes/no]")
+        else:
+            answer = 'yes'
+        if answer == 'yes':
+            for cmd in cluster_cmds:
+                if dry:
+                    print(cmd)
+                else:
+                    os.system(cmd)
+
+    if mode == 'euler_slurm':
+        cluster_cmds = []
+        bsub_cmd = 'sbatch --wrap ' + \
+                   f'--time={23 if long else 3}:59 ' + \
+                   f'--mem-per-cpu={mem} ' + \
+                   f'-n {num_cpus} ' + \
+                   f'-o slurm_outputs/ '
+
+        if num_gpus > 0:
+            bsub_cmd += f'--gpus={num_gpus} '
 
         for python_cmd in command_list:
             cluster_cmds.append(bsub_cmd + python_cmd)

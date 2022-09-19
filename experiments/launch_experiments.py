@@ -56,7 +56,7 @@ def main(args):
     # submit jobs
     generate_run_commands(
         command_list,
-        mode='euler',
+        mode='euler_slurm',
         promt=True,
         dry=args.dry,
         long=args.long
