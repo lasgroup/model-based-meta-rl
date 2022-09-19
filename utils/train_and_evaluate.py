@@ -20,6 +20,7 @@ def train_and_evaluate_agent(environment, agent, params):
             environment,
             num_episodes=params.train_episodes,
             max_steps=params.max_steps,
+            eval_frequency=params.eval_frequency,
             plot_flag=False,
             callback_frequency=1,
             print_frequency=1,
