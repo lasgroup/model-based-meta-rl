@@ -21,17 +21,8 @@ from lib.meta_rl.algorithms.pacoh.modules.likelihood import GaussianLikelihood
 from lib.meta_rl.algorithms.pacoh.modules.hyper_prior import GaussianHyperPrior
 from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussianPrior
 
-
-# TODO:
 """
-Make it work with H-UCRL
-Plot trajectories and axis
-hyperparam tuning:
-    num_iter_meta_train
-    num_iter_meta_test
-    num_particles: test and train
-    per_task_batch_size
-    observation_queue size
+Add plot trajectories and axis
 """
 
 
