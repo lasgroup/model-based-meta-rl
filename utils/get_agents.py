@@ -384,6 +384,8 @@ def get_rl2_agent(
     num_states = environment.num_states
     num_actions = environment.num_actions
 
+    params.exploration = "greedy"
+
     # Define value function.
     value_function = get_recurrent_value_function(
         dim_state=(dim_state[0] + dim_action[0] + 2, ),
@@ -455,6 +457,8 @@ def get_grbal_agent(
     dim_action = environment.dim_action
     num_states = environment.num_states
     num_actions = environment.num_actions
+
+    params.exploration = "greedy"
 
     # Define dynamics model
     dynamical_model = get_model(

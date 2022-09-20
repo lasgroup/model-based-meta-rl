@@ -64,6 +64,8 @@ class RLSquaredAgent(PPOAgent):
         self.meta_environment = meta_environment
 
     def act(self, state):
+        if not isinstance(state, torch.Tensor):
+            state = torch.tensor(state, dtype=torch.float32)
         if len(self.trajectories[-1]) > 0:
             previous_observation = self.trajectories[-1][-1]
         else:
