@@ -73,6 +73,8 @@ if __name__ == '__main__':
     parser.add_argument("--long", action="store_true")
     parser.add_argument("--seed", type=int, default=1)
 
+    parser.add_argument("--num-cpu-cores", type=int, default=20)
+
     # Training Parameters
     parser.add_argument(
         "--env-group",
@@ -83,6 +85,10 @@ if __name__ == '__main__':
     parser.add_argument("--train-episodes", type=int, default=1200)
     parser.add_argument("--test-episodes", type=int, default=40)
     parser.add_argument("--eval-frequency", type=int, default=0)
+
+    # Meta Learning Parameters
+    parser.add_argument("--num-train-env-instances", type=int, default=40)
+    parser.add_argument("--num-test-env-instances", type=int, default=40)
 
     parser.add_argument("--use-action-cost", action="store_true")
 
@@ -100,6 +106,9 @@ if __name__ == '__main__':
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=3)
 
+    parser.add_argument("--parallel_episodes_per_env", type=int, default=5)
+    parser.add_argument("--num_episodes_per_rollout", type=int, default=1)
+
     # RL2 parameters
     parser.add_argument("--rl2-trial-len", type=int, default=2)
 
@@ -111,4 +120,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger --pacoh-collect-meta-data --use-action-cost
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger --pacoh-collect-meta-data --use-action-cost --num-cpu-cores 20
