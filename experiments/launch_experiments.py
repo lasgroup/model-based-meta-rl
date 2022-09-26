@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
-import experiments.meta_rl_experiments.run
+import experiments.meta_rl_experiments.run_parallel_pacoh
 import lib.agents.stable_baselines.run
 from datetime import datetime
 import argparse
@@ -14,7 +14,7 @@ import os
 search_configs = OrderedDict({
     # random search
     "env-config-file": ['random-ant.yaml', 'random-half-cheetah.yaml'],
-    "agent-name": ['pacoh'],
+    "agent-name": ['parallel_pacoh'],
     "exploration": ['optimistic']
 })
 
@@ -50,13 +50,16 @@ def main(args):
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            cmd = generate_base_command(experiments.meta_rl_experiments.run, flags=flags_)
+            cmd = generate_base_command(experiments.meta_rl_experiments.run_parallel_pacoh, flags=flags_)
             command_list.append(cmd)
+
+    os.system(f"export OMP_NUM_THREADS={args.num_cpu_cores}")
 
     # submit jobs
     generate_run_commands(
         command_list,
         mode='euler_slurm',
+        num_cpus=args.num_cpu_cores,
         promt=True,
         dry=args.dry,
         long=args.long
@@ -106,8 +109,8 @@ if __name__ == '__main__':
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=3)
 
-    parser.add_argument("--parallel_episodes_per_env", type=int, default=5)
-    parser.add_argument("--num_episodes_per_rollout", type=int, default=1)
+    parser.add_argument("--parallel-episodes-per-env", type=int, default=5)
+    parser.add_argument("--num-episodes-per-rollout", type=int, default=1)
 
     # RL2 parameters
     parser.add_argument("--rl2-trial-len", type=int, default=2)

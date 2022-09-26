@@ -57,6 +57,9 @@ class HallucinatedEnvironmentWrapper:
     def set_task(self, random_samples):
         self._base_env.set_task(random_samples)
 
+    def sample_tasks(self, n_tasks):
+        return self._base_env.sample_tasks(n_tasks)
+
     def seed(self, seed=None):
         if hasattr(self._base_env, "seed") and isinstance(self._base_env.seed, Callable):
             return self._base_env.seed(seed)

@@ -100,7 +100,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
     if mode == 'euler_lsf':
         cluster_cmds = []
         bsub_cmd = 'bsub ' + \
-                   f'-W {LONGER if long else SHORT}:59 ' + \
+                   f'-W {LONG if long else SHORT}:59 ' + \
                    f'-R "rusage[mem={mem}]" ' + \
                    f'-n {num_cpus} ' + \
                    f'-R "span[hosts={n_hosts}]" ' + \
@@ -128,7 +128,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
 
         os.system('mkdir slurm_outputs')
         bsub_cmd = '#!/bin/bash\n\n' + \
-                   f'#SBATCH --time={LONGER if long else SHORT}:59:59\n' + \
+                   f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
                    f'#SBATCH -n {num_cpus}\n' + \
                    f'#SBATCH -o slurm_outputs/out_{np.random.randint(10000000)}.txt\n'

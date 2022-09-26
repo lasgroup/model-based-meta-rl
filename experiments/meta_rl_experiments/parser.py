@@ -122,8 +122,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
 
-    parser.add_argument("--parallel_episodes_per_env", type=int, default=4)
-    parser.add_argument("--num_episodes_per_rollout", type=int, default=1)
+    parser.add_argument("--parallel-episodes-per-env", type=int, default=4)
+    parser.add_argument("--num-episodes-per-rollout", type=int, default=1)
 
     # RL2 parameters
     parser.add_argument("--rl2-trial-len", type=int, default=2)
