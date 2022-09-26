@@ -38,3 +38,14 @@ def sample_transitions(trajectories, num_samples=1):
 def get_trajectory_segment(trajectory, start_index=0, end_index=None):
     segment_ = {key: val[start_index:end_index, ...] if val.ndim > 0 else val for key, val in asdict(trajectory).items()}
     return Observation(**segment_)
+
+
+def combine_datasets(dataset_list):
+    combined_dataset = type(dataset_list[0])(
+        max_len=dataset_list[0].max_len,
+        transformations=dataset_list[0].transformations,
+        num_memory_steps=dataset_list[0].num_memory_steps
+    )
+    for data in dataset_list:
+        combined_dataset.add_dataset(data)
+    return combined_dataset

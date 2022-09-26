@@ -62,8 +62,7 @@ class Logger(object):
         if log_dir is None:
             log_dir = f"runs/{name}/{comment.replace(' ','_')}"
         self.log_dir = safe_make_dir(log_dir)
-        self.console = sys.stdout
-        self.file = open(os.path.join(log_dir, filename), 'w')
+        self.file = os.path.join(log_dir, filename)
 
         if offline_mode:
             os.environ["WANDB_API_KEY"] = os.getenv("WANDB_API_KEY")
@@ -237,9 +236,11 @@ class Logger(object):
             pass
 
     def write(self, message):
-        self.console.write(message)
-        self.file.write(message)
+        sys.__stdout__.write(message)
+        with open(self.file, 'w') as f:
+            f.write(message)
 
     def flush(self):
-        self.console.flush()
-        self.file.flush()
+        sys.__stdout__.flush()
+        with open(self.file, 'w') as f:
+            f.flush()

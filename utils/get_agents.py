@@ -4,22 +4,23 @@ import os
 import torch
 import argparse
 
-from rllib.agent import PPOAgent, SACAgent
-from rllib.algorithms.ppo import PPO
-from rllib.algorithms.sac import SAC
-from rllib.dataset import ExperienceReplay
 from torch import nn, optim
 from torch.nn.modules import loss
 
-from lib.agents import MPCAgent, MPCPolicyAgent
-from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent
-from lib.meta_rl.agents.pacoh_agent import PACOHAgent
-from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
-    get_recurrent_value_function, get_rnn_policy
-
 from rllib.model import AbstractModel
+from rllib.algorithms.ppo import PPO
+from rllib.algorithms.sac import SAC
+from rllib.agent import PPOAgent, SACAgent
+from rllib.dataset import ExperienceReplay
 from rllib.dataset.transforms import AbstractTransform
 from rllib.environment.abstract_environment import AbstractEnvironment
+
+import lib.meta_rl.agents.parallel_pacoh_agent
+
+from lib.agents import MPCAgent, MPCPolicyAgent
+from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent
+from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
+    get_recurrent_value_function, get_rnn_policy
 
 
 def get_mpc_agent(
@@ -537,7 +538,7 @@ def get_pacoh_agent(
         initial_distribution: torch.distributions.Distribution = None
 ) -> Tuple[PACOHAgent, str]:
     """
-    Get a Gradient-based Adaptive Learner agent
+    Get a meta-RL agent based on PACOH
     :param environment: RL environment
     :param reward_model: Reward model
     :param transformations: State and action transformations
@@ -545,7 +546,7 @@ def get_pacoh_agent(
     :param input_transform: Input transformation
     :param termination_model: Early termination check
     :param initial_distribution: Distribution for initial exploration
-    :return: An GrBAL agent
+    :return: A PACOH agent
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
@@ -627,6 +628,115 @@ def get_pacoh_agent(
         num_posterior_particles=params.pacoh_num_posterior_particles,
         env_name=params.env_config_file.replace('-', '_').strip(".yaml"),
         trajectory_replay_load_path=trajectory_load_path,
+        comment=comment,
+    )
+
+    return agent, comment
+
+
+def get_parallel_pacoh_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[PACOHAgent, str]:
+    """
+    Get a meta-RL agent based on PACOH
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :param termination_model: Early termination check
+    :param initial_distribution: Distribution for initial exploration
+    :return: A PACOH agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    params.model_kind = "BayesianNN"
+
+    # Define dynamics model
+    dynamical_model = get_model(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        transformations=transformations,
+        input_transform=input_transform,
+        params=params
+    )
+
+    # Define model optimizer
+    try:
+        model_optimizer = optim.AdamW(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = model_optimizer = optim.AdamW(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+
+    # Define value function.
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
+    terminal_reward = value_function if params.mpc_terminal_reward else None
+
+    # Define policy
+    policy = get_mpc_policy(
+        dynamical_model=dynamical_model,
+        reward=reward_model,
+        params=params,
+        action_scale=environment.action_scale,
+        terminal_reward=terminal_reward,
+        termination_model=termination_model
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    if not params.pacoh_collect_meta_data:
+        trajectory_load_path = os.path.join(
+            "lib/meta_rl/experience_replay",
+            f"{params.env_config_file.replace('-', '_').strip('.yaml')}_training_{params.train_episodes}.pkl"
+        )
+        params.train_episodes = 0
+    else:
+        trajectory_load_path = None
+
+    agent = lib.meta_rl.agents.parallel_pacoh_agent.ParallelPACOHAgent(
+        mpc_policy=policy,
+        model_optimizer=model_optimizer,
+        initial_distribution=initial_distribution,
+        gamma=params.gamma,
+        num_iter_meta_train=params.pacoh_num_iter_meta_train,
+        num_iter_eval_train=params.pacoh_num_iter_eval_train,
+        n_samples_per_prior=params.pacoh_n_samples_per_prior,
+        num_hyper_posterior_particles=params.pacoh_num_hyper_posterior_particles,
+        num_posterior_particles=params.pacoh_num_posterior_particles,
+        env_name=params.env_config_file.replace('-', '_').strip(".yaml"),
+        trajectory_replay_load_path=trajectory_load_path,
+        parallel_episodes_per_env=params.parallel_episodes_per_env,
+        num_episodes_per_rollout=params.num_episodes_per_rollout,
+        max_env_steps=params.max_steps,
         comment=comment,
     )
 

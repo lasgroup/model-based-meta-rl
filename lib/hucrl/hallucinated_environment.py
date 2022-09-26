@@ -22,8 +22,13 @@ class HallucinatedEnvironmentWrapper:
             dtype=np.float32,
         )
 
-    def __getattr__(self, name: str):
-        return getattr(self._base_env, name)
+    @property
+    def num_random_params(self):
+        return self._base_env.num_random_params
+
+    @property
+    def goal(self):
+        return self._base_env.goal
 
     @property
     def original_dim_action(self) -> Tuple[int]:
@@ -48,6 +53,9 @@ class HallucinatedEnvironmentWrapper:
 
     def close(self):
         return self._base_env.close()
+
+    def set_task(self, random_samples):
+        self._base_env.set_task(random_samples)
 
     def seed(self, seed=None):
         if hasattr(self._base_env, "seed") and isinstance(self._base_env.seed, Callable):

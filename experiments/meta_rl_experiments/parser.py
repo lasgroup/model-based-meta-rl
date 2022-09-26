@@ -8,6 +8,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     """
     parser = argparse.ArgumentParser()
 
+    # Compute parameters
+    parser.add_argument("--num-cpu-cores", type=int, default=4)
+
     # Environment parameters
     parser.add_argument(
         "--env-config-file",
@@ -28,8 +31,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="pacoh",
-        choices=["rl2", "grbal", "pacoh"]
+        default="parallel_pacoh",
+        choices=["rl2", "grbal", "pacoh", "parallel_pacoh"]
     )
     # TODO: Check where exploration is used
     parser.add_argument(
@@ -118,6 +121,9 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
+
+    parser.add_argument("--parallel_episodes_per_env", type=int, default=4)
+    parser.add_argument("--num_episodes_per_rollout", type=int, default=1)
 
     # RL2 parameters
     parser.add_argument("--rl2-trial-len", type=int, default=2)

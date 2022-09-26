@@ -7,7 +7,7 @@ import numpy as np
 from dotmap import DotMap
 
 from lib.environments import ENVIRONMENTS_PATH
-from experiments.meta_rl_experiments.run_utils import get_environment_and_agent
+from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 from experiments.meta_rl_experiments.parser import get_argument_parser
 from utils.train_and_evaluate import train_and_evaluate_agent
 
@@ -31,9 +31,9 @@ if __name__ == "__main__":
 
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)
-    torch.set_num_threads(1)
+    torch.set_num_threads(params.num_cpu_cores)
 
-    environment, agent = get_environment_and_agent(params)
+    environment, agent = get_environment_and_meta_agent(params)
 
     train_and_evaluate_agent(environment, agent, params)
 

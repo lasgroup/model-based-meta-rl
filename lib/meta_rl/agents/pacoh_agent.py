@@ -364,6 +364,7 @@ class PACOHAgent(MPCAgent):
 
         return self.mll_pre_factor * mll_sum
 
+    # TODO: write in parallel
     def _compute_likelihood_across_tasks(self, params, meta_batch):
         """
         Compute the average likelihood, i.e. the mean of the likelihood for the points in the batch (x,y)
@@ -486,7 +487,11 @@ class PACOHAgent(MPCAgent):
             "x_mean": torch.cat((self.state_mean, self.action_mean), dim=-1),
             "x_std": torch.cat((self.state_std, self.action_std), dim=-1),
             "y_mean": self.next_state_mean,
-            "y_std": self.next_state_std
+            "y_std": self.next_state_std,
+            "state_mean": self.state_mean,
+            "state_std": self.state_std,
+            "action_mean": self.action_mean,
+            "action_std": self.action_std
         }
 
     def _set_unit_normalization_stats(self):
@@ -496,3 +501,11 @@ class PACOHAgent(MPCAgent):
         self.action_std = torch.ones_like(self.action_std)
         self.next_state_mean = torch.zeros_like(self.next_state_mean)
         self.next_state_std = torch.ones_like(self.next_state_std)
+
+    def set_normalization_stats(self, normalization_stats):
+        self.state_mean = normalization_stats['state_mean']
+        self.state_std = normalization_stats['state_std']
+        self.action_mean = normalization_stats['action_mean']
+        self.action_std = normalization_stats['action_std']
+        self.next_state_mean = normalization_stats['y_mean']
+        self.next_state_std = normalization_stats['y_std']

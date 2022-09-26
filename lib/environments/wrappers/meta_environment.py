@@ -1,11 +1,12 @@
 """Implementation of a meta-learning environment"""
 
-from typing import Callable, Union
+from typing import Callable, Union, Tuple
 from dotmap import DotMap
 
 import numpy as np
 
 from rand_param_envs.base import RandomEnv
+from rllib.environment import AbstractEnvironment
 
 from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
 from lib.environments.wrappers.random_environment import RandomEnvironment
@@ -69,8 +70,39 @@ class MetaEnvironmentWrapper:
             params = self.test_env_params[self.current_test_env % self.num_test_env_instances]
         self._base_env.set_task(params)
 
-    def __getattr__(self, name: str):
-        return getattr(self._base_env, name)
+    def get_env(self, env_id=0):
+        """Returns an environment with params set as env_id"""
+        if self.training:
+            self.current_train_env = env_id
+            params = self.train_env_params[self.current_train_env]
+        else:
+            self.current_test_env = env_id
+            params = self.test_env_params[self.current_test_env]
+        self._base_env.set_task(params)
+        return self._base_env
+
+    @property
+    def num_random_params(self):
+        return self._base_env.num_random_params
+
+    @property
+    def goal(self):
+        return self._base_env.goal
+
+    @property
+    def original_dim_action(self) -> Tuple[int]:
+        return self._base_env.dim_action
+
+    @property
+    def hallucinated_dim_action(self) -> Tuple[int]:
+        return self._base_env.hall_shape
+
+    @property
+    def unwrapped(self) -> AbstractEnvironment:
+        return self._base_env
+
+    def set_task(self, random_samples):
+        self._base_env.set_task(random_samples)
 
     def reset(self) -> np.ndarray:
         return self._base_env.reset()
