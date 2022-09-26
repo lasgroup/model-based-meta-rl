@@ -40,6 +40,7 @@ class Logger(object):
                  name,
                  comment="",
                  filename="sysout",
+                 safe_log_dir=True,
                  log_dir=None,
                  save_statistics=False,
                  log_episodes=False,
@@ -61,7 +62,12 @@ class Logger(object):
         comment = comment + "_" + current_time if len(comment) else current_time
         if log_dir is None:
             log_dir = f"runs/{name}/{comment.replace(' ','_')}"
-        self.log_dir = safe_make_dir(log_dir)
+        if not safe_log_dir:
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            self.log_dir = log_dir
+        else:
+            self.log_dir = safe_make_dir(log_dir)
         self.file = os.path.join(log_dir, filename)
 
         if offline_mode:

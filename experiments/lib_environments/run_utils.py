@@ -66,6 +66,7 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         name=name,
         comment=comment,
         log_dir=params.log_dir,
+        safe_log_dir=params.safe_log_dir,
         save_statistics=params.save_statistics,
         use_wandb=params.use_wandb,
         offline_mode=params.offline_logger

@@ -103,7 +103,7 @@ if __name__ == '__main__':
     parser.add_argument("--model-learn-num-iter", type=int, default=250)
 
     parser.add_argument("--pacoh-collect-meta-data", action="store_true")
-    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=100000)
+    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=120000)
     parser.add_argument("--pacoh-num-iter-eval-train", type=int, default=10)
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)

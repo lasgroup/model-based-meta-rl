@@ -24,7 +24,10 @@ def set_tasks(meta_envs):
 
 def get_parallel_environments_and_agents(params):
     params.agent_name = 'mpc'
-    
+    params.safe_log_dir = False
+    params.save_statistics = False
+    params.use_wandb = False
+
     envs_agents = [(get_environment_and_agent(params)) for _ in range(params.num_train_env_instances)]
 
     task_envs = [MetaEnvironmentWrapper(env_agent[0], params) for env_agent in envs_agents]

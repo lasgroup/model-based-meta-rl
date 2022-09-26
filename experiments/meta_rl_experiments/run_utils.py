@@ -72,6 +72,7 @@ def get_environment_and_meta_agent(params: argparse.Namespace) -> (AbstractEnvir
     agent.logger = Logger(
         name=name,
         comment=comment,
+        safe_log_dir=params.safe_log_dir,
         log_dir=params.log_dir,
         save_statistics=params.save_statistics,
         use_wandb=params.use_wandb,

@@ -96,7 +96,7 @@ class ParallelPACOHAgent(PACOHAgent):
             copy_agents_id = []
             for task, agent in zip(tasks, agents):
                 for i in range(self.parallel_episodes_per_env):
-                    env_copy, _, _ = get_wrapped_env(params, task)
+                    env_copy, _, _ = get_wrapped_env(params, copy.deepcopy(task))
                     agent_copy = copy.deepcopy(agent)
                     agent_copy.dataset.reset()
                     copy_agents_id.append(
