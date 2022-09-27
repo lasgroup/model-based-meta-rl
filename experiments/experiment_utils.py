@@ -121,7 +121,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                 if dry:
                     print(cmd)
                 else:
-                    os.system(cmd)
+                    os.system(f"export OMP_NUM_THREADS={num_cpus}; {cmd}")
 
     elif mode == 'euler_slurm':
         cluster_cmds = []
@@ -153,7 +153,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                     f.close()
                     st = os.stat('temp_script.sh')
                     os.chmod('temp_script.sh', st.st_mode | stat.S_IEXEC)
-                    os.system('sbatch temp_script.sh')
+                    os.system(f"export OMP_NUM_THREADS={num_cpus}; sbatch temp_script.sh")
                     os.system('rm temp_script.sh')
 
     elif mode == 'local':
