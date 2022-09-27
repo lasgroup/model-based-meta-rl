@@ -53,8 +53,6 @@ def main(args):
             cmd = generate_base_command(experiments.meta_rl_experiments.run_parallel_pacoh, flags=flags_)
             command_list.append(cmd)
 
-    os.system(f"export OMP_NUM_THREADS={args.num_cpu_cores}")
-
     # submit jobs
     generate_run_commands(
         command_list,
@@ -109,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=3)
 
-    parser.add_argument("--parallel-episodes-per-env", type=int, default=5)
+    parser.add_argument("--parallel-episodes-per-env", type=int, default=2)
     parser.add_argument("--num-episodes-per-rollout", type=int, default=1)
 
     # RL2 parameters

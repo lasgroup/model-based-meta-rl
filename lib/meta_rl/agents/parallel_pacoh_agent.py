@@ -47,7 +47,7 @@ class ParallelPACOHAgent(PACOHAgent):
             )
             env_copy.eval()
             env_copy.current_test_env = episode - 1
-            agent_copy = self.get_copy(params, env_copy)
+            agent_copy = self.get_copy(copy.deepcopy(params), env_copy)
             agent_copy.training = False
             copy_agents_id.append(
                 rollout_agent.remote(env_copy, agent_copy, self.max_env_steps, num_episodes=1, render=render)
@@ -58,6 +58,9 @@ class ParallelPACOHAgent(PACOHAgent):
         return np.asarray(returns)
 
     def get_copy(self, params, meta_env):
+        params.safe_log_dir = False
+        params.save_statistics = False
+        params.use_wandb = False
         _, agent = run_utils.get_environment_and_meta_agent(params=params)
         agent.set_meta_environment(meta_env)
         agent.prior_module.sample_parametrized(

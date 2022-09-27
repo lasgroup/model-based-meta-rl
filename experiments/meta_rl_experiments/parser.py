@@ -60,6 +60,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
+    parser.add_argument("--log-to-file", type=bool, default=True)
     parser.add_argument("--safe-log-dir", type=bool, default=True)
     parser.add_argument("--save-statistics", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")

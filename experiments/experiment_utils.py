@@ -95,7 +95,7 @@ def generate_base_command(module, flags: Optional[Dict[str, Any]] = None, unbuff
 
 
 def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: int = 0,
-                          dry: bool = False, n_hosts: int = 1, mem: int = 6000, long: bool = False,
+                          dry: bool = False, n_hosts: int = 1, mem: int = 3000, long: bool = False,
                           mode: str = 'local', promt: bool = True) -> None:
     if mode == 'euler_lsf':
         cluster_cmds = []
@@ -121,7 +121,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                 if dry:
                     print(cmd)
                 else:
-                    os.system(f"export OMP_NUM_THREADS={num_cpus}; {cmd}")
+                    os.system(cmd)
 
     elif mode == 'euler_slurm':
         cluster_cmds = []
@@ -130,14 +130,14 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
         bsub_cmd = '#!/bin/bash\n\n' + \
                    f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
-                   f'#SBATCH -n {num_cpus}\n' + \
-                   f'#SBATCH -o slurm_outputs/out_{np.random.randint(10000000)}.txt\n'
+                   f'#SBATCH -n {num_cpus}\n'
 
         if num_gpus > 0:
             bsub_cmd += f'#SBATCH--gpus={num_gpus}\n'
 
         for python_cmd in command_list:
-            cluster_cmds.append(bsub_cmd + f"\n{python_cmd}\n")
+            out_bsub_cmd = bsub_cmd + f'#SBATCH -o slurm_outputs/out_{np.random.randint(1000000)}.txt\n'
+            cluster_cmds.append(out_bsub_cmd + f"\n{python_cmd}\n")
 
         if promt:
             answer = input(f"About to submit {len(cluster_cmds)} compute jobs to the cluster. Proceed? [yes/no]")
@@ -153,7 +153,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                     f.close()
                     st = os.stat('temp_script.sh')
                     os.chmod('temp_script.sh', st.st_mode | stat.S_IEXEC)
-                    os.system(f"export OMP_NUM_THREADS={num_cpus}; sbatch temp_script.sh")
+                    os.system(f"sbatch temp_script.sh")
                     os.system('rm temp_script.sh')
 
     elif mode == 'local':

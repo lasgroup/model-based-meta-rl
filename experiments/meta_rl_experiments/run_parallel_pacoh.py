@@ -2,6 +2,7 @@ import os
 import ray
 import copy
 import yaml
+import time
 import torch
 import numpy as np
 
@@ -40,6 +41,8 @@ def get_parallel_environments_and_agents(params):
 
 if __name__ == "__main__":
 
+    start = time.time()
+
     parser = get_argument_parser()
     params = vars(parser.parse_args())
     with open(
@@ -55,11 +58,13 @@ if __name__ == "__main__":
     params.update(env_config)
     params = DotMap(params)
 
+
+    ray.init(num_cpus=params.num_cpu_cores)
+
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)
     torch.set_num_threads(params.num_cpu_cores)
 
-    ray.init()
 
     assert params.agent_name == 'parallel_pacoh'
     meta_environment, meta_agent = get_environment_and_meta_agent(params)
@@ -85,3 +90,5 @@ if __name__ == "__main__":
     metrics.update({"test_returns": eval_returns})
 
     meta_agent.logger.log_hparams(params.toDict(), metrics)
+
+    print(f'---------------------------------\nTotal Run Time: {(time.time()-start)/60} min')
