@@ -92,7 +92,8 @@ class ParallelPACOHAgent(PACOHAgent):
 
     def collect_meta_training_data(self, params, meta_environment, agents, num_train_episodes, max_env_steps=None):
         train_returns = []
-        num_rollouts = num_train_episodes // (len(agents) * self.num_episodes_per_rollout)
+        total_episodes_per_rollout = len(agents) * self.parallel_episodes_per_env * self.num_episodes_per_rollout
+        num_rollouts = num_train_episodes // total_episodes_per_rollout
         max_env_steps = self.max_env_steps if max_env_steps is None else max_env_steps
         tasks = meta_environment.train_env_params
         for rollout in range(num_rollouts):
