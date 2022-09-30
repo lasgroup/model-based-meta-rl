@@ -103,9 +103,9 @@ if __name__ == '__main__':
     parser.add_argument("--pacoh-collect-meta-data", action="store_true")
     parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=120000)
     parser.add_argument("--pacoh-num-iter-eval-train", type=int, default=10)
-    parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
-    parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=4)
-    parser.add_argument("--pacoh-num-posterior-particles", type=int, default=3)
+    parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=3)
+    parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=2)
+    parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
 
     parser.add_argument("--parallel-episodes-per-env", type=int, default=2)
     parser.add_argument("--num-episodes-per-rollout", type=int, default=1)

@@ -58,13 +58,11 @@ if __name__ == "__main__":
     params.update(env_config)
     params = DotMap(params)
 
-
     ray.init(num_cpus=params.num_cpu_cores)
 
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)
     torch.set_num_threads(params.num_cpu_cores)
-
 
     assert params.agent_name == 'parallel_pacoh'
     meta_environment, meta_agent = get_environment_and_meta_agent(params)

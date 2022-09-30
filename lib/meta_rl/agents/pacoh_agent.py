@@ -53,7 +53,7 @@ class PACOHAgent(MPCAgent):
             hyper_prior_likelihood_log_var_mean_mean=-8,
             hyper_prior_likelihood_log_var_log_var_mean=-4.,
             meta_batch_size=4,
-            per_task_batch_size=16,
+            per_task_batch_size=8,
             eval_num_context_samples=16,
             use_data_normalization=False,
             env_name="",
