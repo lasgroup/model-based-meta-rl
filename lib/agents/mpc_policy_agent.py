@@ -23,6 +23,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             initial_distribution: torch.distributions.Distribution = None,
             exploration_scheme: str = "thompson_sampling",
             use_validation_set: bool = False,
+            model_learn_num_iter: int = 50,
             gamma: float = 1.0,
             tensorboard=False,
             comment="",
@@ -44,7 +45,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             plan_horizon=8,  # Calling the mpc policy already plans.
             plan_samples=16,
             plan_elites=1,
-            model_learn_num_iter=50,
+            model_learn_num_iter=model_learn_num_iter,
             model_learn_batch_size=32,
             bootstrap=True,
             policy_opt_num_iter=1,

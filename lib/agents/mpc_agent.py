@@ -17,6 +17,7 @@ class MPCAgent(ModelBasedAgent):
             gamma: float = 1.0,
             max_memory: int = 10000,
             model_learn_batch_size: int = 32,
+            model_learn_num_iter: int = 50,
             use_validation_set: bool = False,
             tensorboard=False,
             comment="",
@@ -36,7 +37,7 @@ class MPCAgent(ModelBasedAgent):
             plan_horizon=0,  # Calling the mpc policy already plans.
             plan_samples=0,
             plan_elites=0,
-            model_learn_num_iter=50,
+            model_learn_num_iter=model_learn_num_iter,
             model_learn_batch_size=model_learn_batch_size,
             bootstrap=True,
             policy_opt_num_iter=0,

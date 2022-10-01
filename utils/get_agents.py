@@ -106,6 +106,7 @@ def get_mpc_agent(
         exploration_scheme=params.exploration,
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
+        model_learn_num_iter=params.model_learn_num_iter,
         gamma=params.gamma,
         comment=comment,
     )
@@ -235,6 +236,7 @@ def get_mpc_policy_agent(
         exploration_scheme=params.exploration,
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
+        model_learn_num_iter=params.model_learn_num_iter,
         gamma=params.gamma,
         comment=comment,
     )
