@@ -62,14 +62,15 @@ if __name__ == "__main__":
 
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)
-    torch.set_num_threads(params.num_cpu_cores)
+    torch.set_num_threads(min(4, params.num_cpu_cores))
 
     assert params.agent_name == 'parallel_pacoh'
     meta_environment, meta_agent = get_environment_and_meta_agent(params)
 
     envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
 
-    train_returns = meta_agent.collect_meta_training_data(params, meta_environment, agents, params.train_episodes)
+    if params.pacoh_collect_meta_data:
+        train_returns = meta_agent.collect_meta_training_data(params, meta_environment, agents, params.train_episodes)
 
     meta_agent.logger.export_to_json()  # Save statistics.
 

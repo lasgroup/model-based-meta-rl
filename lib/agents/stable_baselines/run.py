@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)
-    torch.set_num_threads(params.num_cpu_cores)
+    torch.set_num_threads(min(4, params.num_cpu_cores))
 
     environment, _ = get_environment_and_agent(params)
 

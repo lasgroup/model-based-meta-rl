@@ -3,6 +3,7 @@ import copy
 import math
 import time
 from collections import deque
+from functools import reduce
 
 import numpy as np
 import torch
@@ -352,7 +353,7 @@ class PACOHAgent(MPCAgent):
 
     def _estimate_mll(self, prior_samples, meta_batch, n_train_samples):
         param_sample = self.prior_module.sample_parametrized(self.n_samples_per_prior, prior_samples)
-        log_likelihood = self._compute_likelihood_across_tasks(param_sample, meta_batch)
+        log_likelihood = self._compute_batched_likelihood_across_tasks(param_sample, meta_batch)
 
         # multiply by sqrt of m and apply logsumexp
         neg_log_likelihood = log_likelihood * (n_train_samples[:, None, None]).sqrt()
@@ -364,7 +365,6 @@ class PACOHAgent(MPCAgent):
 
         return self.mll_pre_factor * mll_sum
 
-    # TODO: write in parallel
     def _compute_likelihood_across_tasks(self, params, meta_batch):
         """
         Compute the average likelihood, i.e. the mean of the likelihood for the points in the batch (x,y)
@@ -400,10 +400,61 @@ class PACOHAgent(MPCAgent):
         log_likelihood_across_tasks = torch.stack(log_likelihood_list)
         return log_likelihood_across_tasks
 
+    def _compute_batched_likelihood_across_tasks(self, params, meta_batch):
+        """
+        Compute the average likelihood, i.e. the mean of the likelihood for the points in the batch (x,y)
+        If you want an unbiased estimator of the dataset likelihood, set the prefactor to the number of points
+
+        Returns: log_likelihood_across_tasks with shape (meta_batch_size, n_hyper_posterior_samples, n_prior_samples)
+        """
+        params = params.reshape((self.n_batched_models_train, params.shape[-1]))
+        nn_params, likelihood_std = self._split_into_nn_params_and_likelihood_std(params)
+
+        # iterate over tasks
+        log_likelihood_list = []
+        state_list = []
+        action_list = []
+        next_state_list = []
+        batch_size_cum_list = [0, ]
+
+        for i in range(self.meta_batch_size):
+            observation = meta_batch[i]
+            state, next_state = observation.state, observation.next_state
+            action = observation.action[..., :self.dynamical_model.base_model.dim_action[0]]
+            state, action, next_state = self._normalize_data(state, action, next_state)
+
+            state_list.append(state.reshape((-1, state.shape[-1])))
+            action_list.append(action.reshape((-1, action.shape[-1])))
+            next_state_list.append(next_state.reshape((-1, next_state.shape[-1])))
+            batch_size_cum_list.append(batch_size_cum_list[-1] + reduce(lambda x, y: x * y, list(state.shape[:-1])))
+
+        stacked_states = torch.cat(state_list, dim=0)
+        stacked_actions = torch.cat(action_list, dim=0)
+        stacked_next_states = torch.cat(next_state_list, dim=0)
+
+        # NN forward pass
+        pred_fn = self.get_forward_fn(nn_params)
+        stacked_y_hat = pred_fn.forward_nn(
+            stacked_states,
+            stacked_actions,
+            nn_params=nn_params
+        )  # (k, b, d)
+
+        for i in range(self.meta_batch_size):
+            y = stacked_next_states[batch_size_cum_list[i]: batch_size_cum_list[i + 1]]
+            y_hat = stacked_y_hat[:, batch_size_cum_list[i]: batch_size_cum_list[i + 1]]
+
+            # compute likelihood
+            log_likelihood = self.likelihood.log_prob(y_hat, y, likelihood_std)
+            log_likelihood = log_likelihood.reshape((self.n_batched_priors, self.n_samples_per_prior))
+            log_likelihood_list.append(log_likelihood)
+
+        log_likelihood_across_tasks = torch.stack(log_likelihood_list)
+        return log_likelihood_across_tasks
+
     def get_forward_fn(self, params):
-        reg_model = copy.deepcopy(self.meta_nn_model)
-        reg_model.set_parameters_as_vector(params)
-        return reg_model
+        self.meta_nn_model.set_parameters_as_vector(params)
+        return self.meta_nn_model
 
     def _get_kernel_matrix_and_grad(self, X):
         X2 = X.detach().clone()
