@@ -213,10 +213,10 @@ class PACOHAgent(MPCAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        self.meta_fit()
-        super().eval(val)
         if self.save_data:
             self.save_trajectory_replay()
+        self.meta_fit()
+        super().eval(val)
 
     def fit_task(self):
         self.eval_model.train()
