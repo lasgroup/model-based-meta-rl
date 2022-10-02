@@ -137,6 +137,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
     parser.add_argument("--ppo-eta", type=float, default=0.01)
+    parser.add_argument("--ppo-clip-gradient-val", type=float, default=10.0)
 
     # SAC parameters
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)

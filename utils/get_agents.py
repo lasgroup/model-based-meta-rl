@@ -300,6 +300,7 @@ def get_ppo_agent(
         batch_size=32,
         epsilon=0.2,
         eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
+        clip_gradient_val=params.ppo_clip_gradient_val,
         gamma=params.gamma,
         comment=comment
     )
@@ -429,6 +430,7 @@ def get_rl2_agent(
         batch_size=32,
         epsilon=0.2,
         eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
+        clip_gradient_val=params.ppo_clip_gradient_val,
         gamma=params.gamma,
         comment=comment
     )
