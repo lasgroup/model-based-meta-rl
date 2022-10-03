@@ -94,17 +94,21 @@ def generate_base_command(module, flags: Optional[Dict[str, Any]] = None, unbuff
     return base_cmd
 
 
-def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: int = 0,
+def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: int = 0, exp_name='',
                           dry: bool = False, n_hosts: int = 1, mem: int = 3000, long: bool = False,
                           mode: str = 'local', promt: bool = True) -> None:
     if mode == 'euler_lsf':
         cluster_cmds = []
+
+        output_path = os.path.join('lsf_outputs', exp_name)
+        os.makedirs(output_path, exist_ok=True)
+
         bsub_cmd = 'bsub ' + \
                    f'-W {LONG if long else SHORT}:59 ' + \
                    f'-R "rusage[mem={mem}]" ' + \
                    f'-n {num_cpus} ' + \
                    f'-R "span[hosts={n_hosts}]" ' + \
-                   f'-o lsf_outputs/ '
+                   f'-o {output_path}/ '
 
         if num_gpus > 0:
             bsub_cmd += f'-R "rusage[ngpus_excl_p={num_gpus}]" '
@@ -126,7 +130,8 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
     elif mode == 'euler_slurm':
         cluster_cmds = []
 
-        os.system('mkdir slurm_outputs')
+        output_path = os.path.join('slurm_outputs', exp_name)
+        os.makedirs(output_path, exist_ok=True)
         bsub_cmd = '#!/bin/bash\n\n' + \
                    f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
@@ -136,7 +141,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
             bsub_cmd += f'#SBATCH--gpus={num_gpus}\n'
 
         for python_cmd in command_list:
-            out_bsub_cmd = bsub_cmd + f'#SBATCH -o slurm_outputs/out_{np.random.randint(1000000)}.txt\n'
+            out_bsub_cmd = bsub_cmd + f'#SBATCH -o {output_path}/out_{np.random.randint(1000000)}.txt\n'
             cluster_cmds.append(out_bsub_cmd + f"\n{python_cmd}\n")
 
         if promt:

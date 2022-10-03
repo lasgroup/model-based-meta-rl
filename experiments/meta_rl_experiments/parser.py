@@ -27,6 +27,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--max-steps", type=int, default=200)
     parser.add_argument("--skip-early-termination", action="store_true")
+    parser.add_argument("--env-random-scale-limit", type=float, default=3.0)
 
     # MetaRL Agent parameters
     parser.add_argument(

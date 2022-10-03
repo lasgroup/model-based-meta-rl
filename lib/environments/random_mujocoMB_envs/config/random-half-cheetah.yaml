@@ -1,4 +1,3 @@
 name: RandomMBHalfCheetahEnv
 max_steps: 250
 action_cost: 0.1
-env_random_scale_limit: 3.0

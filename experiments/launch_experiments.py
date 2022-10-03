@@ -56,6 +56,7 @@ def main(args):
     # submit jobs
     generate_run_commands(
         command_list,
+        exp_name=args.exp_name,
         mode='euler_slurm',
         num_cpus=args.num_cpu_cores,
         promt=True,
