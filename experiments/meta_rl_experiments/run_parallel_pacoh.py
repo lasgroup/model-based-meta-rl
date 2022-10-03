@@ -70,7 +70,9 @@ if __name__ == "__main__":
     envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
 
     if params.pacoh_collect_meta_data:
-        train_returns = meta_agent.collect_meta_training_data(params, meta_environment, agents, params.train_episodes)
+        train_returns = meta_agent.collect_meta_training_data(
+            params, meta_environment, agents, params.train_episodes, use_early_termination=not params.skip_early_termination
+        )
 
     meta_agent.logger.export_to_json()  # Save statistics.
 
@@ -81,6 +83,7 @@ if __name__ == "__main__":
             meta_environment,
             num_episodes=params.test_episodes,
             render=params.render,
+            use_early_termination=not params.skip_early_termination
         )
         eval_returns = np.mean(returns)
         print(f"Test Cumulative Rewards: {eval_returns}")

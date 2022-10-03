@@ -27,6 +27,7 @@ def train_and_evaluate_agent(environment, agent, params):
             save_milestones=None,
             render=False,
             callbacks=None,
+            use_early_termination=not params.skip_early_termination
         )
 
         agent.logger.export_to_json()  # Save statistics.
@@ -39,6 +40,7 @@ def train_and_evaluate_agent(environment, agent, params):
             num_episodes=params.test_episodes,
             max_steps=params.max_steps,
             render=params.render,
+            use_early_termination=not params.skip_early_termination
         )
 
         returns = np.mean(agent.logger.get("train_return-0"))

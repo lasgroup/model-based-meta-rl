@@ -35,7 +35,7 @@ class ParallelPACOHAgent(PACOHAgent):
         self.num_episodes_per_rollout = num_episodes_per_rollout
         self.max_env_steps = max_env_steps
 
-    def rollout(self, params, meta_environment=None, num_episodes=1, render=False):
+    def rollout(self, params, meta_environment=None, num_episodes=1, render=False, use_early_termination=True):
         if meta_environment is None:
             meta_environment = self.meta_environment
         copy_agents_id = []
@@ -50,7 +50,14 @@ class ParallelPACOHAgent(PACOHAgent):
             agent_copy = self.get_copy(copy.deepcopy(params), env_copy)
             agent_copy.training = False
             copy_agents_id.append(
-                rollout_agent.remote(env_copy, agent_copy, self.max_env_steps, num_episodes=1, render=render)
+                rollout_agent.remote(
+                    env_copy,
+                    agent_copy,
+                    self.max_env_steps,
+                    num_episodes=1,
+                    render=render,
+                    use_early_termination=use_early_termination
+                )
             )
         copy_agents = ray.get(copy_agents_id)
         returns = [agent.logger.get("eval_return-0")[-1] for agent in copy_agents]
@@ -91,7 +98,7 @@ class ParallelPACOHAgent(PACOHAgent):
             )
         return ray.get(results_id)
 
-    def collect_meta_training_data(self, params, meta_environment, agents, num_train_episodes, max_env_steps=None):
+    def collect_meta_training_data(self, params, meta_environment, agents, num_train_episodes, max_env_steps=None, use_early_termination=True):
         train_returns = []
         total_episodes_per_rollout = len(agents) * self.parallel_episodes_per_env * self.num_episodes_per_rollout
         num_rollouts = num_train_episodes // total_episodes_per_rollout
@@ -105,7 +112,13 @@ class ParallelPACOHAgent(PACOHAgent):
                     agent_copy = copy.deepcopy(agent)
                     agent_copy.dataset.reset()
                     copy_agents_id.append(
-                        rollout_agent.remote(env_copy, agent_copy, max_env_steps, self.num_episodes_per_rollout)
+                        rollout_agent.remote(
+                            env_copy,
+                            agent_copy,
+                            max_env_steps,
+                            self.num_episodes_per_rollout,
+                            use_early_termination=use_early_termination
+                        )
                     )
             copy_agents = ray.get(copy_agents_id)
             datasets = [agent.dataset for agent in copy_agents]

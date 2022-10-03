@@ -15,7 +15,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="point_env_2d.yaml",
+        default="point-env-2d.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
@@ -26,6 +26,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--max-steps", type=int, default=200)
+    parser.add_argument("--skip-early-termination", action="store_true")
 
     # Agent parameters
     parser.add_argument(
@@ -119,7 +120,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
     parser.add_argument("--ppo-eta", type=float, default=0.01)
-    parser.add_argument("--ppo-clip-gradient-val", type=float, default=10.0)
+    parser.add_argument("--ppo-clip-gradient-val", type=float, default=2.0)
 
     # SAC parameters
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)

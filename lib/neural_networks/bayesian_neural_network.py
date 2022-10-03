@@ -212,6 +212,10 @@ class FeedForwardBNN(VectorizedModel):
             mean = out.gather(-1, head_idx).squeeze(-1)
             scale = torch.diag_embed(scale.gather(-1, head_idx).squeeze(-1))
         elif self.prediction_strategy == "set_head_idx":  # TS-INF
+            '''
+            Not correctly implemented, 
+            mpc solver never sets head_idx, also different head_ids for different states in the batch
+            '''
             mean = out.gather(-1, self.head_idx)
             scale = torch.diag_embed(scale.gather(-1, self.head_idx))
         elif self.prediction_strategy == "multi_head":

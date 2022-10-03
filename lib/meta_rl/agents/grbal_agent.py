@@ -102,62 +102,65 @@ class GrBALAgent(MPCAgent):
 
     def _train_model_step(self):
         self.model_optimizer.zero_grad()
-        loss = torch.zeros(1)
-        for batch in range(self.model_learn_batch_size):
-            trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
-            loss += model_loss(self.dynamical_model.base_model, trajectory, dynamical_model=None).mean()
-        loss.backward()
-        self.model_optimizer.step()
-        self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
+        if max(self.dataset.trajectory_lengths) >= (self.past_segment_len + self.future_segment_len):
+            loss = torch.zeros(1)
+            for batch in range(self.model_learn_batch_size):
+                trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
+                loss += model_loss(self.dynamical_model.base_model, trajectory, dynamical_model=None).mean()
+            loss.backward()
+            self.model_optimizer.step()
+            self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
 
     def _maml_train_model_step(self):
         self.meta_optimizer.zero_grad()
         loss = torch.zeros(1)
-        for batch in range(self.model_learn_batch_size):
-            trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
-            task_model = self.pre_update_model.clone()
-            error = model_loss(
-                task_model,
-                get_trajectory_segment(trajectory, 0, self.past_segment_len),
-                dynamical_model=None
-            ).mean()
-            task_model.adapt(error)
-            loss += model_loss(
-                task_model,
-                get_trajectory_segment(trajectory, -self.future_segment_len, None),
-                dynamical_model=None
-            ).mean() / self.model_learn_batch_size
-        loss.backward()
-        self.meta_optimizer.step()
-        self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
+        if max(self.dataset.trajectory_lengths) >= (self.past_segment_len + self.future_segment_len):
+            for batch in range(self.model_learn_batch_size):
+                trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
+                task_model = self.pre_update_model.clone()
+                error = model_loss(
+                    task_model,
+                    get_trajectory_segment(trajectory, 0, self.past_segment_len),
+                    dynamical_model=None
+                ).mean()
+                task_model.adapt(error)
+                loss += model_loss(
+                    task_model,
+                    get_trajectory_segment(trajectory, -self.future_segment_len, None),
+                    dynamical_model=None
+                ).mean() / self.model_learn_batch_size
+            loss.backward()
+            self.meta_optimizer.step()
+            self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
 
     def _maml_validate_model_step(self):
         mse, sharpness, calibration_score = [], [], []
-        for batch in range(self.model_learn_batch_size):
-            self.meta_optimizer.zero_grad()
-            trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
-            task_model = self.pre_update_model.clone()
-            error = model_loss(
-                task_model,
-                get_trajectory_segment(trajectory, 0, self.past_segment_len),
-                dynamical_model=None
-            ).mean()
-            task_model.adapt(error)
-            _, mse_, sharpness_, calibration_score_ = get_model_validation_score(
-                task_model,
-                get_trajectory_segment(trajectory, -self.future_segment_len, None)
-            )
-            mse.append(mse_)
-            sharpness.append(sharpness_)
-            calibration_score.append(calibration_score_)
+        if max(self.dataset.trajectory_lengths) >= (self.past_segment_len + self.future_segment_len):
+            for batch in range(self.model_learn_batch_size):
+                self.meta_optimizer.zero_grad()
+                trajectory = self.dataset.sample_segment(self.past_segment_len + self.future_segment_len)
+                task_model = self.pre_update_model.clone()
+                error = model_loss(
+                    task_model,
+                    get_trajectory_segment(trajectory, 0, self.past_segment_len),
+                    dynamical_model=None
+                ).mean()
+                task_model.adapt(error)
+                _, mse_, sharpness_, calibration_score_ = get_model_validation_score(
+                    task_model,
+                    get_trajectory_segment(trajectory, -self.future_segment_len, None)
+                )
+                mse.append(mse_)
+                sharpness.append(sharpness_)
+                calibration_score.append(calibration_score_)
 
-        self.logger.update(
-            **{
-                f"{self.dynamical_model.model_kind[:3]}-val-mse": sum(mse) / self.model_learn_batch_size,
-                f"{self.dynamical_model.model_kind[:3]}-sharp": sum(sharpness) / self.model_learn_batch_size,
-                f"{self.dynamical_model.model_kind[:3]}-calib": sum(calibration_score) / self.model_learn_batch_size,
-            }
-        )
+            self.logger.update(
+                **{
+                    f"{self.dynamical_model.model_kind[:3]}-val-mse": sum(mse) / self.model_learn_batch_size,
+                    f"{self.dynamical_model.model_kind[:3]}-sharp": sum(sharpness) / self.model_learn_batch_size,
+                    f"{self.dynamical_model.model_kind[:3]}-calib": sum(calibration_score) / self.model_learn_batch_size,
+                }
+            )
 
     def train(self, val=True):
         """Set the agent in training mode"""

@@ -86,6 +86,7 @@ if __name__ == '__main__':
     parser.add_argument("--train-episodes", type=int, default=1200)
     parser.add_argument("--test-episodes", type=int, default=40)
     parser.add_argument("--eval-frequency", type=int, default=0)
+    parser.add_argument("--skip-early-termination", action="store_true")
 
     # Meta Learning Parameters
     parser.add_argument("--num-train-env-instances", type=int, default=40)
@@ -116,7 +117,6 @@ if __name__ == '__main__':
     # GrBAL parameters
     parser.add_argument("--grbal-past-segment-len", type=int, default=16)
     parser.add_argument("--grbal-future-segment-len", type=int, default=16)
-
 
     args = parser.parse_args()
     main(args)
