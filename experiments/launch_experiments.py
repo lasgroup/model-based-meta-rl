@@ -31,7 +31,7 @@ def main(args):
     for idx in possible_configs:
         # transfer flags from the args
         flags = copy.deepcopy(args.__dict__)
-        for key in ["seed", "exp_name", "num_seeds_per_hparam", "dry", "long"]:
+        for key in ["seed", "num_seeds_per_hparam", "dry", "long"]:
             flags.pop(key)
         for i, param in enumerate(search_configs.keys()):
             flags[param] = search_configs[param][idx[i]]
