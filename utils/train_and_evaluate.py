@@ -48,4 +48,4 @@ def train_and_evaluate_agent(environment, agent, params):
         returns = np.mean(agent.logger.get("eval_return-0"))
         metrics.update({"test_returns": returns})
 
-        agent.logger.log_hparams(params.toDict(), metrics)
+        agent.logger.log_metrics(hparams=params.toDict(), metrics=metrics)

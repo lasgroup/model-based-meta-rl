@@ -9,7 +9,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
 
     # Compute parameters
-    parser.add_argument("--num-cpu-cores", type=int, default=4)
+    parser.add_argument("--num-cpu-cores", type=int, default=5)
 
     # Environment parameters
     parser.add_argument(
@@ -57,7 +57,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--use-exact-termination-model", action="store_true")
 
     # Meta Learning Parameters
-    parser.add_argument("--num-train-env-instances", type=int, default=40)
+    parser.add_argument("--num-train-env-instances", type=int, default=5)
     parser.add_argument("--num-test-env-instances", type=int, default=50)
 
     # Logger Parameters

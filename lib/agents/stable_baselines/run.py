@@ -87,4 +87,4 @@ if __name__ == "__main__":
     metrics = dict()
     returns = np.mean(np.array(returns))
     metrics.update({"test_returns": returns})
-    rllib_logger.log_hparams(params.toDict(), metrics)
+    rllib_logger.log_metrics(hparams=params.toDict(), metrics=metrics)

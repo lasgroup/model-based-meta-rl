@@ -32,30 +32,33 @@ class Logger(object):
     comment: str, optional.
         This is useful to separate equivalent runs.
         The folder is runs/`name'/`comment_date'.
-    tensorboard: bool, optional.
-        Flag that indicates whether or not to save the results in the tensorboard.
+    use_wandb: bool, optional.
+        Flag that indicates whether to save the results in the wandb.
     """
 
-    def __init__(self,
-                 name,
-                 comment="",
-                 filename="sysout",
-                 safe_log_dir=True,
-                 log_dir=None,
-                 save_statistics=False,
-                 log_episodes=False,
-                 use_wandb=True,
-                 offline_mode=False
-                 ):
+    def __init__(
+        self,
+        name,
+        comment="",
+        filename="sysout.txt",
+        safe_log_dir=True,
+        log_dir=None,
+        save_statistics=False,
+        log_episodes=False,
+        use_wandb=True,
+        offline_mode=False
+    ):
+
         self.statistics = list()
         self.current = dict()
         self.all = defaultdict(list)
+        self.keys = set()
+
+        self.episode = 0
+
         self.use_wandb = use_wandb
         self.save_statistics = save_statistics
         self.log_episodes = log_episodes
-
-        self.episode = 0
-        self.keys = set()
 
         now = datetime.now()
         current_time = now.strftime("%b%d_%H_%M_%S")
@@ -149,7 +152,7 @@ class Logger(object):
 
             self.all[key].append(value)
 
-            if self.use_wandb is not None and self.log_episodes:
+            if self.use_wandb and self.log_episodes:
                 wandb.log(
                     {f"episode_{self.episode}/{key}": self.current[key][1]},
                     step=self.current[key][0],
@@ -210,10 +213,11 @@ class Logger(object):
         for key in self.all.keys():
             self.keys.add(key)
 
-    def log_hparams(self, hparams, metrics=None):
+    def log_metrics(self, hparams=None, metrics=None):
         """Log hyper parameters together with a metric dictionary."""
-        if self.use_wandb:  # Do not save.
-            wandb.config.update(hparams)
+        if hparams is not None:
+            self.save_hparams(hparams)
+        if self.use_wandb:
             wandb.log(metrics)
         if self.save_statistics:
             self.export_to_json()
@@ -243,10 +247,10 @@ class Logger(object):
 
     def write(self, message):
         sys.__stdout__.write(message)
-        with open(self.file, 'w') as f:
+        with open(self.file, 'a') as f:
             f.write(message)
 
     def flush(self):
         sys.__stdout__.flush()
-        with open(self.file, 'w') as f:
+        with open(self.file, 'a') as f:
             f.flush()

@@ -26,6 +26,7 @@ def set_tasks(meta_envs):
 def get_parallel_environments_and_agents(params):
     params.agent_name = 'mpc'
     params.safe_log_dir = False
+    params.log_to_file = False
     params.save_statistics = False
     params.use_wandb = False
 
@@ -69,6 +70,8 @@ if __name__ == "__main__":
 
     envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
 
+    meta_agent.logger.save_hparams(params.toDict())
+
     if params.pacoh_collect_meta_data:
         train_returns = meta_agent.collect_meta_training_data(
             params, meta_environment, agents, params.train_episodes, use_early_termination=not params.skip_early_termination
@@ -91,6 +94,6 @@ if __name__ == "__main__":
     metrics.update({"train_returns": train_returns})
     metrics.update({"test_returns": eval_returns})
 
-    meta_agent.logger.log_hparams(params.toDict(), metrics)
+    meta_agent.logger.log_metrics(hparams=params.toDict(), metrics=metrics)
 
     print(f'---------------------------------\nTotal Run Time: {(time.time()-start)/60} min')

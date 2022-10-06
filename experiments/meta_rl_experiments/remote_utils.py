@@ -4,7 +4,7 @@ from rllib.util.rollout import rollout_episode
 
 
 @ray.remote
-def rollout_agent(environment, agent, max_env_steps, num_episodes=1, print_frequency=1, render=False, use_early_termination=True):
+def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, render=False, use_early_termination=True):
     for episode in range(num_episodes):
         rollout_episode(
             environment=environment,
@@ -15,8 +15,6 @@ def rollout_agent(environment, agent, max_env_steps, num_episodes=1, print_frequ
             callbacks=None,
             use_early_termination=use_early_termination
         )
-        if print_frequency and episode % print_frequency == 0:
-            print(agent)
     return agent
 
 
