@@ -45,6 +45,15 @@ def get_environment_and_meta_agent(params: argparse.Namespace) -> (AbstractEnvir
             params=params,
             input_transform=None
         )
+    elif params.agent_name == "parallel_grbal":
+        agent, comment = agents.get_parallel_grbal_agent(
+            environment=environment,
+            reward_model=reward_model,
+            transformations=transformations,
+            termination_model=termination_model,
+            params=params,
+            input_transform=None
+        )
     elif params.agent_name == "pacoh":
         agent, comment = agents.get_pacoh_agent(
             environment=environment,

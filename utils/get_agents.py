@@ -16,6 +16,7 @@ from rllib.dataset.transforms import AbstractTransform
 from rllib.environment.abstract_environment import AbstractEnvironment
 
 import lib.meta_rl.agents.parallel_pacoh_agent
+import lib.meta_rl.agents.parallel_grbal_agent
 
 from lib.agents import MPCAgent, MPCPolicyAgent
 from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent
@@ -107,6 +108,7 @@ def get_mpc_agent(
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
         model_learn_num_iter=params.model_learn_num_iter,
+        max_memory=params.max_memory,
         gamma=params.gamma,
         comment=comment,
     )
@@ -237,6 +239,7 @@ def get_mpc_policy_agent(
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
         model_learn_num_iter=params.model_learn_num_iter,
+        max_memory=params.max_memory,
         gamma=params.gamma,
         comment=comment,
     )
@@ -522,9 +525,108 @@ def get_grbal_agent(
         model_optimizer=model_optimizer,
         past_segment_len=params.grbal_past_segment_len,
         future_segment_len=params.grbal_future_segment_len,
+        model_learn_num_iter=params.model_learn_num_iter,
         model_learn_batch_size=params.model_learn_batch_size,
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
+        gamma=params.gamma,
+        comment=comment,
+    )
+
+    return agent, comment
+
+
+def get_parallel_grbal_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[GrBALAgent, str]:
+    """
+    Get a Parallel Gradient-based Adaptive Learner agent
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :param termination_model: Early termination check
+    :param initial_distribution: Distribution for initial exploration
+    :return: A parallel GrBAL agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    params.exploration = "greedy"
+
+    # Define dynamics model
+    dynamical_model = get_model(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        transformations=transformations,
+        input_transform=input_transform,
+        params=params
+    )
+
+    # Define model optimizer
+    try:
+        model_optimizer = optim.AdamW(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = model_optimizer = optim.AdamW(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+
+    # Define value function.
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+    # TODO: Use as terminal reward and train value function in ModelBasedAgent
+    terminal_reward = value_function if params.mpc_terminal_reward else None
+
+    # Define policy
+    policy = get_mpc_policy(
+        dynamical_model=dynamical_model,
+        reward=reward_model,
+        params=params,
+        action_scale=environment.action_scale,
+        terminal_reward=terminal_reward,
+        termination_model=termination_model
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    agent = lib.meta_rl.agents.parallel_grbal_agent.ParallelGrBALAgent(
+        mpc_policy=policy,
+        model_optimizer=model_optimizer,
+        past_segment_len=params.grbal_past_segment_len,
+        future_segment_len=params.grbal_future_segment_len,
+        model_learn_batch_size=params.model_learn_batch_size,
+        model_learn_num_iter=params.model_learn_num_iter,
+        use_validation_set=params.use_validation_set,
+        initial_distribution=initial_distribution,
+        num_parallel_agents=params.grbal_num_parallel_agents,
+        num_episodes_per_rollout=params.num_episodes_per_rollout,
+        max_env_steps=params.max_steps,
         gamma=params.gamma,
         comment=comment,
     )

@@ -73,7 +73,6 @@ class ParallelPACOHAgent(PACOHAgent):
         params.save_statistics = False
         params.log_to_file = False
         params.use_wandb = False
-        params.pacoh_collect_meta_data = True
         _, agent = run_utils.get_environment_and_meta_agent(params=params)
         agent.set_meta_environment(meta_env)
         agent.prior_module.sample_parametrized(

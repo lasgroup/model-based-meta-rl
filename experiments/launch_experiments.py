@@ -4,6 +4,8 @@ from collections import OrderedDict
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
 import experiments.meta_rl_experiments.run_parallel_pacoh
+import experiments.meta_rl_experiments.run_parallel_grbal
+import experiments.meta_rl_experiments.run
 import lib.agents.stable_baselines.run
 from datetime import datetime
 import argparse
@@ -45,12 +47,19 @@ def main(args):
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
 
+        if flags['agent-name'] == 'parallel_pacoh':
+            run_file = experiments.meta_rl_experiments.run_parallel_pacoh
+        elif flags['agent-name'] == 'parallel_grbal':
+            run_file = experiments.meta_rl_experiments.run_parallel_grbal
+        else:
+            run_file = experiments.meta_rl_experiments.run
+
         for j in range(args.num_seeds_per_hparam):
             seed = init_seeds[j]
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            cmd = generate_base_command(experiments.meta_rl_experiments.run_parallel_pacoh, flags=flags_)
+            cmd = generate_base_command(run_file, flags=flags_)
             command_list.append(cmd)
 
     # submit jobs

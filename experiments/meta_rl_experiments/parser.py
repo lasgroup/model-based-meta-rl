@@ -34,7 +34,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--agent-name",
         type=str,
         default="parallel_pacoh",
-        choices=["rl2", "grbal", "pacoh", "parallel_pacoh"]
+        choices=["rl2", "grbal", "parallel_grbal", "pacoh", "parallel_pacoh"]
     )
     # TODO: Check where exploration is used
     parser.add_argument(
@@ -137,6 +137,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # GrBAL parameters
     parser.add_argument("--grbal-past-segment-len", type=int, default=32)
     parser.add_argument("--grbal-future-segment-len", type=int, default=32)
+    parser.add_argument("--grbal-num-parallel-agents", type=int, default=8)
 
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)

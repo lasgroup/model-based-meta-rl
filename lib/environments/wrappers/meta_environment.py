@@ -29,33 +29,59 @@ class MetaEnvironmentWrapper:
         self.num_test_env_instances = params.num_test_env_instances
 
         if hasattr(base_env, 'num_random_params'):
-            self.train_env_params = np.random.rand(self.num_train_env_instances, self._base_env.num_random_params)
-            self.test_env_params = np.random.rand(self.num_test_env_instances, self._base_env.num_random_params)
+            self._train_env_params = np.random.rand(self.num_train_env_instances, self._base_env.num_random_params)
+            self._test_env_params = np.random.rand(self.num_test_env_instances, self._base_env.num_random_params)
         else:
-            self.train_env_params = self._base_env.sample_tasks(self.num_train_env_instances)
-            self.test_env_params = self._base_env.sample_tasks(self.num_test_env_instances)
+            self._train_env_params = self._base_env.sample_tasks(self.num_train_env_instances)
+            self._test_env_params = self._base_env.sample_tasks(self.num_test_env_instances)
 
         self.current_train_env = 0
         self.current_test_env = 0
 
         if self.training:
-            params = self.train_env_params[self.current_train_env]
+            params = self._train_env_params[self.current_train_env]
         else:
-            params = self.test_env_params[self.current_test_env]
+            params = self._test_env_params[self.current_test_env]
         self._base_env.set_task(params)
 
         self._counters = {"steps": 0, "episodes": 0, "train_trials": 0, "test_trials": 0}
+
+    @property
+    def train_env_params(self):
+        return self._train_env_params
+
+    @property
+    def test_env_params(self):
+        return self._test_env_params
+
+    @train_env_params.setter
+    def train_env_params(self, val):
+        assert isinstance(val, list)
+        self._train_env_params = val
+        self.num_train_env_instances = len(val)
+        self.current_train_env = self.current_train_env % self.num_train_env_instances
+        if self.training:
+            self._base_env.set_task(self._train_env_params[self.current_train_env])
+
+    @test_env_params.setter
+    def test_env_params(self, val):
+        assert isinstance(val, list)
+        self._test_env_params = val
+        self.num_test_env_instances = len(val)
+        self.current_test_env = self.current_test_env % self.num_test_env_instances
+        if not self.training:
+            self._base_env.set_task(self._test_env_params[self.current_test_env])
 
     def sample_new_env(self):
         """Samples new environment parameters from the task distribution"""
         if self.training:
             self._counters["train_trials"] += 1
             self.current_train_env = np.random.randint(self.num_train_env_instances)
-            params = self.train_env_params[self.current_train_env]
+            params = self._train_env_params[self.current_train_env]
         else:
             self._counters["test_trials"] += 1
             self.current_test_env = np.random.randint(self.num_test_env_instances)
-            params = self.test_env_params[self.current_test_env]
+            params = self._test_env_params[self.current_test_env]
         self._base_env.set_task(params)
 
     def sample_next_env(self):
@@ -63,21 +89,21 @@ class MetaEnvironmentWrapper:
         if self.training:
             self._counters["train_trials"] += 1
             self.current_train_env += 1
-            params = self.train_env_params[self.current_train_env % self.num_train_env_instances]
+            params = self._train_env_params[self.current_train_env % self.num_train_env_instances]
         else:
             self._counters["test_trials"] += 1
             self.current_test_env += 1
-            params = self.test_env_params[self.current_test_env % self.num_test_env_instances]
+            params = self._test_env_params[self.current_test_env % self.num_test_env_instances]
         self._base_env.set_task(params)
 
     def get_env(self, env_id=0):
         """Returns an environment with params set as env_id"""
         if self.training:
             self.current_train_env = env_id
-            params = self.train_env_params[self.current_train_env]
+            params = self._train_env_params[self.current_train_env]
         else:
             self.current_test_env = env_id
-            params = self.test_env_params[self.current_test_env]
+            params = self._test_env_params[self.current_test_env]
         self._base_env.set_task(params)
         return self._base_env
 

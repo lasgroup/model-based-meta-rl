@@ -20,11 +20,6 @@ class TrajectoryReplay(ExperienceReplay):
         super().__init__(*args, **kwargs)
         self.trajectory_starts = []
         self.trajectory_lengths = []
-        self.observation_trajectory = torch.empty((self.max_len, ), dtype=torch.int)
-
-    def append(self, observation):
-        self.observation_trajectory[self.ptr] = len(self.trajectory_lengths)
-        super().append(observation)
 
     def start_episode(self):
         self.trajectory_starts.append(self.ptr)
@@ -73,6 +68,11 @@ class TrajectoryReplay(ExperienceReplay):
         else:
             obs, idx, weight = default_collate([self[i] for i in indices])
             return Observation(**obs), idx, weight
+
+    def reset(self):
+        self.trajectory_starts = []
+        self.trajectory_lengths = []
+        super().reset()
 
     @property
     def num_episodes(self):

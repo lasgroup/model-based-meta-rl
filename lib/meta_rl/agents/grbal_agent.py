@@ -2,6 +2,7 @@
 from collections import deque
 
 import torch
+from gym.utils import colorize
 
 from rllib.dataset import stack_list_of_tuples
 from rllib.util.neural_networks.utilities import deep_copy_module
@@ -94,6 +95,9 @@ class GrBALAgent(MPCAgent):
         """
         Performs the GrBAL learning procedure for the dynamics model
         """
+        if self.model_learn_num_iter > 0:
+            print(colorize("Training Dynamics Model", "yellow"))
+
         self.dynamical_model.base_model.train()
         for num_iter in range(self.model_learn_num_iter):
             self._maml_train_model_step()
