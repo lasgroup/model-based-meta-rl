@@ -9,6 +9,7 @@ import numpy as np
 from dotmap import DotMap
 from rllib.util.training.utilities import Evaluate
 
+from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from lib.environments import ENVIRONMENTS_PATH
 from experiments.meta_rl_experiments.parser import get_argument_parser
 from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
@@ -47,6 +48,17 @@ if __name__ == "__main__":
     ) as file:
         env_config = yaml.safe_load(file)
     params.update(env_config)
+
+    with open(
+            os.path.join(
+                AGENT_CONFIG_PATH,
+                params["agent_name"].split('_')[-1] + "_defaults.yaml"
+            ),
+            "r"
+    ) as file:
+        agent_config = yaml.safe_load(file)
+    params.update(agent_config)
+
     params = DotMap(params)
 
     ray.init(num_cpus=params.num_cpu_cores)

@@ -36,7 +36,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="parallel_pacoh",
         choices=["rl2", "grbal", "parallel_grbal", "pacoh", "parallel_pacoh"]
     )
-    # TODO: Check where exploration is used
     parser.add_argument(
         "--exploration",
         type=str,
@@ -72,7 +71,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")
     parser.add_argument("--model-num-heads", type=int, default=5)
-    parser.add_argument("--model-layers", type=int, nargs="*", default=[200, 200, 200, 200])
+    parser.add_argument("--model-layers", type=int, nargs="*", default=[512, 512, 512])
     parser.add_argument("--model-unbiased-head", action="store_true")
     parser.add_argument("--model-heteroscedastic", type=bool, default=True)
     parser.add_argument("--model-non-linearity", type=str, default="ReLU")
@@ -94,24 +93,26 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
 
     # Value function parameters
-    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[220])
+    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[256])
     parser.add_argument("--value-function-unbiased-head", action="store_true")
     parser.add_argument("--value-function-non-linearity", type=str, default="Tanh")
     parser.add_argument("--value-function-tau", type=float, default=0)
     parser.add_argument("--value-function-num-heads", type=int, default=2)
+    parser.add_argument("--recurrent-value-function-embedding-layers", type=int, nargs="*", default=[256, 256])
 
     # Policy function parameters
-    parser.add_argument("--policy-layers", type=int, nargs="*", default=[220])
+    parser.add_argument("--policy-layers", type=int, nargs="*", default=[256])
     parser.add_argument("--policy-unbiased-head", action="store_true")
     parser.add_argument("--policy-non-linearity", type=str, default="Tanh")
     parser.add_argument("--policy-tau", type=float, default=0)
     parser.add_argument("--policy-deterministic", action="store_true")
+    parser.add_argument("--recurrent-policy-embedding-layers", type=int, nargs="*", default=[256, 256])
 
     # MPC parameters
-    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="icem")
+    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem", "pets"], default="icem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
-    parser.add_argument("--mpc-num-particles", type=int, default=400)
+    parser.add_argument("--mpc-num-particles", type=int, default=1000)
     parser.add_argument("--mpc-num-elites", type=int, default=10)
     parser.add_argument("--mpc-horizon", type=int, default=16)
     parser.add_argument("--mpc-pets-trajectory-samples", type=int, default=5)
@@ -144,7 +145,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
     parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
     parser.add_argument("--ppo-eta", type=float, default=0.01)
-    parser.add_argument("--ppo-clip-gradient-val", type=float, default=2.0)
+    parser.add_argument("--ppo-clip-gradient-val", type=float, default=1.0)
 
     # SAC parameters
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)

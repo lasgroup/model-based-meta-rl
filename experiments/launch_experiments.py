@@ -109,26 +109,7 @@ if __name__ == '__main__':
     parser.add_argument("--use-wandb", action="store_true")
     parser.add_argument("--offline-logger", action="store_true")
 
-    parser.add_argument("--model-learn-num-iter", type=int, default=250)
-
-    parser.add_argument("--pacoh-collect-meta-data", action="store_true")
-    parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=120000)
-    parser.add_argument("--pacoh-num-iter-eval-train", type=int, default=10)
-    parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=3)
-    parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=2)
-    parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
-
-    parser.add_argument("--parallel-episodes-per-env", type=int, default=2)
-    parser.add_argument("--num-episodes-per-rollout", type=int, default=1)
-
-    # RL2 parameters
-    parser.add_argument("--rl2-trial-len", type=int, default=2)
-
-    # GrBAL parameters
-    parser.add_argument("--grbal-past-segment-len", type=int, default=16)
-    parser.add_argument("--grbal-future-segment-len", type=int, default=16)
-
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger --pacoh-collect-meta-data --use-action-cost --num-cpu-cores 20
+# python experiments/launch_experiments.py --exp-name initial_test --dry --long --use-wandb --offline-logger --use-action-cost --num-cpu-cores 20

@@ -1,0 +1,19 @@
+# Exploration Parameters
+exploration: "greedy"
+
+# Value Function Parameters
+value_function_layers: [256]
+recurrent_value_function_embedding_layers: [256, 256]
+value_function_non_linearity: "ReLU"
+
+# Policy Parameters
+policy_layers: [256]
+recurrent_policy_embedding_layers: [256, 256]
+policy_non_linearity: "ReLU"
+
+# RL2 Parameters
+rl2_trial_len: 2
+
+# PPO Parameters
+ppo_clip_gradient_val: 1.0
+ppo_eta: 0.08

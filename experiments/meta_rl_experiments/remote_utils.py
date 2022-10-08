@@ -26,5 +26,5 @@ def add_dataset(agent, dataset):
 
 @ray.remote
 def train_agent(agent):
-    agent.learn_model()
+    agent.learn()
     return agent

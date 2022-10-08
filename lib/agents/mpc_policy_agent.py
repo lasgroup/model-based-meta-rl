@@ -21,7 +21,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             model_optimizer: torch.optim.Optimizer = None,
             policy_optimizer: torch.optim.Optimizer = None,
             initial_distribution: torch.distributions.Distribution = None,
-            exploration_scheme: str = "thompson_sampling",
+            exploration_scheme: str = "greedy",
             use_validation_set: bool = False,
             model_learn_num_iter: int = 50,
             max_memory: int = 10000,

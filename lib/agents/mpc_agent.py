@@ -13,7 +13,7 @@ class MPCAgent(ModelBasedAgent):
             mpc_policy: MPCPolicy,
             model_optimizer: torch.optim.Optimizer = None,
             initial_distribution: torch.distributions.Distribution = None,
-            exploration_scheme: str = "thompson_sampling",
+            exploration_scheme: str = "greedy",
             gamma: float = 1.0,
             max_memory: int = 10000,
             model_learn_batch_size: int = 32,

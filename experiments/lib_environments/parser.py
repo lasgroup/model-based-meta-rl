@@ -35,7 +35,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
         default="mpc",
         choices=["mpc", "mpc_policy", "ppo", "sac"]
     )
-    # TODO: Check where exploration is used
     parser.add_argument(
         "--exploration",
         type=str,
@@ -107,7 +106,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--policy-deterministic", action="store_true")
 
     # MPC parameters
-    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem"], default="icem")
+    parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem", "pets"], default="icem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
     parser.add_argument("--mpc-num-particles", type=int, default=400)
