@@ -190,7 +190,9 @@ class FeedForwardBNN(VectorizedModel):
         else:
             scale = self._scale_likelihood(likelihood_std)
             scale = scale.transpose(0, 1)
-            scale = torch.tile(scale.unsqueeze(0), (out.shape[0], 1, 1))
+            while scale.ndim < out.ndim:
+                scale = scale.unsqueeze(0)
+            scale = torch.tile(scale, (*out.shape[:-2], 1, 1))
 
         if self.prediction_strategy == "moment_matching":
             mean = out.mean(-1)

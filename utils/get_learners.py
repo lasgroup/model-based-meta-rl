@@ -15,6 +15,7 @@ from lib.model.bayesian_model import BayesianNNModel
 from lib.policies.rnn_policy import RNNPolicy
 from lib.solvers.icem_shooting import ICEMShooting
 from lib.hucrl.hallucinated_model import HallucinatedModel
+from lib.solvers.pets_shooting import PETSShooting
 from lib.value_function.rnn_value_function import RNNValueFunction
 
 
@@ -320,7 +321,7 @@ def get_mpc_policy(
             dynamical_model=dynamical_model,
             reward_model=reward,
             gamma=params.gamma,
-            scale=1 / 8,
+            scale=1/8,
             action_scale=action_scale,
             num_model_steps=params.mpc_horizon,
             num_iter=params.mpc_num_iter,
@@ -342,6 +343,25 @@ def get_mpc_policy(
             num_model_steps=params.mpc_horizon,
             num_iter=params.mpc_num_iter,
             num_elites=params.mpc_num_elites,
+            alpha=params.mpc_alpha,
+            terminal_reward=terminal_reward,
+            termination_model=termination_model,
+            warm_start=not params.mpc_not_warm_start,
+            default_action=params.mpc_default_action,
+            num_cpu=1,
+        )
+    elif params.mpc_solver == "pets":
+        assert params.model_prediction_strategy == "sample_multiple_head", "Use Trajectory Sampling"
+        solver = PETSShooting(
+            dynamical_model=dynamical_model,
+            reward_model=reward,
+            gamma=params.gamma,
+            scale=0.5,
+            action_scale=action_scale,
+            num_model_steps=params.mpc_horizon,
+            num_iter=params.mpc_num_iter,
+            num_elites=params.mpc_num_elites,
+            trajectory_samples_per_action=params.mpc_pets_trajectory_samples,
             alpha=params.mpc_alpha,
             terminal_reward=terminal_reward,
             termination_model=termination_model,

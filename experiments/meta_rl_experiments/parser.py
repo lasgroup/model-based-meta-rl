@@ -114,6 +114,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--mpc-num-particles", type=int, default=400)
     parser.add_argument("--mpc-num-elites", type=int, default=10)
     parser.add_argument("--mpc-horizon", type=int, default=16)
+    parser.add_argument("--mpc-pets-trajectory-samples", type=int, default=5)
     parser.add_argument("--mpc-alpha", type=float, default=0.1)
     parser.add_argument("--mpc-terminal-reward", type=bool, default=False)
     parser.add_argument("--mpc-not-warm-start", type=bool, default=False)
