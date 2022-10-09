@@ -15,5 +15,5 @@ policy_non_linearity: "ReLU"
 rl2_trial_len: 2
 
 # PPO Parameters
-ppo_clip_gradient_val: 1.0
+ppo_clip_gradient_val: 0.5
 ppo_eta: 0.08

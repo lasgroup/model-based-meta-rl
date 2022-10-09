@@ -77,6 +77,7 @@ if __name__ == "__main__":
     train_returns = meta_agent.training_rollout(
         meta_environment, agents, envs, params.train_episodes, use_early_termination=not params.skip_early_termination
     )
+    train_returns = np.mean(train_returns)
 
     meta_agent.logger.export_to_json()  # Save statistics.
 
@@ -92,8 +93,7 @@ if __name__ == "__main__":
         eval_returns = np.mean(returns)
         print(f"Test Cumulative Rewards: {eval_returns}")
 
-    metrics.update({"train_returns": train_returns})
-    metrics.update({"test_returns": eval_returns})
+    metrics.update({"train_returns": train_returns, "test_returns": eval_returns})
 
     meta_agent.logger.log_metrics(hparams=params.toDict(), metrics=metrics)
 

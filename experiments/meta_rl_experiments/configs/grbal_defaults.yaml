@@ -3,7 +3,7 @@ exploration: "greedy"
 
 # Model Parameters
 model_kind: "ProbabilisticNN"
-model_layers: [512, 512, 512]
+model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_num_iter: 200
 model_learn_batch_size: 500
@@ -15,7 +15,7 @@ mpc_num_particles: 1000
 
 # Parallel Rollout Parameters
 num_episodes_per_rollout: 1
-grbal_num_parallel_agents: 8
+grbal_num_parallel_agents: 12
 
 # GrBAL Parameters
 grbal_past_segment_len: 32

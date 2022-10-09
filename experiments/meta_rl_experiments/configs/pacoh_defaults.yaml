@@ -4,7 +4,7 @@ pacoh_optimistic_evaluation: True
 
 # Model Parameters
 model_kind: "BayesianNN"
-model_layers: [512, 512, 512]
+model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_num_iter: 500
 model_learn_batch_size: 32
