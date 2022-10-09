@@ -59,6 +59,7 @@ def main(args):
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
+            flags_['agent-config-path'] = os.path.join('slurm_outputs', args.exp_name, 'configs')
             cmd = generate_base_command(run_file, flags=flags_)
             command_list.append(cmd)
 

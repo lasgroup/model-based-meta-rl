@@ -59,9 +59,11 @@ if __name__ == "__main__":
         env_config = yaml.safe_load(file)
     params.update(env_config)
 
+    if params.agent_config_path == "":
+        params.agent_config_path = AGENT_CONFIG_PATH
     with open(
             os.path.join(
-                AGENT_CONFIG_PATH,
+                params.agent_config_path,
                 params["agent_name"].split('_')[-1] + "_defaults.yaml"
             ),
             "r"

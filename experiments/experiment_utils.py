@@ -11,6 +11,7 @@ import subprocess
 import multiprocessing
 
 from typing import Dict, Optional, Any, List
+from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 
 """ Relevant Directories """
 
@@ -132,6 +133,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
 
         output_path = os.path.join('slurm_outputs', exp_name)
         os.makedirs(output_path, exist_ok=True)
+        os.system(f'cp {AGENT_CONFIG_PATH} {output_path}')
         bsub_cmd = '#!/bin/bash\n\n' + \
                    f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
