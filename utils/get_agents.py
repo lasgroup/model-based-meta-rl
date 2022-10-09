@@ -662,6 +662,10 @@ def get_pacoh_agent(
     num_actions = environment.num_actions
 
     params.model_kind = "BayesianNN"
+    if params.pacoh_optimistic_evaluation != (params.exploration == "optimistic"):
+        raise AssertionError(
+            "Only Parallel PACOH Agent supports different exploration modes for training and evaluation."
+        )
 
     # Define dynamics model
     dynamical_model = get_model(
@@ -771,6 +775,7 @@ def get_parallel_pacoh_agent(
     num_actions = environment.num_actions
 
     params.model_kind = "BayesianNN"
+    params.exploration = "optimistic" if params.pacoh_optimistic_evaluation else "greedy"
 
     # Define dynamics model
     dynamical_model = get_model(

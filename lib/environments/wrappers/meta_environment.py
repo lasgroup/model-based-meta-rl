@@ -107,6 +107,14 @@ class MetaEnvironmentWrapper:
         self._base_env.set_task(params)
         return self._base_env
 
+    def set_base_env(self, env):
+        self._base_env = env
+        if self.training:
+            params = self._train_env_params[self.current_train_env]
+        else:
+            params = self._test_env_params[self.current_test_env]
+        self._base_env.set_task(params)
+
     @property
     def num_random_params(self):
         return self._base_env.num_random_params

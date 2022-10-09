@@ -1,5 +1,6 @@
 # Exploration Parameters
 exploration: "optimistic"
+pacoh_optimistic_evaluation: True
 
 # Model Parameters
 model_kind: "BayesianNN"
@@ -12,7 +13,7 @@ model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matc
 # MPC Parameters
 mpc_solver: "icem"
 mpc_horizon: 16
-mpc_num_particles: 1000
+mpc_num_particles: 500
 mpc_pets_trajectory_samples: 5
 
 # PACOH Parameters

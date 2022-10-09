@@ -40,3 +40,7 @@ class HallucinatedModel(TransformedModel):
         scale = super().scale(state, control_action)
 
         return scale
+
+    @property
+    def unwrapped(self):
+        return TransformedModel(self.base_model, list(self.transformations))

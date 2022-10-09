@@ -79,8 +79,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-opt-weight-decay", type=float, default=0.0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=500)
-    parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching", choices=
-                        ["moment_matching", "sample_multiple_head"])
+    parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching",
+                        choices=["moment_matching", "sample_multiple_head"])
     parser.add_argument("--use-validation-set", action="store_true")
 
     # Simulation and replay buffer parameters
@@ -129,6 +129,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
+    parser.add_argument("--pacoh-optimistic-evaluation", type=bool, default="store_true")
 
     parser.add_argument("--parallel-episodes-per-env", type=int, default=1)
     parser.add_argument("--num-episodes-per-rollout", type=int, default=1)

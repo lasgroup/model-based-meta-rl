@@ -39,6 +39,7 @@ class ParallelPACOHAgent(PACOHAgent):
         if meta_environment is None:
             meta_environment = self.meta_environment
         copy_agents_id = []
+        params.exploration = "optimistic" if params.pacoh_optimistic_evaluation else "greedy"
         for episode in range(num_episodes):
             env_copy, _, _ = get_wrapped_meta_env(
                 params,
@@ -102,7 +103,15 @@ class ParallelPACOHAgent(PACOHAgent):
             )
         return ray.get(results_id)
 
-    def collect_meta_training_data(self, params, meta_environment, agents, num_train_episodes, max_env_steps=None, use_early_termination=True):
+    def collect_meta_training_data(
+            self,
+            params,
+            meta_environment,
+            agents,
+            num_train_episodes,
+            use_early_termination=True,
+            max_env_steps=None
+    ):
         train_returns = []
         total_episodes_per_rollout = len(agents) * self.parallel_episodes_per_env * self.num_episodes_per_rollout
         num_rollouts = num_train_episodes // total_episodes_per_rollout
@@ -115,6 +124,7 @@ class ParallelPACOHAgent(PACOHAgent):
                     env_copy, _, _ = get_wrapped_env(params, copy.deepcopy(task))
                     agent_copy = copy.deepcopy(agent)
                     agent_copy.dataset.reset()
+                    agent_copy.model_learn_num_iter = 0
                     copy_agents_id.append(
                         rollout_parallel_agent.remote(
                             env_copy,
