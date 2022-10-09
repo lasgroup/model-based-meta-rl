@@ -43,6 +43,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
+    parser.add_argument("--agent-config-path", type=str, default="")
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)

@@ -10,7 +10,9 @@ import pandas as pd
 import subprocess
 import multiprocessing
 
+from distutils.dir_util import copy_tree
 from typing import Dict, Optional, Any, List
+from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 
 """ Relevant Directories """
 
@@ -131,7 +133,11 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
         cluster_cmds = []
 
         output_path = os.path.join('slurm_outputs', exp_name)
+        config_path = os.path.join(output_path, 'configs')
         os.makedirs(output_path, exist_ok=True)
+        os.makedirs(config_path, exist_ok=True)
+        copy_tree(AGENT_CONFIG_PATH, config_path)
+
         bsub_cmd = '#!/bin/bash\n\n' + \
                    f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
