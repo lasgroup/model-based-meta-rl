@@ -5,6 +5,7 @@ from functools import reduce
 from collections import OrderedDict
 
 import torch
+from rllib.util.neural_networks.utilities import Swish
 
 from rllib.util.utilities import safe_cholesky
 from lib.meta_rl.algorithms.pacoh.modules.kernels import RBFKernel
@@ -137,6 +138,8 @@ class FeedForwardBNN(VectorizedModel):
             non_linearity_fn = torch.relu
         elif non_linearity == "tanh":
             non_linearity_fn = torch.tanh
+        elif non_linearity == "swish":
+            non_linearity_fn = Swish
         else:
             raise NotImplementedError
 

@@ -72,11 +72,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")
     parser.add_argument("--model-num-heads", type=int, default=5)
-    parser.add_argument("--model-layers", type=int, nargs="*", default=[512, 512, 512])
+    parser.add_argument("--model-layers", type=int, nargs="*", default=[200, 200, 200, 200])
     parser.add_argument("--model-unbiased-head", action="store_true")
     parser.add_argument("--model-heteroscedastic", type=bool, default=True)
-    parser.add_argument("--model-non-linearity", type=str, default="ReLU")
-    parser.add_argument("--model-opt-lr", type=float, default=1e-3)
+    parser.add_argument("--model-non-linearity", type=str, default="Swish")
+    parser.add_argument("--model-opt-lr", type=float, default=1e-4)
     parser.add_argument("--model-opt-weight-decay", type=float, default=0.0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=500)
@@ -142,6 +142,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--grbal-past-segment-len", type=int, default=32)
     parser.add_argument("--grbal-future-segment-len", type=int, default=32)
     parser.add_argument("--grbal-num-parallel-agents", type=int, default=8)
+    parser.add_argument("--grbal-inner-lr", type=float, default=0.003)
 
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)

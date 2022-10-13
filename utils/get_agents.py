@@ -523,6 +523,7 @@ def get_grbal_agent(
     agent = GrBALAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
+        inner_lr=params.grbal_inner_lr,
         past_segment_len=params.grbal_past_segment_len,
         exploration_scheme=params.exploration,
         future_segment_len=params.grbal_future_segment_len,
@@ -619,6 +620,7 @@ def get_parallel_grbal_agent(
     agent = lib.meta_rl.agents.parallel_grbal_agent.ParallelGrBALAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
+        inner_lr=params.grbal_inner_lr,
         past_segment_len=params.grbal_past_segment_len,
         future_segment_len=params.grbal_future_segment_len,
         exploration_scheme=params.exploration,
