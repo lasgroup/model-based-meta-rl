@@ -99,6 +99,7 @@ class GrBALAgent(MPCAgent):
             print(colorize("Training Dynamics Model", "yellow"))
 
         self.dynamical_model.base_model.train()
+        self.pre_update_model.train()
         for num_iter in range(self.model_learn_num_iter):
             self._maml_train_model_step()
 

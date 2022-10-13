@@ -12,10 +12,13 @@ def get_environment(params):
             ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0
         )
         reward_model = environment.env.reward_model()
-        if params.use_exact_termination_model:
-            termination_model = environment.env._termination_model().copy()
+        if hasattr(environment.env, 'termination_model'):
+            if params.use_exact_termination_model:
+                termination_model = environment.env._termination_model().copy()
+            else:
+                termination_model = environment.env.termination_model()
         else:
-            termination_model = environment.env.termination_model()
+            termination_model = None
 
     elif params.env_group == "gym_envs":
         import lib.environments.gym_envs
@@ -42,10 +45,13 @@ def get_environment(params):
             ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0
         )
         reward_model = environment.env.reward_model()
-        if params.use_exact_termination_model:
-            termination_model = environment.env._termination_model().copy()
+        if hasattr(environment.env, 'termination_model'):
+            if params.use_exact_termination_model:
+                termination_model = environment.env._termination_model().copy()
+            else:
+                termination_model = environment.env.termination_model()
         else:
-            termination_model = environment.env.termination_model()
+            termination_model = None
 
     else:
         raise NotImplementedError
