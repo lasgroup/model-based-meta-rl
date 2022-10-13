@@ -31,7 +31,7 @@ class FeedForwardBNN(VectorizedModel):
         biased_head=True,
         min_scale=1e-6,
         max_scale=1,
-        likelihood_std=0.1,
+        likelihood_std=0.01,
         learn_likelihood=True,
         prior_std=0.1,
         prior_weight=1e-4,
@@ -139,7 +139,7 @@ class FeedForwardBNN(VectorizedModel):
         elif non_linearity == "tanh":
             non_linearity_fn = torch.tanh
         elif non_linearity == "swish":
-            non_linearity_fn = Swish
+            non_linearity_fn = Swish()
         else:
             raise NotImplementedError
 

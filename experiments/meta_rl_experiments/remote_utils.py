@@ -1,3 +1,6 @@
+import gc
+import psutil
+
 import ray
 
 from rllib.util.rollout import rollout_episode
@@ -28,3 +31,14 @@ def add_dataset(agent, dataset):
 def train_agent(agent):
     agent.learn()
     return agent
+
+
+def auto_garbage_collect(pct=80.0):
+    """
+    auto_garbage_collection - Call the garbage collection if memory used is greater than 80% of total available memory.
+                              This is called to deal with an issue in Ray not freeing up used memory.
+
+        pct - Default value of 80%.  Amount of memory in use that triggers the garbage collection call.
+    """
+    if psutil.virtual_memory().percent >= pct:
+        gc.collect()

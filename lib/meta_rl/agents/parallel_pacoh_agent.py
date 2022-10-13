@@ -8,7 +8,8 @@ import experiments.meta_rl_experiments.run_utils as run_utils
 from lib.datasets.utilities import combine_datasets
 from lib.meta_rl.agents.pacoh_agent import PACOHAgent
 from utils.get_environments import get_wrapped_env, get_wrapped_meta_env
-from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, add_dataset, train_agent
+from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, add_dataset, train_agent, \
+    auto_garbage_collect
 
 
 class ParallelPACOHAgent(PACOHAgent):
@@ -141,6 +142,7 @@ class ParallelPACOHAgent(PACOHAgent):
             self.log_parallel_agents(copy_agents, agents)
             for agent in copy_agents:
                 train_returns.append(agent.logger.get("train_return-0")[-1])
+            auto_garbage_collect()
         self.store_meta_training_data(agents)
         return train_returns
 

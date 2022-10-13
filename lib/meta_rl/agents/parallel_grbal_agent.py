@@ -8,7 +8,7 @@ from experiments.meta_rl_experiments import run_utils
 
 from lib.meta_rl.agents import GrBALAgent
 from utils.get_environments import get_wrapped_meta_env
-from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent
+from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, auto_garbage_collect
 
 
 class ParallelGrBALAgent(GrBALAgent):
@@ -97,6 +97,7 @@ class ParallelGrBALAgent(GrBALAgent):
             self.log_parallel_agents(parallel_agents)
             for agent in parallel_agents:
                 train_returns.append(agent.logger.get("train_return-0")[-1])
+            auto_garbage_collect()
         return train_returns
 
     def get_copy(self, params=None, meta_env=None, agent=None):
