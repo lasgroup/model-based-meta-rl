@@ -8,6 +8,7 @@ model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_num_iter: 500
 model_learn_batch_size: 32
+model_include_aleatoric_uncertainty: True
 model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
 # MPC Parameters
@@ -23,6 +24,7 @@ pacoh_num_iter_eval_train: 15
 pacoh_num_hyper_posterior_particles: 3
 pacoh_n_samples_per_prior: 10
 pacoh_num_posterior_particles: 5
+pacoh_likelihood_std: 2.0
 
 # Parallel Rollout Parameters
 parallel_episodes_per_env: 2

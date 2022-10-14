@@ -80,6 +80,8 @@ def get_model(
             num_actions=num_actions,
             num_particles=num_particles,
             layers=params.model_layers,
+            likelihood_std=params.pacoh_likelihood_std,
+            include_aleatoric_uncertainty=params.model_include_aleatoric_uncertainty,
             prediction_strategy=params.model_prediction_strategy,
             biased_head=not params.model_unbiased_head,
             non_linearity=params.model_non_linearity,

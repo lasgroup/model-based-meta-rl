@@ -83,6 +83,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching",
                         choices=["moment_matching", "sample_multiple_head"])
     parser.add_argument("--use-validation-set", action="store_true")
+    parser.add_argument("--model-include-aleatoric-uncertainty", type=bool, default=True)
 
     # Simulation and replay buffer parameters
     parser.add_argument("--not-bootstrap", action="store_true")
@@ -131,6 +132,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-optimistic-evaluation", type=bool, default="store_true")
+    parser.add_argument("--pacoh-likelihood-std", type=float, default=0.1)
 
     parser.add_argument("--parallel-episodes-per-env", type=int, default=1)
     parser.add_argument("--num-episodes-per-rollout", type=int, default=1)

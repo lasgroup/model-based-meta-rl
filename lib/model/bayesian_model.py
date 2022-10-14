@@ -31,6 +31,8 @@ class BayesianNNModel(NNModel):
         num_particles=15,
         prediction_strategy="moment_matching",
         deterministic=False,
+        likelihood_std=0.1,
+        include_aleatoric_uncertainty=False,
         *args,
         **kwargs,
     ):
@@ -46,6 +48,8 @@ class BayesianNNModel(NNModel):
                     num_particles=num_particles,
                     prediction_strategy=prediction_strategy,
                     deterministic=deterministic,
+                    likelihood_std=likelihood_std,
+                    include_aleatoric_uncertainty=include_aleatoric_uncertainty,
                     **nn_kwargs,
                 )
                 for model in self.nn
