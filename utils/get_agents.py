@@ -62,13 +62,13 @@ def get_mpc_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
@@ -154,13 +154,13 @@ def get_mpc_policy_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
@@ -481,13 +481,13 @@ def get_grbal_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
@@ -578,13 +578,13 @@ def get_parallel_grbal_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
@@ -682,13 +682,13 @@ def get_pacoh_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
@@ -792,13 +792,13 @@ def get_parallel_pacoh_agent(
 
     # Define model optimizer
     try:
-        model_optimizer = optim.AdamW(
+        model_optimizer = optim.Adam(
             dynamical_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
         )
     except ValueError:
-        model_optimizer = model_optimizer = optim.AdamW(
+        model_optimizer = model_optimizer = optim.Adam(
             dynamical_model.base_model.parameters(),
             lr=params.model_opt_lr,
             weight_decay=params.model_opt_weight_decay,
