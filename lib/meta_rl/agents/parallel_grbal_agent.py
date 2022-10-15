@@ -96,7 +96,7 @@ class ParallelGrBALAgent(GrBALAgent):
             self.learn()
             self.log_parallel_agents(parallel_agents)
             for agent in parallel_agents:
-                train_returns.append(agent.logger.get("train_return-0")[-1])
+                train_returns = train_returns + agent.logger.get("train_return-0")[-self.num_episodes_per_rollout:]
             auto_garbage_collect()
         return train_returns
 
@@ -131,8 +131,8 @@ class ParallelGrBALAgent(GrBALAgent):
         train_dict = {key: value[1] for key, value in self.logger.current.items()}
         for i, rollout_agent in enumerate(rollout_agents):
             for j in reversed(range(self.num_episodes_per_rollout)):
-                episode_dict = rollout_agent.logger[-j]
-                if i == self.num_parallel_agents - 1 and j == 0:
+                episode_dict = rollout_agent.logger[-(j+1)]
+                if i == (self.num_parallel_agents - 1) and j == 0:
                     episode_dict.update(train_dict)
                 self.logger.end_episode(**episode_dict)
                 self.update_counters(rollout_agent)

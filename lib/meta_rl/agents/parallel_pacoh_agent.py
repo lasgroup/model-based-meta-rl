@@ -141,7 +141,7 @@ class ParallelPACOHAgent(PACOHAgent):
             agents = self.train_agents(agents)
             self.log_parallel_agents(copy_agents, agents)
             for agent in copy_agents:
-                train_returns.append(agent.logger.get("train_return-0")[-1])
+                train_returns = train_returns + agent.logger.get("train_return-0")[-self.num_episodes_per_rollout:]
             auto_garbage_collect()
         self.store_meta_training_data(agents)
         return train_returns
@@ -159,7 +159,7 @@ class ParallelPACOHAgent(PACOHAgent):
             for j in range(self.parallel_episodes_per_env):
                 for episode in reversed(range(self.num_episodes_per_rollout)):
                     rollout_agent = rollout_agents[i * self.parallel_episodes_per_env + j]
-                    episode_dict = rollout_agent.logger[-episode]
+                    episode_dict = rollout_agent.logger[-(episode+1)]
                     if j == self.parallel_episodes_per_env - 1 and episode == 0:
                         episode_dict.update({key: value[1] for key, value in train_agent.logger.current.items()})
                     self.logger.end_episode(**episode_dict)

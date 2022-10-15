@@ -7,21 +7,21 @@ beta: 3.0
 model_kind: "BayesianNN"
 model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
-model_learn_num_iter: 4000
+model_learn_num_iter: 150
 model_learn_batch_size: 32
 model_include_aleatoric_uncertainty: True
 model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
 # MPC Parameters
 mpc_solver: "cem"
-mpc_horizon: 16
-mpc_num_particles: 500
+mpc_horizon: 25
+mpc_num_particles: 800
 mpc_pets_trajectory_samples: 5
 
 # PACOH Parameters
 pacoh_collect_meta_data: True
 pacoh_num_iter_meta_train: 100000
-pacoh_num_iter_eval_train: 20
+pacoh_num_iter_eval_train: 15
 pacoh_num_hyper_posterior_particles: 3
 pacoh_n_samples_per_prior: 5
 pacoh_num_posterior_particles: 5
