@@ -30,6 +30,7 @@ def get_parallel_environments_and_agents(params):
     params.log_to_file = False
     params.save_statistics = False
     params.use_wandb = False
+    params.model_kind = params.pacoh_training_model_kind
 
     envs_agents = [(get_environment_and_agent(params)) for _ in range(params.num_train_env_instances)]
 

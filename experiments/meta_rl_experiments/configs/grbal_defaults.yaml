@@ -5,11 +5,11 @@ exploration: "greedy"
 model_kind: "ProbabilisticNN"
 model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
-model_learn_num_iter: 1500
-model_learn_batch_size: 50
+model_learn_num_iter: 2000
+model_learn_batch_size: 16
 
 # MPC Parameters
-mpc_solver: "icem"
+mpc_solver: "cem"
 mpc_horizon: 16
 mpc_num_particles: 1000
 

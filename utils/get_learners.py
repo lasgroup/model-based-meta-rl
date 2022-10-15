@@ -323,7 +323,7 @@ def get_mpc_policy(
             dynamical_model=dynamical_model,
             reward_model=reward,
             gamma=params.gamma,
-            scale=1/8,
+            scale=0.5,
             action_scale=action_scale,
             num_model_steps=params.mpc_horizon,
             num_iter=params.mpc_num_iter,
