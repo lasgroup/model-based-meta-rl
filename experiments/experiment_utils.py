@@ -65,11 +65,11 @@ def _start_process(target, args=None):
     return p
 
 
-def generate_base_command(module, flags: Optional[Dict[str, Any]] = None, unbuffered: bool = True) -> str:
+def generate_base_command(base_exp_script, flags: Optional[Dict[str, Any]] = None, unbuffered: bool = True) -> str:
     """ Generates the command to execute python module with provided flags
 
     Args:
-        module: python module / file to run
+        base_exp_script: python module / file to run
         flags: dictonary of flag names and the values to assign to them.
                assumes that boolean flags are encoded as store_true flags with False as default.
         unbuffered: whether to invoke an unbuffered python output stream
@@ -80,7 +80,6 @@ def generate_base_command(module, flags: Optional[Dict[str, Any]] = None, unbuff
 
     """ Module is a python file to execute """
     interpreter_script = sys.executable
-    base_exp_script = os.path.abspath(module.__file__)
     if unbuffered:
         base_cmd = interpreter_script + ' -u ' + base_exp_script
     else:

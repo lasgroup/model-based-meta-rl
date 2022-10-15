@@ -3,10 +3,6 @@ from collections import OrderedDict
 
 from experiments.experiment_utils import generate_base_command, generate_run_commands, hash_dict, RESULT_DIR
 
-import experiments.meta_rl_experiments.run_parallel_pacoh
-import experiments.meta_rl_experiments.run_parallel_grbal
-import experiments.meta_rl_experiments.run
-import lib.agents.stable_baselines.run
 from datetime import datetime
 import argparse
 import numpy as np
@@ -48,11 +44,11 @@ def main(args):
             continue
 
         if flags['agent-name'] == 'parallel_pacoh':
-            run_file = experiments.meta_rl_experiments.run_parallel_pacoh
+            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
         elif flags['agent-name'] == 'parallel_grbal':
-            run_file = experiments.meta_rl_experiments.run_parallel_grbal
+            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')
         else:
-            run_file = experiments.meta_rl_experiments.run
+            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run.py')
 
         for j in range(args.num_seeds_per_hparam):
             seed = init_seeds[j]
@@ -60,7 +56,7 @@ def main(args):
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
             flags_['agent-config-path'] = os.path.abspath(os.path.join('slurm_outputs', args.exp_name, 'configs'))
-            cmd = generate_base_command(run_file, flags=flags_)
+            cmd = generate_base_command(run_file_path, flags=flags_)
             command_list.append(cmd)
 
     # submit jobs
