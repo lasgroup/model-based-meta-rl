@@ -11,7 +11,8 @@ model_learn_batch_size: 16
 # MPC Parameters
 mpc_solver: "cem"
 mpc_horizon: 25
-mpc_num_particles: 800
+mpc_num_particles: 1000
+mpc_num_elites: 50
 
 # Parallel Rollout Parameters
 num_episodes_per_rollout: 1
