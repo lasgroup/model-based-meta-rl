@@ -52,7 +52,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--eval-frequency", type=int, default=0)
 
     # Reward parameters
-    parser.add_argument("--gamma", type=float, default=0.99)
+    parser.add_argument("--gamma", type=float, default=1.0)
     parser.add_argument("--use-action-cost", action="store_true")
     parser.add_argument("--use-exact-termination-model", action="store_true")
 

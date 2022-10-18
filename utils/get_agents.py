@@ -193,7 +193,7 @@ def get_mpc_policy_agent(
             policy=policy,
             critic=critic,
             criterion=loss.MSELoss(reduction="mean"),
-            gamma=params.gamma,
+            gamma=0.99,
             epsilon=0.2,
             clamp_value=False
         )
@@ -212,7 +212,7 @@ def get_mpc_policy_agent(
             policy=policy,
             critic=critic,
             criterion=loss.MSELoss(reduction="mean"),
-            gamma=params.gamma
+            gamma=0.99
         )
     else:
         raise NotImplementedError
@@ -304,7 +304,7 @@ def get_ppo_agent(
         epsilon=0.2,
         eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
         clip_gradient_val=params.ppo_clip_gradient_val,
-        gamma=params.gamma,
+        gamma=0.99,
         comment=comment
     )
 
@@ -367,7 +367,7 @@ def get_sac_agent(
         optimizer=policy_optimizer,
         memory=memory,
         num_iter=128,
-        gamma=params.gamma,
+        gamma=0.99,
         comment=comment
     )
 
@@ -434,7 +434,7 @@ def get_rl2_agent(
         epsilon=0.2,
         eta=params.ppo_eta,  # Controls agent exploration, higher value leads to more exploration
         clip_gradient_val=params.ppo_clip_gradient_val,
-        gamma=params.gamma,
+        gamma=0.99,
         comment=comment
     )
 
@@ -494,7 +494,6 @@ def get_grbal_agent(
         )
 
     # Define value function.
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -503,7 +502,6 @@ def get_grbal_agent(
         params=params,
         input_transform=input_transform
     )
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy
@@ -591,7 +589,6 @@ def get_parallel_grbal_agent(
         )
 
     # Define value function.
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -600,7 +597,6 @@ def get_parallel_grbal_agent(
         params=params,
         input_transform=input_transform
     )
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy
@@ -695,7 +691,6 @@ def get_pacoh_agent(
         )
 
     # Define value function.
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -704,7 +699,6 @@ def get_pacoh_agent(
         params=params,
         input_transform=input_transform
     )
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy
@@ -805,7 +799,6 @@ def get_parallel_pacoh_agent(
         )
 
     # Define value function.
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     value_function = get_value_function(
         dim_state=dim_state,
         dim_action=dim_action,
@@ -814,7 +807,6 @@ def get_parallel_pacoh_agent(
         params=params,
         input_transform=input_transform
     )
-    # TODO: Use as terminal reward and train value function in ModelBasedAgent
     terminal_reward = value_function if params.mpc_terminal_reward else None
 
     # Define policy

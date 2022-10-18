@@ -48,7 +48,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Reward parameters
     parser.add_argument("--action-cost", type=float, default=0.1)
-    parser.add_argument("--gamma", type=float, default=0.99)
+    parser.add_argument("--gamma", type=float, default=1.0)
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticEnsemble")

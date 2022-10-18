@@ -10,7 +10,7 @@ model_non_linearity: "ReLU"
 model_learn_opt_lr: 0.0001
 model_learn_num_iter: 5000
 model_learn_batch_size: 100
-model_include_aleatoric_uncertainty: False
+model_include_aleatoric_uncertainty: True
 model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
 # MPC Parameters
