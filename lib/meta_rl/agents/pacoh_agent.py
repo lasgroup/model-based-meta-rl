@@ -489,7 +489,7 @@ class PACOHAgent(MPCAgent):
             eval_metrics_std[key] = np.std(eval(key)).item()
         return eval_metrics_mean, eval_metrics_std
 
-    def save_trajectory_replay(self, project_rel_path="lib/meta_rl/experience_replay", data_type="training"):
+    def save_trajectory_replay(self, project_rel_path="experiments/meta_rl_experiments/experience_replay", data_type="training"):
         file_name = f"{self.env_name}_{data_type}_{self.dataset.num_episodes}.pkl"
         save_path = os.path.join(get_project_path(), project_rel_path, file_name)
         torch.save(self.dataset, save_path)

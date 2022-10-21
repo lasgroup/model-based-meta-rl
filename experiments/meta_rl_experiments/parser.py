@@ -47,9 +47,11 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--multiple-runs-id", type=int, default=0)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=10)
     parser.add_argument("--eval-frequency", type=int, default=0)
+    parser.add_argument("--env-load-params-from-file", action="store_true")
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=1.0)

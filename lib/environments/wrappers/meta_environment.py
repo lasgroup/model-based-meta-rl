@@ -1,5 +1,5 @@
 """Implementation of a meta-learning environment"""
-
+import os
 from typing import Callable, Union, Tuple
 from dotmap import DotMap
 
@@ -10,6 +10,7 @@ from rllib.environment import AbstractEnvironment
 
 from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
 from lib.environments.wrappers.random_environment import RandomEnvironment
+from utils.utils import get_project_path
 
 
 class MetaEnvironmentWrapper:
@@ -19,7 +20,8 @@ class MetaEnvironmentWrapper:
             self,
             base_env: Union[RandomEnvironment, RandomEnv, RandomMujocoEnv],
             params: DotMap,
-            training: bool = True
+            training: bool = True,
+            env_params_dir: str = None,
     ):
 
         self._base_env = base_env
@@ -28,7 +30,12 @@ class MetaEnvironmentWrapper:
         self.num_train_env_instances = params.num_train_env_instances
         self.num_test_env_instances = params.num_test_env_instances
 
-        if hasattr(base_env, 'num_random_params'):
+        if env_params_dir is not None:
+            self._train_env_params = self.load_params_from_file(
+                self.num_train_env_instances, env_params_dir, offset=params.multiple_runs_id, mode="train")
+            self._test_env_params = self.load_params_from_file(
+                self.num_test_env_instances, env_params_dir, offset=params.multiple_runs_id, mode="test")
+        elif hasattr(base_env, 'num_random_params'):
             self._train_env_params = np.random.rand(self.num_train_env_instances, self._base_env.num_random_params)
             self._test_env_params = np.random.rand(self.num_test_env_instances, self._base_env.num_random_params)
         else:
@@ -114,6 +121,12 @@ class MetaEnvironmentWrapper:
         else:
             params = self._test_env_params[self.current_test_env]
         self._base_env.set_task(params)
+
+    def load_params_from_file(self, num_tasks, rel_params_dir, offset=0, mode='train'):
+        params_file = os.path.join(get_project_path(), rel_params_dir, f'{mode}.npz')
+        params = np.load(params_file, allow_pickle=True)['arr_0']
+        offset = offset if num_tasks == 1 else 0
+        return list(params[np.arange(num_tasks) + offset])
 
     @property
     def num_random_params(self):

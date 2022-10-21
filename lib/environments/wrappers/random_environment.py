@@ -10,6 +10,7 @@ class RandomEnvironment(AbstractEnvironment, ABC):
 
     def __init__(self, *args, **kwargs):
         super(RandomEnvironment, self).__init__(*args, **kwargs)
+        self.random_scale_limit = 1.0
 
     def set_task(self, random_samples):
         pass

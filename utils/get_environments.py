@@ -1,3 +1,5 @@
+import os
+
 from lib.environments.wrappers.gym_environment import GymEnvironment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
@@ -77,7 +79,15 @@ def get_wrapped_meta_env(params, meta_training_tasks=None, meta_test_tasks=None)
 
     if params.exploration == "optimistic":
         environment = HallucinatedEnvironmentWrapper(environment)
-    environment = MetaEnvironmentWrapper(environment, params)
+
+    if params.env_load_params_from_file:
+        env_params_dir = os.path.join(
+            "experiments/meta_rl_experiments/random_env_params",
+            f"{params.env_config_file.replace('-', '_').strip('.yaml')}"
+        )
+    else:
+        env_params_dir = None
+    environment = MetaEnvironmentWrapper(environment, params, env_params_dir=env_params_dir)
 
     if meta_training_tasks is not None:
         environment.train_env_params = meta_training_tasks

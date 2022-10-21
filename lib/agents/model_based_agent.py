@@ -329,6 +329,9 @@ class ModelBasedAgent(AbstractAgent):
             )
         self.sim_trajectory = stack_list_of_tuples(trajectory)
 
+    def set_meta_environment(self, *args, **kwargs):
+        pass
+
     def learn_policy(self):
 
         self.algorithm.reset()

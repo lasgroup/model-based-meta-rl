@@ -39,6 +39,7 @@ def main(args):
                    f"_{flags['exploration']}"
         current_time = datetime.now().strftime("%b%d_%H_%M_%S")
         exp_path = os.path.join(exp_base_path, f"{exp_name}_{current_time}")
+        flags['agent-config-path'] = os.path.abspath(os.path.join('slurm_outputs', args.exp_name, 'configs'))
 
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
@@ -55,7 +56,7 @@ def main(args):
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            flags_['agent-config-path'] = os.path.abspath(os.path.join('slurm_outputs', args.exp_name, 'configs'))
+            flags_['multiple-runs-id'] = j
             cmd = generate_base_command(run_file_path, flags=flags_)
             command_list.append(cmd)
 

@@ -1,7 +1,8 @@
+import os
 from typing import Union
 
 import sys
-import argparse
+import dotmap
 
 from utils.logger import Logger
 import utils.get_agents as agents
@@ -16,7 +17,7 @@ from rllib.dataset.transforms import ActionScaler, DeltaState, MeanFunction, Sta
     NextStateNormalizer
 
 
-def get_environment_and_meta_agent(params: argparse.Namespace) -> (AbstractEnvironment, AbstractAgent):
+def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironment, AbstractAgent):
     """
     Creates an environment and agent with the given parameters
     :param params: environment arguments
@@ -72,6 +73,15 @@ def get_environment_and_meta_agent(params: argparse.Namespace) -> (AbstractEnvir
             params=params,
             input_transform=None
         )
+    elif params.agent_name == "mpc":
+        agent, comment = agents.get_mpc_agent(
+            environment=environment,
+            reward_model=reward_model,
+            transformations=transformations,
+            termination_model=termination_model,
+            params=params,
+            input_transform=None
+        )
     else:
         raise NotImplementedError
 
@@ -92,7 +102,15 @@ def get_environment_and_meta_agent(params: argparse.Namespace) -> (AbstractEnvir
 
     if params.exploration == "optimistic":
         environment = HallucinatedEnvironmentWrapper(environment)
-    environment = MetaEnvironmentWrapper(environment, params)
+
+    if params.env_load_params_from_file:
+        env_params_dir = os.path.join(
+            "experiments/meta_rl_experiments/random_env_params",
+            f"{params.env_config_file.replace('-', '_').strip('.yaml')}"
+        )
+    else:
+        env_params_dir = None
+    environment = MetaEnvironmentWrapper(environment, params, env_params_dir=env_params_dir)
 
     agent.set_meta_environment(environment)
 

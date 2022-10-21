@@ -2,7 +2,9 @@
 **/runs/
 **/wandb/
 **/results/
-**/meta_rl/experience_replay/
+**/slurm_outputs/
+**/experiments/meta_rl_experiments/random_env_params/
+**/experiments/meta_rl_experiments/experience_replay/
 
 src/
 

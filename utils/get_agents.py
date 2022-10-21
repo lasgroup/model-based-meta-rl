@@ -717,7 +717,7 @@ def get_pacoh_agent(
 
     if not params.pacoh_collect_meta_data:
         trajectory_load_path = os.path.join(
-            "lib/meta_rl/experience_replay",
+            "experiments/meta_rl_experiments/experience_replay",
             f"{params.env_config_file.replace('-', '_').strip('.yaml')}_training_{params.train_episodes}.pkl"
         )
         params.train_episodes = 0
@@ -825,7 +825,7 @@ def get_parallel_pacoh_agent(
 
     if not params.pacoh_collect_meta_data:
         trajectory_load_path = os.path.join(
-            "lib/meta_rl/experience_replay",
+            "experiments/meta_rl_experiments/experience_replay",
             f"{params.env_config_file.replace('-', '_').strip('.yaml')}_training_{params.train_episodes}.pkl"
         )
         params.train_episodes = 0

@@ -17,9 +17,11 @@ from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 
 
-def set_tasks(meta_envs):
+def set_tasks(envs, meta_environment):
     task_envs = []
-    for i, env in enumerate(meta_envs):
+    for i, env in enumerate(envs):
+        env.train_env_params = meta_environment.train_env_params
+        env.test_env_params = meta_environment.test_env_params
         task_envs.append(env.get_env(env_id=i))
     return task_envs
 
@@ -36,8 +38,6 @@ def get_parallel_environments_and_agents(params):
 
     task_envs = [MetaEnvironmentWrapper(env_agent[0], params) for env_agent in envs_agents]
     task_agents = [env_agent[1] for env_agent in envs_agents]
-
-    task_envs = set_tasks(task_envs)
 
     return task_envs, task_agents
 
@@ -84,6 +84,7 @@ if __name__ == "__main__":
     meta_environment, meta_agent = get_environment_and_meta_agent(copy.deepcopy(params))
 
     envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
+    envs = set_tasks(envs, meta_environment)
 
     meta_agent.logger.save_hparams(params.toDict())
 
