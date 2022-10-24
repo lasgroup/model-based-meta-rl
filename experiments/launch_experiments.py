@@ -99,6 +99,7 @@ if __name__ == '__main__':
     # Meta Learning Parameters
     parser.add_argument("--num-train-env-instances", type=int, default=40)
     parser.add_argument("--num-test-env-instances", type=int, default=40)
+    parser.add_argument("--num-test-episodes-per-env", type=int, default=40)
     parser.add_argument("--env-random-scale-limit", type=float, default=3.0)
 
     parser.add_argument("--use-action-cost", action="store_true")

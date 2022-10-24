@@ -36,19 +36,18 @@ class ParallelPACOHAgent(PACOHAgent):
         self.num_episodes_per_rollout = num_episodes_per_rollout
         self.max_env_steps = max_env_steps
 
-    def rollout(self, params, meta_environment=None, num_episodes=1, render=False, use_early_termination=True):
+    def eval_rollout(self, params, meta_environment=None, num_episodes=1, render=False, use_early_termination=True):
         if meta_environment is None:
             meta_environment = self.meta_environment
         copy_agents_id = []
         params.exploration = "optimistic" if params.pacoh_optimistic_evaluation else "greedy"
-        for episode in range(num_episodes):
+        for episode in range(params.num_test_env_instances):
             env_copy, _, _ = get_wrapped_meta_env(
                 params,
                 meta_training_tasks=meta_environment.train_env_params,
-                meta_test_tasks=meta_environment.test_env_params
+                meta_test_tasks=[meta_environment.test_env_params[episode]]
             )
             env_copy.eval()
-            env_copy.current_test_env = episode - 1
             agent_copy = self.get_copy(copy.deepcopy(params), env_copy)
             agent_copy.training = False
             copy_agents_id.append(
@@ -56,17 +55,19 @@ class ParallelPACOHAgent(PACOHAgent):
                     env_copy,
                     agent_copy,
                     self.max_env_steps,
-                    num_episodes=1,
+                    num_episodes=num_episodes,
                     render=render,
                     use_early_termination=use_early_termination
                 )
             )
         copy_agents = ray.get(copy_agents_id)
+        returns = []
         for agent in copy_agents:
-            self.logger.end_episode(**agent.logger[-1])
+            for episode in reversed(range(num_episodes)):
+                self.logger.end_episode(**agent.logger[-episode-1])
+                print(self)
+                returns.append(agent.logger.get("eval_return-0")[-episode-1])
             self.update_counters(agent)
-            print(self)
-        returns = [agent.logger.get("eval_return-0")[-1] for agent in copy_agents]
 
         return np.asarray(returns)
 
@@ -104,7 +105,7 @@ class ParallelPACOHAgent(PACOHAgent):
             )
         return ray.get(results_id)
 
-    def collect_meta_training_data(
+    def training_rollout(
             self,
             params,
             meta_environment,
@@ -140,14 +141,13 @@ class ParallelPACOHAgent(PACOHAgent):
             agents = self.store_rollout_data(datasets, agents)
             agents = self.train_agents(agents)
             self.log_parallel_agents(copy_agents, agents)
+            self.store_meta_training_data(copy_agents)
             for agent in copy_agents:
                 train_returns = train_returns + agent.logger.get("train_return-0")[-self.num_episodes_per_rollout:]
             auto_garbage_collect()
-        self.store_meta_training_data(agents)
         return train_returns
 
     def store_meta_training_data(self, agents):
-        self.dataset.reset()
         for agent in agents:
             self.dataset.start_episode()
             self.dataset.add_dataset(agent.dataset)

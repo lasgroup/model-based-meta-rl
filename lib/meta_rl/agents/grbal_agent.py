@@ -1,4 +1,6 @@
 """Implementation of Gradient-based Adaptive Learner Algorithm"""
+import os
+import time
 from collections import deque
 
 import torch
@@ -8,6 +10,7 @@ from rllib.dataset import stack_list_of_tuples
 from rllib.util.neural_networks.utilities import deep_copy_module
 from rllib.util.training.utilities import model_loss, get_model_validation_score
 
+from utils.utils import get_project_path
 from lib.agents.mpc_agent import MPCAgent
 from lib.datasets import TrajectoryReplay
 from lib.meta_rl.algorithms.maml import MAML
@@ -33,6 +36,9 @@ class GrBALAgent(MPCAgent):
             inner_lr: float = 0.01,
             model_learn_batch_size: int = 500,
             max_memory: int = 1000000,
+            num_iter_meta_train: int = 0,
+            trajectory_replay_load_path=None,
+            multiple_runs_id=0,
             *args,
             **kwargs
     ):
@@ -43,6 +49,8 @@ class GrBALAgent(MPCAgent):
             **kwargs
         )
 
+        self.multiple_runs_id = multiple_runs_id
+
         self.meta_environment = meta_environment
 
         self.pre_update_model = MAML(deep_copy_module(self.dynamical_model.base_model), lr=inner_lr)
@@ -50,6 +58,7 @@ class GrBALAgent(MPCAgent):
             self.pre_update_model.parameters(),
             **self.model_optimizer.defaults
         )
+        self.num_iter_meta_train = num_iter_meta_train
 
         self.past_segment_len = past_segment_len
         self.future_segment_len = future_segment_len
@@ -59,6 +68,8 @@ class GrBALAgent(MPCAgent):
             max_len=max_memory,
             transformations=self.dynamical_model.transformations
         )
+        if trajectory_replay_load_path is not None:
+            self.load_trajectory_replay(trajectory_replay_load_path)
 
     def set_meta_environment(self, meta_environment):
         self.meta_environment = meta_environment
@@ -105,6 +116,34 @@ class GrBALAgent(MPCAgent):
 
         self._maml_validate_model_step()
 
+    def meta_fit(self, log_period=500, eval_period=3000):
+        """
+        Fits the MAML pre-update model
+        """
+        print("Start meta-training -------------------- ")
+        t = time.time()
+
+        self.dynamical_model.base_model.train()
+        self.pre_update_model.train()
+
+        for it in range(self.num_iter_meta_train):
+
+            loss = self._maml_train_model_step()
+
+            message = ''
+            if it % log_period == 0 or it % eval_period == 0:
+                avg_log_prob = loss.mean().numpy()
+                message += '\nIter %d/%d - Time %.2f sec' % (it, self.num_iter_meta_train, time.time() - t)
+                message += ' - Train-Loss: %.5f' % avg_log_prob
+
+                t = time.time()
+
+            if len(message) > 0:
+                print(message)
+
+        loss = loss.mean().numpy()
+        return loss
+
     def _train_model_step(self):
         self.model_optimizer.zero_grad()
         if max(self.dataset.trajectory_lengths) >= (self.past_segment_len + self.future_segment_len):
@@ -137,6 +176,7 @@ class GrBALAgent(MPCAgent):
             loss.backward()
             self.meta_optimizer.step()
             self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
+        return loss.detach()
 
     def _maml_validate_model_step(self):
         mse, sharpness, calibration_score = [], [], []
@@ -166,6 +206,12 @@ class GrBALAgent(MPCAgent):
                     f"{self.dynamical_model.model_kind[:3]}-calib": sum(calibration_score) / self.model_learn_batch_size,
                 }
             )
+
+    def load_trajectory_replay(self, project_rel_path):
+        load_path = os.path.join(get_project_path(), project_rel_path)
+        self.dataset = torch.load(load_path)
+        if os.path.exists(load_path.replace('train', 'test')):
+            self.val_dataset = torch.load(load_path.replace('train', 'test'))
 
     def train(self, val=True):
         """Set the agent in training mode"""

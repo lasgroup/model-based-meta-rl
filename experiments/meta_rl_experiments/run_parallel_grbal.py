@@ -76,19 +76,23 @@ if __name__ == "__main__":
 
     meta_agent.logger.save_hparams(params.toDict())
 
-    train_returns = meta_agent.training_rollout(
-        meta_environment, agents, envs, params.train_episodes, use_early_termination=not params.skip_early_termination
-    )
-    train_returns = np.mean(train_returns)
+    if params.collect_meta_data:
+        train_returns = meta_agent.training_rollout(
+            meta_environment, agents, envs, params.train_episodes, use_early_termination=not params.skip_early_termination
+        )
+        train_returns = np.mean(train_returns)
+    else:
+        meta_agent.meta_fit()
+        train_returns = []
 
     meta_agent.logger.export_to_json()  # Save statistics.
 
     metrics = dict()
     with Evaluate(meta_agent):
         returns = meta_agent.eval_rollout(
-            params,
+            copy.deepcopy(params),
             meta_environment,
-            num_episodes=params.test_episodes,
+            num_episodes=params.num_test_episodes_per_env,
             render=params.render,
             use_early_termination=not params.skip_early_termination
         )

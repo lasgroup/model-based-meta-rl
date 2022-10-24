@@ -1,4 +1,5 @@
 # Exploration Parameters
+collect_meta_data: True
 exploration: "optimistic"
 pacoh_optimistic_evaluation: True
 beta: 1.0
@@ -21,7 +22,6 @@ mpc_pets_trajectory_samples: 5
 mpc_num_elites: 50
 
 # PACOH Parameters
-pacoh_collect_meta_data: True
 pacoh_num_iter_meta_train: 100000
 pacoh_num_iter_eval_train: 25
 pacoh_num_hyper_posterior_particles: 3

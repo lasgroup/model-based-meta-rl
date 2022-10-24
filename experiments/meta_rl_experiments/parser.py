@@ -61,6 +61,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     # Meta Learning Parameters
     parser.add_argument("--num-train-env-instances", type=int, default=5)
     parser.add_argument("--num-test-env-instances", type=int, default=50)
+    parser.add_argument("--num-test-episodes-per-env", type=int, default=40)
 
     # Logger Parameters
     parser.add_argument("--log-dir", type=str, default=None)
@@ -70,6 +71,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offline-logger", action="store_true")
     parser.add_argument("--use-wandb", action="store_true")
     parser.add_argument("--exp-name", type=str, default="test_exp")
+    parser.add_argument("--collect-meta-data", action="store_true")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")
@@ -127,7 +129,6 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         choices=["zero", "constant", "mean"], default="constant")
 
     # PACOH parameters
-    parser.add_argument("--pacoh-collect-meta-data", action="store_true")
     parser.add_argument("--pacoh-num-iter-meta-train", type=int, default=2000)
     parser.add_argument("--pacoh-num-iter-eval-train", type=int, default=50)
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
@@ -148,6 +149,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--grbal-future-segment-len", type=int, default=32)
     parser.add_argument("--grbal-num-parallel-agents", type=int, default=8)
     parser.add_argument("--grbal-inner-lr", type=float, default=0.003)
+    parser.add_argument("--grbal-num-iter-meta-train", type=int, default=2000)
 
     # PPO parameters
     parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)

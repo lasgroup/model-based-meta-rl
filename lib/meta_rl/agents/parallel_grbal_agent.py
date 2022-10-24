@@ -38,14 +38,13 @@ class ParallelGrBALAgent(GrBALAgent):
         if meta_environment is None:
             meta_environment = self.meta_environment
         copy_agents_id = []
-        for episode in range(num_episodes):
+        for episode in range(params.num_test_env_instances):
             env_copy, _, _ = get_wrapped_meta_env(
                 params,
                 meta_training_tasks=meta_environment.train_env_params,
-                meta_test_tasks=meta_environment.test_env_params
+                meta_test_tasks=[meta_environment.test_env_params[episode]]
             )
             env_copy.eval()
-            env_copy.current_test_env = episode - 1
             agent_copy = self.get_copy(params=copy.deepcopy(params), meta_env=env_copy)
             agent_copy.training = False
             copy_agents_id.append(
@@ -53,17 +52,19 @@ class ParallelGrBALAgent(GrBALAgent):
                     env_copy,
                     agent_copy,
                     self.max_env_steps,
-                    num_episodes=1,
+                    num_episodes=num_episodes,
                     render=render,
                     use_early_termination=use_early_termination
                 )
             )
         copy_agents = ray.get(copy_agents_id)
+        returns = []
         for agent in copy_agents:
-            self.logger.end_episode(**agent.logger[-1])
+            for episode in reversed(range(num_episodes)):
+                self.logger.end_episode(**agent.logger[-episode-1])
+                print(self)
+                returns.append(agent.logger.get("eval_return-0")[-episode-1])
             self.update_counters(agent)
-            print(self)
-        returns = [agent.logger.get("eval_return-0")[-1] for agent in copy_agents]
 
         return np.asarray(returns)
 

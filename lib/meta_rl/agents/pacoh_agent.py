@@ -57,8 +57,10 @@ class PACOHAgent(MPCAgent):
             per_task_batch_size=8,
             eval_num_context_samples=32,
             use_data_normalization=False,
+            fit_at_step=False,
             env_name="",
             trajectory_replay_load_path=None,
+            multiple_runs_id=0,
             *args,
             **kwargs
     ):
@@ -70,6 +72,8 @@ class PACOHAgent(MPCAgent):
 
         self.meta_environment = meta_environment
         self.env_name = env_name
+        self.multiple_runs_id = multiple_runs_id
+        self.fit_at_step = fit_at_step
 
         self.dataset = TrajectoryReplay(
             max_len=max_memory,
@@ -81,7 +85,7 @@ class PACOHAgent(MPCAgent):
         else:
             self.save_data = True
 
-        self.observation_queue = deque([], 1000)
+        self.observation_queue = deque([], 50000)
 
         self.use_data_normalization = use_data_normalization
 
@@ -113,17 +117,6 @@ class PACOHAgent(MPCAgent):
         train_model_config = self.eval_model_config.copy()
         train_model_config.update({"num_particles": self.n_batched_models_train})
         self.meta_nn_model = BayesianNNModel(**train_model_config)
-        # if isinstance(self.meta_nn_model, HallucinatedModel):
-        #     self.meta_nn_model = HallucinatedModel(
-        #     self.meta_nn_model,
-        #     self.dynamical_model.transformations,
-        #     beta=self.dynamical_model.beta
-        # )
-        # elif isinstance(self.meta_nn_model, TransformedModel):
-        #     self.meta_nn_model = TransformedModel(
-        #     self.meta_nn_model,
-        #     self.dynamical_model.transformations
-        # )
 
         # setup likelihood
         self.likelihood = GaussianLikelihood(self.output_dim, self.n_batched_models_train,
@@ -180,8 +173,8 @@ class PACOHAgent(MPCAgent):
         super().observe(observation)
 
     def act(self, state: torch.Tensor) -> torch.Tensor:
-        if not self.training:
-            self.fit_task()
+        if not self.training and self.fit_at_step:
+            self.fit_task(num_iter_eval_train=self.num_iter_eval_train)
         return super().act(state)
 
     def start_episode(self):
@@ -189,21 +182,10 @@ class PACOHAgent(MPCAgent):
         self.meta_environment.sample_next_env()
         self.dataset.start_episode()
         super().start_episode()
-        if not self.training:
-            self.eval_model = BayesianNNModel(
-                **self.eval_model_config,
-                meta_learned_prior=self.prior_module,
-                normalization_stats=self.get_normalization_stats()
-            )
-            self.eval_model_optimizer = type(self.model_optimizer)(
-                [self.eval_model.particles],
-                **self.model_optimizer.defaults
-            )
 
     def end_episode(self):
         self.dataset.end_episode()
         super().end_episode()
-        self.observation_queue.clear()
 
     def train(self, val=True):
         """Set the agent in training mode"""
@@ -217,11 +199,47 @@ class PACOHAgent(MPCAgent):
             self.save_trajectory_replay()
         self.meta_fit()
         super().eval(val)
+        self.start_trial()
 
-    def fit_task(self):
+    def start_trial(self):
+        self.observation_queue.clear()
+        self._sample_prior_model()
+        self.dynamical_model.base_model.set_particles(self.eval_model.particles.detach().clone())
+        self.dynamical_model.base_model.set_normalization_stats(self.get_normalization_stats())
+
+    def learn(self):
+        """
+
+        :return:
+        """
+        if self.training:
+            self.learn_model()
+        else:
+            self.fit_task(num_iter_eval_train=self.model_learn_num_iter)
+
+        if (
+                self.total_steps < self.exploration_steps or
+                self.total_episodes < self.exploration_episodes
+        ):
+            return
+        else:
+            self.simulate_and_learn_policy()
+
+    def _sample_prior_model(self):
+        self.eval_model = BayesianNNModel(
+            **self.eval_model_config,
+            meta_learned_prior=self.prior_module,
+            normalization_stats=self.get_normalization_stats()
+        )
+        self.eval_model_optimizer = type(self.model_optimizer)(
+            [self.eval_model.particles],
+            **self.model_optimizer.defaults
+        )
+
+    def fit_task(self, num_iter_eval_train=None):
         self.eval_model.train()
         if len(self.observation_queue) > 0:
-            for num_iter in range(self.num_iter_eval_train):
+            for num_iter in range(num_iter_eval_train):
                 batch_idx = np.random.choice(len(self.observation_queue), self.eval_num_context_samples)
                 eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
                 eval_observations.action = eval_observations.action[..., : self.eval_model.dim_action[0]]
@@ -489,17 +507,6 @@ class PACOHAgent(MPCAgent):
             eval_metrics_std[key] = np.std(eval(key)).item()
         return eval_metrics_mean, eval_metrics_std
 
-    def save_trajectory_replay(self, project_rel_path="experiments/meta_rl_experiments/experience_replay", data_type="training"):
-        file_name = f"{self.env_name}_{data_type}_{self.dataset.num_episodes}.pkl"
-        save_path = os.path.join(get_project_path(), project_rel_path, file_name)
-        torch.save(self.dataset, save_path)
-
-    def load_trajectory_replay(self, project_rel_path):
-        load_path = os.path.join(get_project_path(), project_rel_path)
-        self.dataset = torch.load(load_path)
-        if os.path.exists(load_path.replace('training', 'eval')):
-            self.val_dataset = torch.load(load_path.replace('training', 'eval'))
-
     def _compute_normalization_stats(self):
         train_obs = self.dataset.all_data
         train_states, train_next_states = train_obs.state, train_obs.next_state
@@ -560,3 +567,14 @@ class PACOHAgent(MPCAgent):
         self.action_std = normalization_stats['action_std']
         self.next_state_mean = normalization_stats['y_mean']
         self.next_state_std = normalization_stats['y_std']
+
+    def save_trajectory_replay(self, proj_rel_path="experiments/meta_rl_experiments/experience_replay", mode="train"):
+        file_name = f"{self.env_name}_{mode}_{self.dataset.num_episodes}_{self.multiple_runs_id}.pkl"
+        save_path = os.path.join(get_project_path(), proj_rel_path, file_name)
+        torch.save(self.dataset, save_path)
+
+    def load_trajectory_replay(self, project_rel_path):
+        load_path = os.path.join(get_project_path(), project_rel_path)
+        self.dataset = torch.load(load_path)
+        if os.path.exists(load_path.replace('train', 'test')):
+            self.val_dataset = torch.load(load_path.replace('train', 'test'))

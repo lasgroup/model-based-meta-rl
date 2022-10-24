@@ -22,6 +22,7 @@ from lib.agents import MPCAgent, MPCPolicyAgent
 from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent
 from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
     get_recurrent_value_function, get_rnn_policy
+from utils.utils import get_dataset_path
 
 
 def get_mpc_agent(
@@ -518,6 +519,12 @@ def get_grbal_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
+        params.train_episodes = 0
+    else:
+        trajectory_load_path = None
+
     agent = GrBALAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
@@ -530,6 +537,9 @@ def get_grbal_agent(
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
         gamma=params.gamma,
+        multiple_runs_id=params.multiple_runs_id,
+        trajectory_replay_load_path=trajectory_load_path,
+        num_iter_meta_train=params.grbal_num_iter_meta_train,
         comment=comment,
     )
 
@@ -613,6 +623,12 @@ def get_parallel_grbal_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
+        params.train_episodes = 0
+    else:
+        trajectory_load_path = None
+
     agent = lib.meta_rl.agents.parallel_grbal_agent.ParallelGrBALAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
@@ -628,6 +644,9 @@ def get_parallel_grbal_agent(
         num_episodes_per_rollout=params.num_episodes_per_rollout,
         max_env_steps=params.max_steps,
         gamma=params.gamma,
+        multiple_runs_id=params.multiple_runs_id,
+        trajectory_replay_load_path=trajectory_load_path,
+        num_iter_meta_train=params.grbal_num_iter_meta_train,
         comment=comment,
     )
 
@@ -715,11 +734,8 @@ def get_pacoh_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
-    if not params.pacoh_collect_meta_data:
-        trajectory_load_path = os.path.join(
-            "experiments/meta_rl_experiments/experience_replay",
-            f"{params.env_config_file.replace('-', '_').strip('.yaml')}_training_{params.train_episodes}.pkl"
-        )
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
         params.train_episodes = 0
     else:
         trajectory_load_path = None
@@ -739,6 +755,7 @@ def get_pacoh_agent(
         num_posterior_particles=params.pacoh_num_posterior_particles,
         env_name=params.env_config_file.replace('-', '_').strip(".yaml"),
         trajectory_replay_load_path=trajectory_load_path,
+        multiple_runs_id=params.multiple_runs_id,
         comment=comment,
     )
 
@@ -823,11 +840,8 @@ def get_parallel_pacoh_agent(
     model_name = dynamical_model.base_model.name
     comment = f"{model_name} {params.exploration.capitalize()}"
 
-    if not params.pacoh_collect_meta_data:
-        trajectory_load_path = os.path.join(
-            "experiments/meta_rl_experiments/experience_replay",
-            f"{params.env_config_file.replace('-', '_').strip('.yaml')}_training_{params.train_episodes}.pkl"
-        )
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
         params.train_episodes = 0
     else:
         trajectory_load_path = None
@@ -850,6 +864,7 @@ def get_parallel_pacoh_agent(
         parallel_episodes_per_env=params.parallel_episodes_per_env,
         num_episodes_per_rollout=params.num_episodes_per_rollout,
         max_env_steps=params.max_steps,
+        multiple_runs_id=params.multiple_runs_id,
         comment=comment,
     )
 
