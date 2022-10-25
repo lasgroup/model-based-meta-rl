@@ -10,13 +10,13 @@ model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_opt_lr: 0.0001
 model_learn_num_iter: 5000
-model_learn_batch_size: 100
+model_learn_batch_size: 32
 model_include_aleatoric_uncertainty: True
 model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
 # MPC Parameters
-mpc_solver: "cem"
-mpc_horizon: 25
+mpc_solver: "icem"
+mpc_horizon: 40
 mpc_num_particles: 1000
 mpc_pets_trajectory_samples: 5
 mpc_num_elites: 50
