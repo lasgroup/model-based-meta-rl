@@ -94,7 +94,7 @@ if __name__ == "__main__":
         )
         train_returns = np.mean(train_returns)
     else:
-        train_returns = []
+        train_returns = 0.0
 
     meta_agent.logger.export_to_json()  # Save statistics.
 

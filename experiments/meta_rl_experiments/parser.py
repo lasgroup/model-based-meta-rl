@@ -34,7 +34,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--agent-name",
         type=str,
         default="parallel_pacoh",
-        choices=["rl2", "grbal", "parallel_grbal", "pacoh", "parallel_pacoh"]
+        choices=["mpc", "rl2", "grbal", "parallel_grbal", "pacoh", "parallel_pacoh"]
     )
     parser.add_argument(
         "--exploration",
@@ -51,7 +51,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=10)
     parser.add_argument("--eval-frequency", type=int, default=0)
-    parser.add_argument("--env-load-params-from-file", action="store_true")
+    parser.add_argument("--env-load-params-from-file", type=bool, default=True)
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=1.0)

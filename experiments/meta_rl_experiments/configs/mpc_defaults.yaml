@@ -1,11 +1,11 @@
 # Exploration Parameters
-collect_meta_data: False
+collect_meta_data: True
 exploration: "optimistic"
 pacoh_optimistic_evaluation: True
 beta: 1.0
 
 # Model Parameters
-model_kind: "BayesianNN"
+model_kind: "ProbabilisticEnsemble"
 model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_opt_lr: 0.0001

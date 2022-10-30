@@ -44,12 +44,12 @@ class ParallelPACOHAgent(PACOHAgent):
         for episode in range(params.num_test_env_instances):
             env_copy, _, _ = get_wrapped_meta_env(
                 params,
-                meta_training_tasks=meta_environment.train_env_params,
+                meta_training_tasks=[meta_environment.test_env_params[episode]],
                 meta_test_tasks=[meta_environment.test_env_params[episode]]
             )
-            env_copy.eval()
             agent_copy = self.get_copy(copy.deepcopy(params), env_copy)
-            agent_copy.training = False
+            # env_copy.eval()
+            # agent_copy.training = False
             copy_agents_id.append(
                 rollout_parallel_agent.remote(
                     env_copy,
@@ -66,7 +66,7 @@ class ParallelPACOHAgent(PACOHAgent):
             for episode in reversed(range(num_episodes)):
                 self.logger.end_episode(**agent.logger[-episode-1])
                 print(self)
-                returns.append(agent.logger.get("eval_return-0")[-episode-1])
+                returns.append(agent.logger.get("train_return-0")[-episode-1])
             self.update_counters(agent)
 
         return np.asarray(returns)
@@ -84,6 +84,8 @@ class ParallelPACOHAgent(PACOHAgent):
         )
         agent.hyper_posterior_particles = self.hyper_posterior_particles.detach().clone()
         agent.set_normalization_stats(self.get_normalization_stats())
+        agent.start_trial()
+        agent.dataset.reset()
         return agent
 
     @staticmethod

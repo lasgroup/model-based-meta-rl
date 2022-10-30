@@ -1,5 +1,5 @@
 # Exploration Parameters
-collect_meta_data: True
+collect_meta_data: False
 exploration: "greedy"
 
 # Model Parameters

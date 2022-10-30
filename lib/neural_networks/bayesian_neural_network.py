@@ -10,7 +10,7 @@ from rllib.util.neural_networks.utilities import Swish
 from rllib.util.utilities import safe_cholesky
 from lib.meta_rl.algorithms.pacoh.modules.kernels import RBFKernel
 from lib.meta_rl.algorithms.pacoh.modules.likelihood import GaussianLikelihood
-from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import GaussianPrior
+from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import GaussianPrior, BatchedGaussianPrior
 from lib.meta_rl.algorithms.pacoh.modules.vectorized_nn import VectorizedModel, LinearVectorized
 
 
@@ -131,6 +131,17 @@ class FeedForwardBNN(VectorizedModel):
 
         # setup kernel and optimizer
         self.kernel = RBFKernel(bandwidth=bandwidth)
+
+    def set_prior(self, prior):
+        assert isinstance(prior, GaussianPrior) or isinstance(prior, BatchedGaussianPrior)
+        assert prior.get_parameters_stacked_per_prior().shape[-1] == \
+               2 * (self.nn_param_size + self.likelihood_param_size)
+        assert self.num_particles % prior.n_batched_priors == 0, "num_particles must be multiple of n_batched_priors"
+
+        self.prior = prior
+        self.meta_learned_prior_mode = True
+        params = self.prior.sample(self.num_particles // self.prior.n_batched_priors).reshape((self.num_particles, -1))
+        self.particles = torch.tensor(params, requires_grad=True)
 
     def parse_layers(self, layers, in_dim, non_linearity):
         non_linearity = non_linearity.lower()
@@ -280,7 +291,7 @@ class FeedForwardBNN(VectorizedModel):
 
     @torch.jit.export
     def set_head_idx(self, head_indexes):
-        """Set ensemble head for particles.."""
+        """Set ensemble head for particles."""
         self.head_indexes = head_indexes
 
     @torch.jit.export

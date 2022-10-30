@@ -86,6 +86,9 @@ class BayesianNNModel(NNModel):
     def parameters_as_vector(self):
         return self.nn[0].parameters_as_vector()
 
+    def set_prior(self, prior):
+        self.nn[0].set_prior(prior)
+
     def set_parameters_as_vector(self, value):
         self.nn[0].set_parameters_as_vector(value)
 

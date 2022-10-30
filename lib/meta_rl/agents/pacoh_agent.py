@@ -153,12 +153,6 @@ class PACOHAgent(MPCAgent):
         self.hyper_posterior_particles = self.prior_module.get_parameters_stacked_per_prior().detach().unsqueeze(dim=0)
         self.hyper_posterior_particles.requires_grad = True
 
-        self.eval_model = BayesianNNModel(**self.eval_model_config, meta_learned_prior=self.prior_module)
-        self.eval_model_optimizer = type(self.model_optimizer)(
-            [self.eval_model.particles],
-            **self.model_optimizer.defaults
-        )
-
         self.kernel = RBFKernel(bandwidth=self.eval_model_config["bandwidth"])
         self.meta_optimizer = torch.optim.Adam([self.hyper_posterior_particles], lr=meta_lr)
 
@@ -173,7 +167,7 @@ class PACOHAgent(MPCAgent):
         super().observe(observation)
 
     def act(self, state: torch.Tensor) -> torch.Tensor:
-        if not self.training and self.fit_at_step:
+        if (not self.training) and self.fit_at_step:
             self.fit_task(num_iter_eval_train=self.num_iter_eval_train)
         return super().act(state)
 
@@ -185,6 +179,9 @@ class PACOHAgent(MPCAgent):
 
     def end_episode(self):
         self.dataset.end_episode()
+        if (not self.training) and (not self.fit_at_step):
+            # TODO: If not training, train using dataset (instead of observation queue) and also learn policy
+            self.fit_task(num_iter_eval_train=self.model_learn_num_iter)
         super().end_episode()
 
     def train(self, val=True):
@@ -203,53 +200,24 @@ class PACOHAgent(MPCAgent):
 
     def start_trial(self):
         self.observation_queue.clear()
-        self._sample_prior_model()
-        self.dynamical_model.base_model.set_particles(self.eval_model.particles.detach().clone())
+        self.dynamical_model.base_model.set_prior(self.prior_module)
         self.dynamical_model.base_model.set_normalization_stats(self.get_normalization_stats())
-
-    def learn(self):
-        """
-
-        :return:
-        """
-        if self.training:
-            self.learn_model()
-        else:
-            self.fit_task(num_iter_eval_train=self.model_learn_num_iter)
-
-        if (
-                self.total_steps < self.exploration_steps or
-                self.total_episodes < self.exploration_episodes
-        ):
-            return
-        else:
-            self.simulate_and_learn_policy()
-
-    def _sample_prior_model(self):
-        self.eval_model = BayesianNNModel(
-            **self.eval_model_config,
-            meta_learned_prior=self.prior_module,
-            normalization_stats=self.get_normalization_stats()
-        )
-        self.eval_model_optimizer = type(self.model_optimizer)(
-            [self.eval_model.particles],
-            **self.model_optimizer.defaults
+        self.model_optimizer = type(self.model_optimizer)(
+            [self.dynamical_model.base_model.particles], **self.model_optimizer.defaults
         )
 
     def fit_task(self, num_iter_eval_train=None):
-        self.eval_model.train()
+        self.dynamical_model.train()
         if len(self.observation_queue) > 0:
             for num_iter in range(num_iter_eval_train):
                 batch_idx = np.random.choice(len(self.observation_queue), self.eval_num_context_samples)
                 eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
-                eval_observations.action = eval_observations.action[..., : self.eval_model.dim_action[0]]
+                eval_observations.action = eval_observations.action[..., : self.dynamical_model.dim_action[0]]
                 train_bayesian_nn_step(
-                    model=self.eval_model,
+                    model=self.dynamical_model,
                     observation=eval_observations,
-                    optimizer=self.eval_model_optimizer
+                    optimizer=self.model_optimizer
                 )
-        self.dynamical_model.base_model.set_particles(self.eval_model.particles.detach().clone())
-        self.dynamical_model.base_model.set_normalization_stats(self.get_normalization_stats())
 
     def get_meta_batch(self, dataset=None):
         if dataset is None:

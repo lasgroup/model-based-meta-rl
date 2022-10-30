@@ -126,6 +126,7 @@ class MetaEnvironmentWrapper:
         params_file = os.path.join(get_project_path(), rel_params_dir, f'{mode}.npz')
         params = np.load(params_file, allow_pickle=True)['arr_0']
         offset = offset if num_tasks == 1 else 0
+        print(f"Loading environment params at index {[np.arange(num_tasks) + offset]} from file: \n{params_file} \n")
         return list(params[np.arange(num_tasks) + offset])
 
     @property
