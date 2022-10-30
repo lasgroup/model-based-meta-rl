@@ -1,6 +1,6 @@
 from rllib.environment.mujoco.reacher_3d import MBReacher3DEnv
 
-from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
+from lib.environments.wrappers.random_mujoco_env import RandomMujocoEnv
 
 
 class RandomMBReacher3DEnv(MBReacher3DEnv, RandomMujocoEnv):

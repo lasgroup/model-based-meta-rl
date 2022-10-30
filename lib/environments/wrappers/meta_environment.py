@@ -8,7 +8,7 @@ import numpy as np
 from rand_param_envs.base import RandomEnv
 from rllib.environment import AbstractEnvironment
 
-from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
+from lib.environments.wrappers.random_mujoco_env import RandomMujocoEnv
 from lib.environments.wrappers.random_environment import RandomEnvironment
 from utils.utils import get_project_path
 

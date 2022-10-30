@@ -110,6 +110,7 @@ class ParallelGrBALAgent(GrBALAgent):
             params.log_to_file = False
             params.use_wandb = False
             params.model_learn_num_iter = 0
+            params.collect_meta_data = True
             _, agent = run_utils.get_environment_and_meta_agent(params=params)
             agent.set_meta_environment(meta_env)
         else:

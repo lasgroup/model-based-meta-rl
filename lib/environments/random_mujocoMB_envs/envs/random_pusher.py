@@ -1,6 +1,6 @@
 from rllib.environment.mujoco.pusher import MBPusherEnv
 
-from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
+from lib.environments.wrappers.random_mujoco_env import RandomMujocoEnv
 
 
 class RandomMBPusherEnv(MBPusherEnv, RandomMujocoEnv):

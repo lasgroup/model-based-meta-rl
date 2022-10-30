@@ -1,6 +1,6 @@
 from rllib.environment.mujoco.cart_pole import MBCartPoleEnv
 
-from lib.environments.random_mujocoMB_envs.random_mujoco_env import RandomMujocoEnv
+from lib.environments.wrappers.random_mujoco_env import RandomMujocoEnv
 
 
 class RandomMBCartPoleEnv(MBCartPoleEnv, RandomMujocoEnv):
