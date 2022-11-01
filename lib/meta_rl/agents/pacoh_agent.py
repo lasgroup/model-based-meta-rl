@@ -214,7 +214,7 @@ class PACOHAgent(MPCAgent):
                 eval_observations = stack_list_of_tuples([self.observation_queue[i] for i in batch_idx])
                 eval_observations.action = eval_observations.action[..., : self.dynamical_model.dim_action[0]]
                 train_bayesian_nn_step(
-                    model=self.dynamical_model,
+                    model=self.dynamical_model.base_model,
                     observation=eval_observations,
                     optimizer=self.model_optimizer
                 )
