@@ -81,7 +81,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-heteroscedastic", type=bool, default=True)
     parser.add_argument("--model-non-linearity", type=str, default="Swish")
     parser.add_argument("--model-opt-lr", type=float, default=1e-3)
-    parser.add_argument("--model-opt-weight-decay", type=float, default=3e-4)
+    parser.add_argument("--model-opt-weight-decay", type=float, default=0.0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=500)
     parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching",

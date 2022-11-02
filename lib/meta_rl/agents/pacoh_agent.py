@@ -536,8 +536,14 @@ class PACOHAgent(MPCAgent):
         self.next_state_mean = normalization_stats['y_mean']
         self.next_state_std = normalization_stats['y_std']
 
-    def save_trajectory_replay(self, proj_rel_path="experiments/meta_rl_experiments/experience_replay", mode="train"):
+    def save_trajectory_replay(self, base_path="experiments/meta_rl_experiments/experience_replay", mode="train"):
+        model_kind = "bnn"
+        num_tasks = 5
+        action_cost_scale = 1
+        proj_rel_path = base_path + f"_{model_kind}_{num_tasks}tasks_{action_cost_scale}acost"
         file_name = f"{self.env_name}_{self.exploration_scheme}_{mode}_{self.dataset.num_episodes}_{self.multiple_runs_id}.pkl"
+        if not os.path.exists(os.path.join(get_project_path(), proj_rel_path)):
+            os.makedirs(os.path.join(get_project_path(), proj_rel_path), exist_ok=True)
         save_path = os.path.join(get_project_path(), proj_rel_path, file_name)
         torch.save(self.dataset, save_path)
 
