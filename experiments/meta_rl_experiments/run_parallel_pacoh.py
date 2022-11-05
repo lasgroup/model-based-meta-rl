@@ -93,6 +93,7 @@ if __name__ == "__main__":
             copy.deepcopy(params), meta_environment, agents, params.train_episodes, not params.skip_early_termination
         )
         train_returns = np.mean(train_returns)
+        meta_agent.save_trajectory_replay(params)
     else:
         train_returns = 0.0
 

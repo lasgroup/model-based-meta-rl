@@ -192,8 +192,8 @@ class PACOHAgent(MPCAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        if self.save_data:
-            self.save_trajectory_replay()
+        # if self.save_data:
+        #     self.save_trajectory_replay()
         self.meta_fit()
         super().eval(val)
         self.start_trial()
@@ -536,11 +536,11 @@ class PACOHAgent(MPCAgent):
         self.next_state_mean = normalization_stats['y_mean']
         self.next_state_std = normalization_stats['y_std']
 
-    def save_trajectory_replay(self, base_path="experiments/meta_rl_experiments/experience_replay", mode="train"):
-        model_kind = "bnn"
-        num_tasks = 5
-        action_cost_scale = 1
-        proj_rel_path = base_path + f"_{model_kind}_{num_tasks}tasks_{action_cost_scale}acost"
+    def save_trajectory_replay(self, params, base_path="experiments/meta_rl_experiments/experience_replay", mode="train"):
+        model_kind = params.pacoh_training_model_kind
+        num_tasks = params.num_train_env_instances
+        action_cost = str(params.action_cost).replace(".", "")
+        proj_rel_path = base_path + f"_{model_kind}_{num_tasks}tasks_{action_cost}acost"
         file_name = f"{self.env_name}_{self.exploration_scheme}_{mode}_{self.dataset.num_episodes}_{self.multiple_runs_id}.pkl"
         if not os.path.exists(os.path.join(get_project_path(), proj_rel_path)):
             os.makedirs(os.path.join(get_project_path(), proj_rel_path), exist_ok=True)
