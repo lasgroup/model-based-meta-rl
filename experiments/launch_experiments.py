@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     # Experiment Parameters
     parser.add_argument("--exp-name", type=str, default="pacoh_defaults")
-    parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
+    parser.add_argument("--num-seeds-per-hparam", type=int, default=10)
     parser.add_argument("--dry", action="store_true")
     parser.add_argument("--long", action="store_true")
     parser.add_argument("--seed", type=int, default=1)

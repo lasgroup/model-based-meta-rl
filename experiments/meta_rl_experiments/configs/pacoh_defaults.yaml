@@ -1,15 +1,17 @@
 # Exploration Parameters
 collect_meta_data: False
+pacoh_training_model_kind: "ProbabilisticEnsemble"
 exploration: "optimistic"
 pacoh_optimistic_evaluation: True
-beta: 1.0
+beta: 1.5
+# action_cost: 1.0     # Pusher Default = 0.1,    Cart Pole Default = 0.01
 
 # Model Parameters
 model_kind: "BayesianNN"
 model_layers: [200, 200, 200, 200]
 model_non_linearity: "ReLU"
 model_learn_opt_lr: 0.0003
-model_learn_num_iter: 1500
+model_learn_num_iter: 2000
 model_learn_batch_size: 32
 model_include_aleatoric_uncertainty: False
 model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
@@ -28,7 +30,6 @@ pacoh_num_hyper_posterior_particles: 3
 pacoh_n_samples_per_prior: 3
 pacoh_num_posterior_particles: 3
 pacoh_likelihood_std: 0.1
-pacoh_training_model_kind: "ProbabilisticEnsemble"
 
 # Parallel Rollout Parameters
 parallel_episodes_per_env: 1
