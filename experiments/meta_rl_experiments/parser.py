@@ -60,7 +60,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Meta Learning Parameters
     parser.add_argument("--num-train-env-instances", type=int, default=5)
-    parser.add_argument("--num-test-env-instances", type=int, default=50)
+    parser.add_argument("--num-test-env-instances", type=int, default=40)
     parser.add_argument("--num-test-episodes-per-env", type=int, default=40)
 
     # Logger Parameters

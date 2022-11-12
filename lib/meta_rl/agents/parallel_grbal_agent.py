@@ -61,7 +61,11 @@ class ParallelGrBALAgent(GrBALAgent):
         returns = []
         for agent in copy_agents:
             for episode in reversed(range(num_episodes)):
-                self.logger.end_episode(**agent.logger[-episode-1])
+                episode_dict = agent.logger[-episode-1]
+                new_dict = {}
+                for key, val in episode_dict.items():
+                    new_dict[key.replace("eval", "train")] = val
+                self.logger.end_episode(**new_dict)
                 print(self)
                 returns.append(agent.logger.get("eval_return-0")[-episode-1])
             self.update_counters(agent)
