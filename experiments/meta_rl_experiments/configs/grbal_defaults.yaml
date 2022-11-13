@@ -10,14 +10,14 @@ model_learn_num_iter: 200
 model_learn_batch_size: 16
 
 # MPC Parameters
-mpc_solver: "cem"
-mpc_horizon: 25
+mpc_solver: "icem"
+mpc_horizon: 40
 mpc_num_particles: 1000
 mpc_num_elites: 50
 
 # Parallel Rollout Parameters
 num_episodes_per_rollout: 1
-grbal_num_parallel_agents: 12
+grbal_num_parallel_agents: 5
 
 # GrBAL Parameters
 grbal_past_segment_len: 32

@@ -55,6 +55,8 @@ def main(args):
             seed = init_seeds[j]
             flags_ = dict(**flags, **{'seed': seed})
             flags_hash = hash_dict(flags_)
+            if flags_['exploration'] == 'greedy':
+                flags_['exp_name'] = flags_['exp_name'].replace('opt', 'gre')
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
             flags_['multiple-runs-id'] = j
             cmd = generate_base_command(run_file_path, flags=flags_)
@@ -77,7 +79,7 @@ if __name__ == '__main__':
 
     # Experiment Parameters
     parser.add_argument("--exp-name", type=str, default="pacoh_defaults")
-    parser.add_argument("--num-seeds-per-hparam", type=int, default=10)
+    parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
     parser.add_argument("--dry", action="store_true")
     parser.add_argument("--long", action="store_true")
     parser.add_argument("--seed", type=int, default=1)
