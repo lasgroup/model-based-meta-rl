@@ -58,6 +58,7 @@ class PACOHAgent(MPCAgent):
             eval_num_context_samples=32,
             use_data_normalization=False,
             fit_at_step=False,
+            early_stopping=True,
             env_name="",
             trajectory_replay_load_path=None,
             multiple_runs_id=0,
@@ -107,6 +108,7 @@ class PACOHAgent(MPCAgent):
         self.num_iter_meta_test = num_iter_meta_test
         self.num_iter_meta_train = num_iter_meta_train
         self.num_iter_eval_train = num_iter_eval_train
+        self.early_stopping = early_stopping
         self.meta_batch_size = meta_batch_size
         self.per_task_batch_size = per_task_batch_size
         self.eval_num_context_samples = eval_num_context_samples
@@ -247,15 +249,17 @@ class PACOHAgent(MPCAgent):
 
         self.mll_pre_factor = self._compute_mll_prefactor()
         self._compute_normalization_stats()
+        avg_log_probs = []
 
         for it in range(self.num_iter_meta_train):
 
             meta_task_batch, n_train_samples = self.get_meta_batch()
             log_prob = self.step(meta_task_batch, n_train_samples)
+            avg_log_probs.append(log_prob.mean().numpy())
 
             message = ''
             if it % log_period == 0 or it % eval_period == 0:
-                avg_log_prob = log_prob.mean().numpy()
+                avg_log_prob = avg_log_probs[-1]
                 message += '\nIter %d/%d - Time %.2f sec' % (it, self.num_iter_meta_train, time.time() - t)
                 message += ' - Train-Loss: %.5f' % avg_log_prob
 
@@ -270,6 +274,12 @@ class PACOHAgent(MPCAgent):
 
             if len(message) > 0:
                 print(message)
+
+            if self.early_stopping and len(avg_log_probs) > 100:
+                running_avg_log_probs = np.mean(avg_log_probs[-100:])
+                if running_avg_log_probs > -200:   # When average negative log-likelihood is high
+                    print(f"\n---------Early stopping meta-training after {it} iterations---------")
+                    break
 
         loss = -log_prob.mean().numpy()
         return loss
