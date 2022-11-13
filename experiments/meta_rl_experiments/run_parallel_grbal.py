@@ -9,8 +9,8 @@ import numpy as np
 from dotmap import DotMap
 from rllib.util.training.utilities import Evaluate
 
-from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from lib.environments import ENVIRONMENTS_PATH
+from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from experiments.meta_rl_experiments.parser import get_argument_parser
 from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 
@@ -73,11 +73,10 @@ if __name__ == "__main__":
     assert params.agent_name == 'parallel_grbal'
     meta_environment, meta_agent = get_environment_and_meta_agent(params)
 
-    envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
-
     meta_agent.logger.save_hparams(params.toDict())
 
     if params.collect_meta_data:
+        envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
         train_returns = meta_agent.training_rollout(
             meta_environment, agents, envs, params.train_episodes, use_early_termination=not params.skip_early_termination
         )

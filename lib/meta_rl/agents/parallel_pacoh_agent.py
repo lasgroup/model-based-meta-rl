@@ -61,15 +61,18 @@ class ParallelPACOHAgent(PACOHAgent):
                 )
             )
         copy_agents = ray.get(copy_agents_id)
-        returns = []
-        for agent in copy_agents:
+        returns = np.zeros((len(copy_agents), num_episodes))
+        for i, agent in enumerate(copy_agents):
+            returns[i] = np.array(agent.logger.get("train_return-0"))
             for episode in reversed(range(num_episodes)):
-                self.logger.end_episode(**agent.logger[-episode-1])
+                episode_dict = agent.logger[-episode-1]
+                if i == len(copy_agents) - 1:
+                    episode_dict["env_avg_train_return-0"] = np.mean(returns[:, -episode-1], axis=0)
+                self.logger.end_episode(**episode_dict)
                 print(self)
-                returns.append(agent.logger.get("train_return-0")[-episode-1])
             self.update_counters(agent)
 
-        return np.asarray(returns)
+        return returns.flatten()
 
     def get_copy(self, params, meta_env):
         params.safe_log_dir = False

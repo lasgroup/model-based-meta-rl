@@ -9,8 +9,8 @@ import numpy as np
 from dotmap import DotMap
 from rllib.util.training.utilities import Evaluate
 
-from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from lib.environments import ENVIRONMENTS_PATH
+from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from experiments.meta_rl_experiments.parser import get_argument_parser
 from experiments.lib_environments.run_utils import get_environment_and_agent
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
@@ -83,12 +83,11 @@ if __name__ == "__main__":
     assert params.agent_name == 'parallel_pacoh'
     meta_environment, meta_agent = get_environment_and_meta_agent(copy.deepcopy(params))
 
-    envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
-    envs = set_tasks(envs, meta_environment)
-
     meta_agent.logger.save_hparams(params.toDict())
 
     if params.collect_meta_data:
+        envs, agents = get_parallel_environments_and_agents(copy.deepcopy(params))
+        envs = set_tasks(envs, meta_environment)
         train_returns = meta_agent.training_rollout(
             copy.deepcopy(params), meta_environment, agents, params.train_episodes, not params.skip_early_termination
         )

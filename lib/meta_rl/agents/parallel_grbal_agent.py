@@ -41,12 +41,12 @@ class ParallelGrBALAgent(GrBALAgent):
         for episode in range(params.num_test_env_instances):
             env_copy, _, _ = get_wrapped_meta_env(
                 params,
-                meta_training_tasks=meta_environment.train_env_params,
+                meta_training_tasks=[meta_environment.test_env_params[episode]],
                 meta_test_tasks=[meta_environment.test_env_params[episode]]
             )
-            env_copy.eval()
             agent_copy = self.get_copy(params=copy.deepcopy(params), meta_env=env_copy)
-            agent_copy.training = False
+            # env_copy.eval()
+            # agent_copy.training = False
             copy_agents_id.append(
                 rollout_parallel_agent.remote(
                     env_copy,
@@ -58,19 +58,18 @@ class ParallelGrBALAgent(GrBALAgent):
                 )
             )
         copy_agents = ray.get(copy_agents_id)
-        returns = []
-        for agent in copy_agents:
+        returns = np.zeros((len(copy_agents), num_episodes))
+        for i, agent in enumerate(copy_agents):
+            returns[i] = np.array(agent.logger.get("train_return-0"))
             for episode in reversed(range(num_episodes)):
                 episode_dict = agent.logger[-episode-1]
-                new_dict = {}
-                for key, val in episode_dict.items():
-                    new_dict[key.replace("eval", "train")] = val
-                self.logger.end_episode(**new_dict)
+                if i == len(copy_agents) - 1:
+                    episode_dict["env_avg_train_return-0"] = np.mean(returns[:, -episode-1], axis=0)
+                self.logger.end_episode(**episode_dict)
                 print(self)
-                returns.append(agent.logger.get("eval_return-0")[-episode-1])
             self.update_counters(agent)
 
-        return np.asarray(returns)
+        return returns.flatten()
 
     def training_rollout(self, meta_environment, parallel_agents, envs, num_train_episodes, max_env_steps=None, use_early_termination=True):
         assert len(parallel_agents) == self.num_parallel_agents
