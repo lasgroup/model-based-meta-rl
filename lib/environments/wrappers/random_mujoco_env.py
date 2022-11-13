@@ -44,6 +44,18 @@ class RandomMujocoEnv:
                 dof_damping_multipliers = np.array(1.5) ** np.random.uniform(-self.random_scale_limit, self.random_scale_limit, size=self.model.geom_friction.shape)
                 new_params['geom_friction'] = np.multiply(self.init_params['geom_friction'], dof_damping_multipliers)
 
+            if 'g' in self.rand_params:
+                dof_damping_multipliers = np.array(1.5) ** np.random.uniform(-self.random_scale_limit, self.random_scale_limit, size=1)
+                new_params['g'] = self.init_params['g'] * dof_damping_multipliers.item()
+
+            if 'l' in self.rand_params:
+                dof_damping_multipliers = np.array(1.5) ** np.random.uniform(-self.random_scale_limit, self.random_scale_limit, size=1)
+                new_params['l'] = self.init_params['l'] * dof_damping_multipliers.item()
+
+            if 'm' in self.rand_params:
+                dof_damping_multipliers = np.array(1.5) ** np.random.uniform(-self.random_scale_limit, self.random_scale_limit, size=1)
+                new_params['m'] = self.init_params['m'] * dof_damping_multipliers.item()
+
             param_sets.append(new_params)
 
         return param_sets
@@ -77,4 +89,14 @@ class RandomMujocoEnv:
         # friction at the body components
         if 'geom_friction' in self.rand_params:
             self.init_params['geom_friction'] = self.model.geom_friction
+
+        if 'g' in self.rand_params:
+            self.init_params['g'] = self.g
+
+        if 'l' in self.rand_params:
+            self.init_params['l'] = self.l
+
+        if 'm' in self.rand_params:
+            self.init_params['m'] = self.m
+
         self.cur_params = self.init_params

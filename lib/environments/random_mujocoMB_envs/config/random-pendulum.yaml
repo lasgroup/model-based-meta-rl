@@ -1,0 +1,3 @@
+name: RandomMBPendulumEnv
+max_steps: 250
+action_cost: 0.001

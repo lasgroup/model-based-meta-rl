@@ -1,3 +1,3 @@
-name: RandomMBReacher3DEnv
+name: RandomMBReacherEnv
 max_steps: 150
 action_cost: 0.001
