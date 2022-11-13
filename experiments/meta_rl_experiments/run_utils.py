@@ -106,7 +106,7 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
     if params.env_load_params_from_file:
         env_params_dir = os.path.join(
             "experiments/meta_rl_experiments/random_env_params",
-            f"{params.env_config_file.replace('-', '_').strip('.yaml')}"
+            f"{params.env_config_file.replace('-', '_').replace('.yaml', '')}"
         )
     else:
         env_params_dir = None
