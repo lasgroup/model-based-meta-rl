@@ -112,8 +112,8 @@ class ParallelGrBALAgent(GrBALAgent):
             params.save_statistics = False
             params.log_to_file = False
             params.use_wandb = False
-            params.model_learn_num_iter = 0
             params.collect_meta_data = True
+            # params.agent_name = 'mpc'
             _, agent = run_utils.get_environment_and_meta_agent(params=params)
             agent.set_meta_environment(meta_env)
         else:
@@ -123,6 +123,7 @@ class ParallelGrBALAgent(GrBALAgent):
         for obs in self.observation_queue.copy():
             agent.observation_queue.append(obs)
         agent.pre_update_model.load_state_dict(self.pre_update_model.state_dict())
+        # agent.dynamical_model.base_model.load_state_dict(self.pre_update_model.module.state_dict())
         return agent
 
     def store_rollout_data(self, agents):
