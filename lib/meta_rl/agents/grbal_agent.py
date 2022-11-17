@@ -39,6 +39,7 @@ class GrBALAgent(MPCAgent):
             num_iter_meta_train: int = 0,
             trajectory_replay_load_path=None,
             multiple_runs_id=0,
+            clip_gradient_val=2.0,
             *args,
             **kwargs
     ):
@@ -58,6 +59,7 @@ class GrBALAgent(MPCAgent):
             self.pre_update_model.parameters(),
             **self.model_optimizer.defaults
         )
+        self.clip_gradient_val = clip_gradient_val
         self.num_iter_meta_train = num_iter_meta_train
 
         self.past_segment_len = past_segment_len
@@ -174,6 +176,7 @@ class GrBALAgent(MPCAgent):
                     dynamical_model=None
                 ).mean() / self.model_learn_batch_size
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.pre_update_model.parameters(), self.clip_gradient_val)
             self.meta_optimizer.step()
             self.logger.update(**{f"{self.dynamical_model.model_kind[:3]}-loss": loss.item()})
         return loss.detach()
