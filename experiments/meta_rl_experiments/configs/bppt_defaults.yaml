@@ -1,0 +1,15 @@
+# Model parameters
+model_non_linearity: "Swish"
+model_opt_lr: 0.001
+model_opt_weight_decay: 0.01
+
+# Critic parameters
+value_function_layers: [400, 400, 400, 400]
+value_function_non_linearity: "Swish"
+
+# Policy parameters
+policy_layers: [400, 400, 400]
+policy_non_linearity: "Swish"
+ppo_opt_lr: 5e-5
+ppo_opt_weight_decay: 1e-5
+

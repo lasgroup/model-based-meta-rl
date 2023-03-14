@@ -7,6 +7,7 @@ from rllib.environment.mujoco.half_cheetah import MBHalfCheetahEnv
 from rllib.environment.mujoco.hopper import MBHopperEnv
 from rllib.environment.mujoco.inverted_double_pendulum import MBInvertedDoublePendulumEnv
 from rllib.environment.mujoco.inverted_pendulum import MBInvertedPendulumEnv
+from rllib.environment.mujoco.pendulum_swing_up import PendulumSwingUpEnv
 from rllib.environment.mujoco.pusher import MBPusherEnv
 from rllib.environment.mujoco.reacher_2d import MBReacherEnv
 from rllib.environment.mujoco.reacher_3d import MBReacher3DEnv

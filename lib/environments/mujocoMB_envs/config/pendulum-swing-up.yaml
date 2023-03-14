@@ -1,0 +1,4 @@
+name: PendulumSwingUp-v0
+max_steps: 250
+action_cost: 0.001
+env_model_name: PendulumSwingUpModel

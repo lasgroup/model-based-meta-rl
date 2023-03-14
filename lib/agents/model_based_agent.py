@@ -21,7 +21,7 @@ from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
 from rllib.util.training.model_learning import train_model as train_model
 
-from lib.datasets.utilities import sample_transitions
+from lib.datasets.utils import sample_transitions
 from lib.model.bayesian_model import BayesianNNModel
 from lib.model.bayesian_model_learning import train_model as bayesian_train_model
 
@@ -31,7 +31,6 @@ class ModelBasedAgent(AbstractAgent):
     Agent for Model based RL
     """
 
-    # TODO: Check if default values make sense.
     def __init__(
             self,
             dynamical_model: AbstractModel,
@@ -71,7 +70,6 @@ class ModelBasedAgent(AbstractAgent):
             tensorboard: bool = False,
             comment: str = ""
     ):
-        self.algorithm = algorithm
         super().__init__(
             train_frequency=0,
             num_rollouts=0,
@@ -286,11 +284,7 @@ class ModelBasedAgent(AbstractAgent):
 
                 self.learn_policy()
 
-    def simulate_model(self):
-        """
-
-        :return:
-        """
+    def sample_initial_states(self):
         initial_states = self.initial_states.sample_batch(
             self.sim_initial_states_num_trajectories
         )
@@ -314,8 +308,14 @@ class ModelBasedAgent(AbstractAgent):
             initial_states_ = obs.state[:, 0, :]
             initial_states = torch.cat((initial_states, initial_states_), dim=0)
 
-        initial_states = initial_states.unsqueeze(0)
+        return initial_states.unsqueeze(0)
 
+    def simulate_model(self):
+        """
+
+        :return:
+        """
+        initial_states = self.sample_initial_states()
         self.policy.reset()
 
         with torch.no_grad():

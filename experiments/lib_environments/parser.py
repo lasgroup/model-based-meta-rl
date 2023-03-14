@@ -32,8 +32,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="mpc",
-        choices=["mpc", "mpc_policy", "ppo", "sac"]
+        default="bptt",
+        choices=["mpc", "mpc_policy", "bptt", "ppo", "sac"]
     )
     parser.add_argument(
         "--exploration",
@@ -92,16 +92,16 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
 
     # Value function parameters
-    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[256, 256])
+    parser.add_argument("--value-function-layers", type=int, nargs="*", default=[400, 400, 400, 400])
     parser.add_argument("--value-function-unbiased-head", action="store_true")
-    parser.add_argument("--value-function-non-linearity", type=str, default="Tanh")
+    parser.add_argument("--value-function-non-linearity", type=str, default="Swish")
     parser.add_argument("--value-function-tau", type=float, default=0)
     parser.add_argument("--value-function-num-heads", type=int, default=2)
 
     # Value function parameters
-    parser.add_argument("--policy-layers", type=int, nargs="*", default=[256, 256])
+    parser.add_argument("--policy-layers", type=int, nargs="*", default=[400, 400, 400])
     parser.add_argument("--policy-unbiased-head", action="store_true")
-    parser.add_argument("--policy-non-linearity", type=str, default="Tanh")
+    parser.add_argument("--policy-non-linearity", type=str, default="Swish")
     parser.add_argument("--policy-tau", type=float, default=0)
     parser.add_argument("--policy-deterministic", action="store_true")
 
@@ -120,8 +120,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
                         choices=["zero", "constant", "mean"], default="constant")
 
     # PPO parameters
-    parser.add_argument("--ppo-opt-lr", type=float, default=3e-4)
-    parser.add_argument("--ppo-opt-weight-decay", type=float, default=0)
+    parser.add_argument("--ppo-opt-lr", type=float, default=5e-5)
+    parser.add_argument("--ppo-opt-weight-decay", type=float, default=1e-5)
     parser.add_argument("--ppo-eta", type=float, default=0.01)
     parser.add_argument("--ppo-clip-gradient-val", type=float, default=2.0)
 

@@ -44,6 +44,15 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
+    elif params.agent_name == "bptt":
+        agent, comment = agents.get_bptt_agent(
+            environment=environment,
+            reward_model=reward_model,
+            transformations=transformations,
+            termination_model=termination_model,
+            params=params,
+            input_transform=None
+        )
     elif params.agent_name == "ppo":
         agent, comment = agents.get_ppo_agent(
             environment=environment,

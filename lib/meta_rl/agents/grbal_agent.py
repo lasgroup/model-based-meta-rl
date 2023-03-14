@@ -14,7 +14,7 @@ from utils.utils import get_project_path
 from lib.agents.mpc_agent import MPCAgent
 from lib.datasets import TrajectoryReplay
 from lib.meta_rl.algorithms.maml import MAML
-from lib.datasets.utilities import get_trajectory_segment
+from lib.datasets.utils import get_trajectory_segment
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 
 
