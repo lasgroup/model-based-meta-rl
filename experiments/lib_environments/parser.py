@@ -42,11 +42,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
         choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
+    parser.add_argument("--agent-config-path", type=str, default="")
 
     # Training Parameters
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--train-episodes", type=int, default=20)
     parser.add_argument("--test-episodes", type=int, default=5)
+    parser.add_argument("--eval-frequency", type=int, default=0)
 
     # Reward parameters
     parser.add_argument("--gamma", type=float, default=1.0)
@@ -81,6 +83,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching",
                         choices=["moment_matching", "sample_multiple_head"])
     parser.add_argument("--use-validation-set", action="store_true")
+    parser.add_argument("--model-include-aleatoric-uncertainty", type=bool, default=True)
 
     # Simulation and replay buffer parameters
     parser.add_argument("--not-bootstrap", action="store_true")
