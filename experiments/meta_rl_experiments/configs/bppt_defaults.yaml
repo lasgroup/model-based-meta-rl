@@ -1,7 +1,13 @@
 # Model parameters
+model_kind: "BayesianNN"
+model_layers: [200, 200, 200, 200]
 model_non_linearity: "Swish"
 model_opt_lr: 0.001
 model_opt_weight_decay: 0.01
+model_learn_num_iter: 500
+model_learn_batch_size: 32
+model_include_aleatoric_uncertainty: False
+model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
 # Critic parameters
 value_function_layers: [400, 400, 400, 400]
@@ -12,3 +18,5 @@ policy_layers: [400, 400, 400]
 policy_non_linearity: "Swish"
 ppo_opt_lr: 5e-5
 ppo_opt_weight_decay: 1e-5
+sim_num_steps: 32
+policy_opt_gradient_steps: 500
