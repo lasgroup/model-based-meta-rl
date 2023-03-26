@@ -20,7 +20,7 @@ from lib.agents.model_based_agent import ModelBasedAgent
 
 
 class BPTTAgent(ModelBasedAgent):
-    """Agent with MPC policy for Model-based RL."""
+    """Agent with BPTT policy for Model-based RL."""
 
     def __init__(
             self,

@@ -26,8 +26,9 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         ActionScaler(scale=environment.action_scale),
     ]
 
-    if params.agent_name == "mpc":
-        agent, comment = agents.get_mpc_agent(
+    if params.agent_name in ["mpc", "mpc_policy", "bptt", "mbpo"]:
+        agent_callable = eval(f"agents.get_{params.agent_name}_agent")
+        agent, comment = agent_callable(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
@@ -35,32 +36,9 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
-    elif params.agent_name == "mpc_policy":
-        agent, comment = agents.get_mpc_policy_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "bptt":
-        agent, comment = agents.get_bptt_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "ppo":
-        agent, comment = agents.get_ppo_agent(
-            environment=environment,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "sac":
-        agent, comment = agents.get_sac_agent(
+    elif params.agent_name in ["ppo", "sac"]:
+        agent_callable = eval(f"agents.get_{params.agent_name}_agent")
+        agent, comment = agent_callable(
             environment=environment,
             params=params,
             input_transform=None

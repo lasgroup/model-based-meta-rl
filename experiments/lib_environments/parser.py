@@ -32,8 +32,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="bptt",
-        choices=["mpc", "mpc_policy", "bptt", "ppo", "sac"]
+        default="mbpo",
+        choices=["mpc", "mpc_policy", "bptt", "ppo", "sac", "mbpo"]
     )
     parser.add_argument(
         "--exploration",
@@ -90,6 +90,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
+    parser.add_argument("--sim-n-envs", type=int, default=8)
 
     # Value function parameters
     parser.add_argument("--value-function-layers", type=int, nargs="*", default=[400, 400, 400, 400])

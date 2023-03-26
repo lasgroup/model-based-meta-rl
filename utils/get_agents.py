@@ -15,15 +15,15 @@ from rllib.dataset import ExperienceReplay
 from rllib.dataset.transforms import AbstractTransform
 from rllib.environment.abstract_environment import AbstractEnvironment
 
+from lib.algorithms.sb3_sac import SB3_SAC
 import lib.meta_rl.agents.parallel_pacoh_agent
 import lib.meta_rl.agents.parallel_grbal_agent
-
-from lib.agents.bptt_agent import BPTTAgent
-from lib.agents import MPCAgent, MPCPolicyAgent
 from lib.environments.mujocoMB_envs.models.utils import get_env_model
+from lib.agents import MPCAgent, MPCPolicyAgent, MBPOAgent, BPTTAgent
 from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent
-from utils.get_learners import get_model, get_value_function, get_q_function, get_mpc_policy, get_nn_policy, \
-    get_recurrent_value_function, get_rnn_policy
+from lib.environments.wrappers.model_based_environment import ModelBasedEnvironment
+
+from utils.get_learners import *
 from utils.utils import get_dataset_path
 
 
@@ -349,6 +349,93 @@ def get_bptt_agent(
         max_memory=params.max_memory,
         gamma=params.gamma,
         td_lambda=0.95,
+        comment=comment,
+    )
+
+    return agent, comment
+
+
+def get_mbpo_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        termination_model: Callable = None,
+        input_transform: nn.Module = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[MBPOAgent, str]:
+    """
+    Get an MBPO agent
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param termination_model: Early termination check
+    :param input_transform: Input transformation
+    :param initial_distribution: Distribution for initial exploration
+    :return: An MPC based agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define dynamics model
+    dynamical_model = get_model(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        transformations=transformations,
+        input_transform=input_transform,
+        params=params
+    )
+
+    # Define model optimizer
+    try:
+        model_optimizer = optim.Adam(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = optim.Adam(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+
+    model_based_env = ModelBasedEnvironment(
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        action_scale=environment.action_scale,
+        num_envs=params.sim_n_envs,
+        sim_num_steps=params.sim_num_steps,
+        initial_states_distribution=None,
+    )
+
+    policy = SB3_SAC(
+        learned_env=model_based_env,
+        params=params
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    agent = MBPOAgent(
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        termination_model=termination_model,
+        model_based_env=model_based_env,
+        policy=policy,
+        model_optimizer=model_optimizer,
+        exploration_scheme=params.exploration,
+        use_validation_set=params.use_validation_set,
+        initial_distribution=initial_distribution,
+        model_learn_num_iter=params.model_learn_num_iter,
+        max_memory=params.max_memory,
+        gamma=params.gamma,
         comment=comment,
     )
 

@@ -1,6 +1,6 @@
 import contextlib
 from dataclasses import asdict
-from typing import Callable
+from typing import Callable, Union
 
 import torch
 import gpytorch
@@ -8,6 +8,7 @@ import numpy as np
 from tqdm import tqdm
 from gym.utils import colorize
 
+from stable_baselines3.common.base_class import BaseAlgorithm
 from rllib.agent.abstract_agent import AbstractAgent
 from rllib.algorithms.abstract_algorithm import AbstractAlgorithm
 from rllib.dataset import BootstrapExperienceReplay, StateExperienceReplay
@@ -38,8 +39,8 @@ class ModelBasedAgent(AbstractAgent):
             termination_model: Callable,
             model_optimizer: torch.optim.Optimizer,
             algorithm: AbstractAlgorithm,
-            value_function: AbstractValueFunction,
-            policy: AbstractPolicy,
+            value_function: Union[AbstractValueFunction, None],
+            policy: Union[AbstractPolicy, None],
             model_learn_num_iter: int = 0,
             model_learn_batch_size: int = 32,
             use_validation_set: bool = False,
