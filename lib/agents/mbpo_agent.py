@@ -102,7 +102,7 @@ class MBPOAgent(ModelBasedAgent):
             callback=callback
         )
 
-        self.policy.reset_buffer()  # TODO: Discuss this
+        # self.policy.reset_buffer()  # TODO: Discuss this
 
     def save(self, filename, directory=None):
         pass

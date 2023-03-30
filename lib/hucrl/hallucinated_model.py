@@ -18,7 +18,7 @@ class HallucinatedModel(TransformedModel):
         dim_action, dim_state = self.a_dim_action[0], self.dim_state[0]
         control_action = action[..., :dim_action]
 
-        optimism_vars = action[..., dim_action : dim_action + dim_state]
+        optimism_vars = action[..., dim_action : dim_action + dim_state].clone()
         optimism_vars = torch.clamp(optimism_vars, -1.0, 1.0)
 
         mean, tril = self.predict(state, control_action)
