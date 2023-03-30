@@ -16,7 +16,7 @@ value_function_non_linearity: "Swish"
 # Policy parameters
 policy_layers: [400, 400, 400]
 policy_non_linearity: "Swish"
-ppo_opt_lr: 5e-5
-ppo_opt_weight_decay: 1e-5
+ppo_opt_lr: 0.00005
+ppo_opt_weight_decay: 0.00001
 sim_num_steps: 32
 policy_opt_gradient_steps: 500

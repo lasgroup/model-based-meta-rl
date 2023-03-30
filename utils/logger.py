@@ -11,6 +11,8 @@ import torch
 import wandb
 from numpy import bool_
 
+from utils import WANDB_API_KEY, WANDB_PROJECT, WANDB_ENTITY
+
 
 def safe_make_dir(dir_name):
     """Create a new directory safely."""
@@ -74,10 +76,11 @@ class Logger(object):
         self.file = os.path.join(log_dir, filename)
 
         if offline_mode:
-            os.environ["WANDB_API_KEY"] = os.getenv("WANDB_API_KEY")
+            os.environ["WANDB_API_KEY"] = WANDB_API_KEY
         if use_wandb:
             wandb.init(
-                project="Meta-MBRL",
+                entity=WANDB_ENTITY,
+                project=WANDB_PROJECT,
                 name=name,
                 notes=comment,
                 dir=log_dir,
