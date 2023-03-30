@@ -30,9 +30,6 @@ class SB3_SAC(SAC):
 
         self.action_scale = learned_env.action_scale
 
-        if not params.offline_logger:
-            wandb.init()
-
     def reset_buffer(self):
         self.replay_buffer.reset()
 
