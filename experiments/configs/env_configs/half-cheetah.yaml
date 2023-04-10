@@ -1,0 +1,41 @@
+# Experiment parameters
+training:
+
+  # Environment parameters
+  max_steps: 1000
+  action_cost: 0.1
+
+  # Training parameters
+  train_episodes: 250
+  test_episodes: 20
+
+
+# Agent parameters
+mbpo:
+
+  # Model parameters
+  model_kind: "BayesianNN"
+  model_layers: [200, 200, 200, 200]
+  model_non_linearity: "ReLU"
+  model_opt_lr: 0.001
+  model_opt_weight_decay: 0.0
+  model_learn_num_iter: 2000
+  model_learn_batch_size: 32
+  model_include_aleatoric_uncertainty: False
+  model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
+
+  # Critic parameters
+  value_function_layers: [400, 400]
+  value_function_non_linearity: "Swish"
+
+  # Policy parameters
+  gamma: 0.99
+  policy_layers: [400, 400]
+  policy_non_linearity: "Swish"
+  ppo_opt_lr: 0.0005
+  policy_tau: 0.005
+  policy_opt_gradient_steps: 200000
+  policy_train_freq: 1
+  policy_grad_steps: 1
+  sac_use_sde: True
+  sim_num_steps: 32
