@@ -22,7 +22,6 @@ if __name__ == "__main__":
     with open(
             os.path.join(
                 params["agent_config_path"],
-                "env_configs",
                 params["env_config_file"]
             ),
             "r"

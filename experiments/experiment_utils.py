@@ -14,7 +14,7 @@ import multiprocessing
 
 from distutils.dir_util import copy_tree
 from typing import Dict, Optional, Any, List
-from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
+from experiments import AGENT_CONFIG_PATH
 
 """ Relevant Directories """
 
