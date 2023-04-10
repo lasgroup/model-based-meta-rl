@@ -34,6 +34,7 @@ class SB3_SAC(SAC):
         )
 
         self.action_scale = learned_env.action_scale
+        self.num_steps_per_update = params.policy_train_freq / float(params.policy_grad_steps)
 
     def reset_buffer(self):
         self.replay_buffer.reset()

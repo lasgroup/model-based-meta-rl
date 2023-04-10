@@ -70,7 +70,7 @@ class MBPOAgent(ModelBasedAgent):
         self.model_based_env.set_initial_distribution(self.sample_initial_states)
         self.pi = None
 
-        self.num_learn_steps = self.policy.train_freq * self.policy_opt_gradient_steps / self.policy.gradient_steps
+        self.num_learn_steps = self.policy.num_steps_per_update * self.policy_opt_gradient_steps
 
     def act(self, state: torch.Tensor) -> torch.Tensor:
         """
