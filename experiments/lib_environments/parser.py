@@ -76,8 +76,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-unbiased-head", action="store_true")
     parser.add_argument("--model-heteroscedastic", type=bool, default=True)
     parser.add_argument("--model-non-linearity", type=str, default="Tanh")
-    parser.add_argument("--model-opt-lr", type=float, default=3e-4)
-    parser.add_argument("--model-opt-weight-decay", type=float, default=0.01)
+    parser.add_argument("--model-opt-lr", type=float, default=1e-3)
+    parser.add_argument("--model-opt-weight-decay", type=float, default=0.0)
     parser.add_argument("--model-learn-num-iter", type=int, default=50)
     parser.add_argument("--model-learn-batch-size", type=int, default=32)
     parser.add_argument("--model-prediction-strategy", type=str, default="moment_matching",
@@ -93,7 +93,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-memory-num-trajectories", type=int, default=0)
-    parser.add_argument("--sim-n-envs", type=int, default=8)
+    parser.add_argument("--sim-n-envs", type=int, default=32)
 
     # Value function parameters
     parser.add_argument("--value-function-layers", type=int, nargs="*", default=[400, 400, 400, 400])
@@ -102,19 +102,22 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--value-function-tau", type=float, default=0)
     parser.add_argument("--value-function-num-heads", type=int, default=2)
 
-    # Value function parameters
+    # Policy parameters
     parser.add_argument("--policy-layers", type=int, nargs="*", default=[400, 400, 400])
+    parser.add_argument("--policy-opt-gradient-steps", type=int, default=500)
     parser.add_argument("--policy-unbiased-head", action="store_true")
     parser.add_argument("--policy-non-linearity", type=str, default="Swish")
-    parser.add_argument("--policy-tau", type=float, default=0)
+    parser.add_argument("--policy-tau", type=float, default=0.005)
     parser.add_argument("--policy-deterministic", action="store_true")
+    parser.add_argument("--policy-grad-steps", type=int, default=1)
+    parser.add_argument("--policy-train-freq", type=int, default=1)
 
     # MPC parameters
     parser.add_argument("--mpc-solver", type=str, choices=["cem", "icem", "pets"], default="icem")
     parser.add_argument("--mpc-policy", type=str, choices=["ppo", "sac"], default="ppo")
     parser.add_argument("--mpc-num-iter", type=int, default=5)
-    parser.add_argument("--mpc-num-particles", type=int, default=400)
-    parser.add_argument("--mpc-num-elites", type=int, default=10)
+    parser.add_argument("--mpc-num-particles", type=int, default=1000)
+    parser.add_argument("--mpc-num-elites", type=int, default=50)
     parser.add_argument("--mpc-pets-trajectory-samples", type=int, default=5)
     parser.add_argument("--mpc-horizon", type=int, default=16)
     parser.add_argument("--mpc-alpha", type=float, default=0.1)
@@ -133,6 +136,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sac-opt-lr", type=float, default=3e-4)
     parser.add_argument("--sac-opt-weight-decay", type=float, default=0)
     parser.add_argument("--sac-memory-len", type=int, default=100000)
+    parser.add_argument("--sac-use-sde", type=bool, default=False)
 
     # Planning parameters
 

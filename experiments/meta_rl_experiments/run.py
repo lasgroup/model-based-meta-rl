@@ -6,8 +6,8 @@ import numpy as np
 
 from dotmap import DotMap
 
+from experiments import AGENT_CONFIG_PATH
 from lib.environments import ENVIRONMENTS_PATH
-from experiments.meta_rl_experiments import AGENT_CONFIG_PATH
 from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 from experiments.meta_rl_experiments.parser import get_argument_parser
 from utils.train_and_evaluate import train_and_evaluate_agent

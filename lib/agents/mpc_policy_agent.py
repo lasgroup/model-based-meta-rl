@@ -52,7 +52,7 @@ class MPCPolicyAgent(ModelBasedAgent):
             model_learn_batch_size=32,
             bootstrap=True,
             policy_opt_num_iter=1,
-            policy_opt_batch_size=4,
+            policy_opt_batch_size=32,
             policy_opt_gradient_steps=policy_opt_gradient_steps,
             policy_opt_target_update_frequency=4,
             policy_update_frequency=1,

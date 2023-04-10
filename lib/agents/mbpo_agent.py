@@ -70,6 +70,8 @@ class MBPOAgent(ModelBasedAgent):
         self.model_based_env.set_initial_distribution(self.sample_initial_states)
         self.pi = None
 
+        self.num_learn_steps = self.policy.train_freq * self.policy_opt_gradient_steps / self.policy.gradient_steps
+
     def act(self, state: torch.Tensor) -> torch.Tensor:
         """
         :param state:
@@ -97,12 +99,12 @@ class MBPOAgent(ModelBasedAgent):
             callback = None
 
         self.policy.learn(
-            total_timesteps=40000,
+            total_timesteps=self.num_learn_steps,
             log_interval=5,
             callback=callback
         )
 
-        # self.policy.reset_buffer()  # TODO: Discuss this
+        # self.policy.reset_buffer()  # Clear buffer after every
 
     def save(self, filename, directory=None):
         pass

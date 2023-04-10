@@ -25,6 +25,11 @@ class SB3_SAC(SAC):
             policy="MlpPolicy",
             env=learned_env,
             learning_rate=params.ppo_opt_lr,
+            gamma=params.gamma,
+            tau=params.policy_tau,
+            gradient_steps=params.policy_grad_steps,
+            train_freq=params.policy_train_freq,
+            use_sde=params.sac_use_sde,
             policy_kwargs=policy_kwargs
         )
 

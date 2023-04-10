@@ -5,6 +5,8 @@ import os
 import stat
 import json
 import glob
+import time
+
 import numpy as np
 import pandas as pd
 import subprocess
@@ -21,7 +23,7 @@ RESULT_DIR = os.path.join(BASE_DIR, 'results')
 
 LONGER = 119
 LONG = 119
-SHORT = 7
+SHORT = 23
 
 class AsyncExecutor:
     """ Async executer """
@@ -165,6 +167,7 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
                     os.chmod('temp_script.sh', st.st_mode | stat.S_IEXEC)
                     os.system(f"sbatch temp_script.sh")
                     os.system('rm temp_script.sh')
+                time.sleep(0.1)
 
     elif mode == 'local':
         if promt:
