@@ -12,7 +12,7 @@ from utils.utils import get_project_path
 from rllib.dataset import stack_list_of_tuples
 from rllib.util.training.utilities import get_model_validation_score
 
-from lib.agents import MPCAgent
+from lib.agents import MBPOAgent
 from lib.datasets import TrajectoryReplay
 from lib.model.bayesian_model import BayesianNNModel
 from lib.model.bayesian_model_learning import train_bayesian_nn_step
@@ -27,7 +27,7 @@ Add plot trajectories and axis
 """
 
 
-class PACOHAgent(MPCAgent):
+class PACOHAgent(MBPOAgent):
     """
     Implementation of the Meta MBRL Agent based on PACOH.
 
@@ -45,6 +45,7 @@ class PACOHAgent(MPCAgent):
             num_iter_meta_train: int = 20000,
             num_iter_meta_test: int = 2000,
             num_iter_eval_train=20,
+            num_learn_eval_steps=400,
             n_samples_per_prior=10,
             num_hyper_posterior_particles=3,
             num_posterior_particles=5,
@@ -108,6 +109,8 @@ class PACOHAgent(MPCAgent):
         self.num_iter_meta_test = num_iter_meta_test
         self.num_iter_meta_train = num_iter_meta_train
         self.num_iter_eval_train = num_iter_eval_train
+        self.num_learn_eval_steps = num_learn_eval_steps
+        self.num_learn_steps_on_trial = 5 * self.num_learn_steps
         self.early_stopping = early_stopping
         self.meta_batch_size = meta_batch_size
         self.per_task_batch_size = per_task_batch_size
@@ -170,7 +173,10 @@ class PACOHAgent(MPCAgent):
 
     def act(self, state: torch.Tensor) -> torch.Tensor:
         if (not self.training) and self.fit_at_step:
-            self.fit_task(num_iter_eval_train=self.num_iter_eval_train)
+            self.fit_task(
+                num_iter_eval_train=self.num_iter_eval_train,
+                num_learn_eval_steps=self.num_learn_eval_steps
+            )
         return super().act(state)
 
     def start_episode(self):
@@ -183,7 +189,10 @@ class PACOHAgent(MPCAgent):
         self.dataset.end_episode()
         if (not self.training) and (not self.fit_at_step):
             # TODO: If not training, train using dataset (instead of observation queue) and also learn policy
-            self.fit_task(num_iter_eval_train=self.model_learn_num_iter)
+            self.fit_task(
+                num_iter_eval_train=self.model_learn_num_iter,
+                num_learn_eval_steps=self.num_learn_steps
+            )
         super().end_episode()
 
     def train(self, val=True):
@@ -207,8 +216,10 @@ class PACOHAgent(MPCAgent):
         self.model_optimizer = type(self.model_optimizer)(
             [self.dynamical_model.base_model.particles], **self.model_optimizer.defaults
         )
+        self.policy.reset_buffer()
+        self.simulate_and_learn_policy(self.num_learn_steps_on_trial)
 
-    def fit_task(self, num_iter_eval_train=None):
+    def fit_task(self, num_iter_eval_train=None, num_learn_eval_steps=None):
         self.dynamical_model.train()
         if len(self.observation_queue) > 0:
             for num_iter in range(num_iter_eval_train):
@@ -220,6 +231,7 @@ class PACOHAgent(MPCAgent):
                     observation=eval_observations,
                     optimizer=self.model_optimizer
                 )
+            self.simulate_and_learn_policy(learn_steps=num_learn_eval_steps)
 
     def get_meta_batch(self, dataset=None):
         if dataset is None:

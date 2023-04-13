@@ -2,9 +2,11 @@ from typing import Callable
 
 import torch
 
-from rllib.model import AbstractModel
-from stable_baselines3.common.base_class import BaseAlgorithm
+from gym.utils import colorize
 from wandb.integration.sb3 import WandbCallback
+from stable_baselines3.common.base_class import BaseAlgorithm
+
+from rllib.model import AbstractModel
 
 from lib.agents.model_based_agent import ModelBasedAgent
 from lib.environments.wrappers.model_based_environment import ModelBasedEnvironment
@@ -25,6 +27,7 @@ class MBPOAgent(ModelBasedAgent):
             exploration_scheme: str = "greedy",
             use_validation_set: bool = False,
             model_learn_num_iter: int = 50,
+            model_learn_batch_size: int = 32,
             policy_opt_gradient_steps: int = 500,
             sim_num_steps: int = 32,
             max_memory: int = 10000,
@@ -46,7 +49,7 @@ class MBPOAgent(ModelBasedAgent):
             plan_samples=16,
             plan_elites=1,
             model_learn_num_iter=model_learn_num_iter,
-            model_learn_batch_size=32,
+            model_learn_batch_size=model_learn_batch_size,
             bootstrap=True,
             policy_opt_num_iter=1,
             policy_opt_batch_size=4,   # 4
@@ -91,7 +94,11 @@ class MBPOAgent(ModelBasedAgent):
 
         return action.clip(-action_scale, +action_scale)
 
-    def simulate_and_learn_policy(self):
+    def simulate_and_learn_policy(self, learn_steps=None):
+
+        print(colorize("\nOptimizing policy with simulated data from the model", "yellow"))
+
+        self.dynamical_model.eval()
 
         if self.logger.use_wandb:
             callback = WandbCallback()
@@ -99,7 +106,7 @@ class MBPOAgent(ModelBasedAgent):
             callback = None
 
         self.policy.learn(
-            total_timesteps=self.num_learn_steps,
+            total_timesteps=learn_steps or self.num_learn_steps,
             log_interval=5,
             callback=callback
         )

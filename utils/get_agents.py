@@ -909,25 +909,18 @@ def get_pacoh_agent(
             weight_decay=params.model_opt_weight_decay,
         )
 
-    # Define value function.
-    value_function = get_value_function(
-        dim_state=dim_state,
-        dim_action=dim_action,
-        num_states=num_states,
-        num_actions=num_actions,
-        params=params,
-        input_transform=input_transform
-    )
-    terminal_reward = value_function if params.mpc_terminal_reward else None
-
-    # Define policy
-    policy = get_mpc_policy(
+    model_based_env = ModelBasedEnvironment(
         dynamical_model=dynamical_model,
-        reward=reward_model,
-        params=params,
+        reward_model=reward_model,
         action_scale=environment.action_scale,
-        terminal_reward=terminal_reward,
-        termination_model=termination_model
+        num_envs=params.sim_n_envs,
+        sim_num_steps=params.sim_num_steps,
+        initial_states_distribution=None,
+    )
+
+    policy = SB3_SAC(
+        learned_env=model_based_env,
+        params=params
     )
 
     # Define Agent
@@ -941,10 +934,16 @@ def get_pacoh_agent(
         trajectory_load_path = None
 
     agent = PACOHAgent(
-        mpc_policy=policy,
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        termination_model=termination_model,
+        model_based_env=model_based_env,
+        policy=policy,
+        policy_opt_gradient_steps=params.policy_opt_gradient_steps,
+        sim_num_steps=params.sim_num_steps,
+        gamma=params.gamma,
         model_optimizer=model_optimizer,
         initial_distribution=initial_distribution,
-        gamma=params.gamma,
         exploration_scheme=params.exploration,
         model_learn_num_iter=params.model_learn_num_iter,
         model_learn_batch_size=params.model_learn_batch_size,
@@ -1015,25 +1014,18 @@ def get_parallel_pacoh_agent(
             weight_decay=params.model_opt_weight_decay,
         )
 
-    # Define value function.
-    value_function = get_value_function(
-        dim_state=dim_state,
-        dim_action=dim_action,
-        num_states=num_states,
-        num_actions=num_actions,
-        params=params,
-        input_transform=input_transform
-    )
-    terminal_reward = value_function if params.mpc_terminal_reward else None
-
-    # Define policy
-    policy = get_mpc_policy(
+    model_based_env = ModelBasedEnvironment(
         dynamical_model=dynamical_model,
-        reward=reward_model,
-        params=params,
+        reward_model=reward_model,
         action_scale=environment.action_scale,
-        terminal_reward=terminal_reward,
-        termination_model=termination_model
+        num_envs=params.sim_n_envs,
+        sim_num_steps=params.sim_num_steps,
+        initial_states_distribution=None,
+    )
+
+    policy = SB3_SAC(
+        learned_env=model_based_env,
+        params=params
     )
 
     # Define Agent
@@ -1047,10 +1039,16 @@ def get_parallel_pacoh_agent(
         trajectory_load_path = None
 
     agent = lib.meta_rl.agents.parallel_pacoh_agent.ParallelPACOHAgent(
-        mpc_policy=policy,
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        termination_model=termination_model,
+        model_based_env=model_based_env,
+        policy=policy,
+        policy_opt_gradient_steps=params.policy_opt_gradient_steps,
+        sim_num_steps=params.sim_num_steps,
+        gamma=params.gamma,
         model_optimizer=model_optimizer,
         initial_distribution=initial_distribution,
-        gamma=params.gamma,
         exploration_scheme=params.exploration,
         num_iter_meta_train=params.pacoh_num_iter_meta_train,
         num_iter_eval_train=params.pacoh_num_iter_eval_train,

@@ -26,7 +26,7 @@ def set_tasks(envs, meta_environment):
 
 
 def get_parallel_environments_and_agents(params):
-    params.agent_name = 'mpc'
+    params.agent_name = 'mbpo'
     params.safe_log_dir = False
     params.log_to_file = False
     params.save_statistics = False
