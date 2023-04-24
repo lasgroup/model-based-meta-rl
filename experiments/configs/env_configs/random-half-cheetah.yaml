@@ -2,7 +2,7 @@
 training:
 
   # Environment parameters
-  name: MBHalfCheetah-v0
+  name: RandomMBHalfCheetahEnv
   max_steps: 1000
   action_cost: 0.1
 

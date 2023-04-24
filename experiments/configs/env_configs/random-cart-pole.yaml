@@ -2,7 +2,7 @@
 training:
 
   # Environment parameters
-  name: MBCartPole-v0
+  name: RandomMBCartPoleEnv
   max_steps: 200
   action_cost: 0.01
 
