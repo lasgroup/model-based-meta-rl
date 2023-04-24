@@ -11,9 +11,9 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ['random-ant.yaml', 'random-half-cheetah.yaml'],
-    "agent-name": ['parallel_pacoh'],
-    "exploration": ['optimistic']
+    "env-config-file": ['cart-pole-mujoco.yaml', 'half-cheetah.yaml', 'pusher.yaml', 'pendulum-swing-up.yaml'],
+    "agent-name": ['mbpo'],
+    "exploration": ['greedy', 'optimistic']
 })
 
 
@@ -44,12 +44,8 @@ def main(args):
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
 
-        if flags['agent-name'] == 'parallel_pacoh':
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
-        elif flags['agent-name'] == 'parallel_grbal':
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')
-        else:
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run.py')
+        # Also select correct wandb project in utils.
+        run_file_path = os.path.abspath('experiments/lib_environments/run.py')
 
         for j in range(args.num_seeds_per_hparam):
             seed = init_seeds[j]
@@ -58,7 +54,6 @@ def main(args):
             if flags_['exploration'] == 'greedy':
                 flags_['exp_name'] = flags_['exp_name'].replace('opt', 'gre')
             flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            flags_['multiple-runs-id'] = j
             cmd = generate_base_command(run_file_path, flags=flags_)
             command_list.append(cmd)
 
@@ -90,14 +85,11 @@ if __name__ == '__main__':
     parser.add_argument(
         "--env-group",
         type=str,
-        default="random_mujocoMB_envs",
+        default="mujocoMB_envs",
         choices=["gym_envs", "mujocoMB_envs", "random_mujocoMB_envs", "point_envs"]
     )
     parser.add_argument("--eval-frequency", type=int, default=0)
     parser.add_argument("--skip-early-termination", action="store_true")
-
-    # Meta Learning Parameters
-    parser.add_argument("--env-random-scale-limit", type=float, default=3.0)
 
     parser.add_argument("--use-action-cost", action="store_true")
 
