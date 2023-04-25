@@ -286,9 +286,10 @@ class ModelBasedAgent(AbstractAgent):
                 self.learn_policy()
 
     def sample_initial_states(self):
-        initial_states = self.initial_states.sample_batch(
-            self.sim_initial_states_num_trajectories
-        )
+        if self.sim_initial_states_num_trajectories > 0:
+            initial_states = self.initial_states.sample_batch(
+                self.sim_initial_states_num_trajectories
+            )
 
         if self.sim_initial_dist_num_trajectories > 0:
             if self.initial_distribution is not None:

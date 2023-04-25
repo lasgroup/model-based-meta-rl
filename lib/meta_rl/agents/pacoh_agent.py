@@ -54,6 +54,8 @@ class PACOHAgent(MBPOAgent):
             hyper_prior_log_var_mean=-3.0,
             hyper_prior_likelihood_log_var_mean_mean=-8,
             hyper_prior_likelihood_log_var_log_var_mean=-4.,
+            sim_initial_states_num_trajectories=0,
+            sim_memory_num_trajectories=256,
             meta_batch_size=4,
             per_task_batch_size=8,
             eval_num_context_samples=32,
@@ -86,6 +88,9 @@ class PACOHAgent(MBPOAgent):
             self.save_data = False
         else:
             self.save_data = True
+
+        self.sim_initial_states_num_trajectories = sim_initial_states_num_trajectories,
+        self.sim_memory_num_trajectories = sim_memory_num_trajectories
 
         self.observation_queue = deque([], 50000)
 
