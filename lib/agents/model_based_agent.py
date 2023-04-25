@@ -290,6 +290,8 @@ class ModelBasedAgent(AbstractAgent):
             initial_states = self.initial_states.sample_batch(
                 self.sim_initial_states_num_trajectories
             )
+        else:
+            initial_states = torch.tensor([])
 
         if self.sim_initial_dist_num_trajectories > 0:
             if self.initial_distribution is not None:

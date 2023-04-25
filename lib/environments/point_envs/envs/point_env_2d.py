@@ -82,7 +82,7 @@ class PointEnv2D(AbstractEnvironment):
             return torch.logical_and(torch.abs(obs[:, 0]) < 0.01, torch.abs(obs[:, 1]) < 0.01)
 
     def reward(self, obs, act, obs_next):
-        return self._reward_model(obs_next, act)[0].item()
+        return self._reward_model(obs, act, obs_next)[0].item()
 
     def reward_model(self):
         return self._reward_model.copy()
@@ -118,7 +118,7 @@ class PointEnv2DReward(StateActionReward):
 
     def state_reward(self, state, next_state=None):
         """Get reward that corresponds to the states."""
-        if state.ndim == 1:
-            return -torch.sqrt(state[0] ** 2 + state[1] ** 2)
+        if next_state.ndim == 1:
+            return -torch.sqrt(next_state[0] ** 2 + next_state[1] ** 2)
         else:
-            return -torch.sqrt(state[..., 0] ** 2 + state[..., 1] ** 2)
+            return -torch.sqrt(next_state[..., 0] ** 2 + next_state[..., 1] ** 2)

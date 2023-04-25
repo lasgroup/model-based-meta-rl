@@ -32,7 +32,7 @@ def train_and_evaluate_agent(environment, agent, params):
 
         agent.logger.export_to_json()  # Save statistics.
 
-        # %% Test agent.
+        # Test agent.
         metrics = dict()
         evaluate_agent(
             agent,

@@ -8,6 +8,7 @@ from rllib.util.rollout import rollout_episode
 
 @ray.remote
 def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, render=False, use_early_termination=True):
+    serialize_replay_buffer(agent.policy.replay_buffer)
     for episode in range(num_episodes):
         rollout_episode(
             environment=environment,
@@ -31,6 +32,15 @@ def add_dataset(agent, dataset):
 def train_agent(agent):
     agent.learn()
     return agent
+
+
+def serialize_replay_buffer(buffer):
+    buffer.observations = buffer.observations.copy()
+    buffer.next_observations = buffer.next_observations.copy()
+    buffer.actions = buffer.actions.copy()
+    buffer.rewards = buffer.rewards.copy()
+    buffer.dones = buffer.dones.copy()
+    buffer.timeouts = buffer.timeouts.copy()
 
 
 def auto_garbage_collect(pct=80.0):

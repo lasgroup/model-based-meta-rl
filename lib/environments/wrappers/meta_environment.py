@@ -125,8 +125,9 @@ class MetaEnvironmentWrapper:
     def load_params_from_file(self, num_tasks, rel_params_dir, offset=0, mode='train'):
         params_file = os.path.join(get_project_path(), rel_params_dir, f'{mode}.npz')
         params = np.load(params_file, allow_pickle=True)['arr_0']
-        offset_ = offset if num_tasks == 1 else 0
+        offset_ = offset if num_tasks == 1 else 0  # Always use the first 5 tasks for testing
         idx = np.arange(num_tasks) + offset_
+        # # Use this for data collection
         # if num_tasks < 10:
         #     idx = np.arange(num_tasks) + offset * 3
         # else:
