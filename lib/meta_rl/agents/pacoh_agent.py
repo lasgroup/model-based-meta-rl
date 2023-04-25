@@ -89,7 +89,7 @@ class PACOHAgent(MBPOAgent):
         else:
             self.save_data = True
 
-        self.sim_initial_states_num_trajectories = sim_initial_states_num_trajectories,
+        self.sim_initial_states_num_trajectories = sim_initial_states_num_trajectories
         self.sim_memory_num_trajectories = sim_memory_num_trajectories
 
         self.observation_queue = deque([], 50000)
