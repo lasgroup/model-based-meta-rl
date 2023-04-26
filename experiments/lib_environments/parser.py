@@ -87,8 +87,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
 
     # Simulation and replay buffer parameters
     parser.add_argument("--not-bootstrap", action="store_true")
-    parser.add_argument("--max-memory", type=int, default=10000)
-    parser.add_argument("--sim-max-memory", type=int, default=10000)
+    parser.add_argument("--max-memory", type=int, default=500000)
+    parser.add_argument("--sim-max-memory", type=int, default=500000)
     parser.add_argument("--sim-num-steps", type=int, default=16)
     parser.add_argument("--sim-initial-dist-num-trajectories", type=int, default=8)
     parser.add_argument("--sim-initial-states-num-trajectories", type=int, default=8)
@@ -137,6 +137,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sac-opt-weight-decay", type=float, default=0)
     parser.add_argument("--sac-memory-len", type=int, default=100000)
     parser.add_argument("--sac-use-sde", type=bool, default=False)
+    parser.add_argument("--sac-ent-coef", type=str, default="auto")
 
     # Planning parameters
 

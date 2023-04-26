@@ -92,4 +92,5 @@ mbpo:
   policy_train_freq: 10
   policy_grad_steps: 1
   sac_use_sde: False
+  sac_ent_coef: "auto"
   sim_num_steps: 32
