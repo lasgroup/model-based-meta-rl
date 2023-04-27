@@ -59,6 +59,8 @@ class MBPOAgent(ModelBasedAgent):
             optimizer=None,
             max_memory=max_memory,
             sim_num_steps=sim_num_steps,
+            sim_initial_states_num_trajectories=0,
+            sim_memory_num_trajectories=256,
             sim_refresh_interval=400,
             initial_distribution=initial_distribution,
             exploration_scheme=exploration_scheme,
