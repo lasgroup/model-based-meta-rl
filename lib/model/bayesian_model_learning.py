@@ -4,7 +4,7 @@ import torch
 from rllib.dataset.datatypes import Observation
 from rllib.util.early_stopping import EarlyStopping
 from rllib.util.training.utilities import get_target, get_model_validation_score, calibration_score, \
-    sharpness
+    sharpness, get_norm_model_validation_score
 from tqdm import tqdm
 
 from lib.model.bayesian_model import BayesianNNModel
@@ -76,13 +76,14 @@ def _validate_model_step(model, observation, logger, dynamical_model=None):
     if not isinstance(observation, Observation):
         observation = Observation(**observation)
     observation.action = observation.action[..., : model.dim_action[0]]
-    _, mse, sharpness_, calibration_score_ = get_model_validation_score(
+    _, mse, nmae, sharpness_, calibration_score_ = get_norm_model_validation_score(
         model, observation, dynamical_model=dynamical_model
     )
 
     logger.update(
         **{
             f"{model.model_kind[:3]}-val-mse": mse,
+            f"{model.model_kind[:3]}-norm-mae": nmae,
             f"{model.model_kind[:3]}-sharp": sharpness_,
             f"{model.model_kind[:3]}-calib": calibration_score_,
         }
