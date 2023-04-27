@@ -72,6 +72,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offline-logger", action="store_true")
     parser.add_argument("--use-wandb", action="store_true")
     parser.add_argument("--exp-name", type=str, default="test_exp")
+    parser.add_argument("--wandb-project", type=str, default="Meta-MBRL")
 
     # Model parameters
     parser.add_argument("--model-kind", type=str, default="ProbabilisticNN")

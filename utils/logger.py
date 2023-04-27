@@ -48,6 +48,7 @@ class Logger(object):
         save_statistics=False,
         log_episodes=False,
         use_wandb=True,
+        project=None,
         offline_mode=False
     ):
 
@@ -77,10 +78,12 @@ class Logger(object):
 
         if offline_mode:
             os.environ["WANDB_API_KEY"] = WANDB_API_KEY
+        if project is None:
+            project = WANDB_PROJECT
         if use_wandb:
             wandb.init(
                 entity=WANDB_ENTITY,
-                project=WANDB_PROJECT,
+                project=project,
                 name=name,
                 notes=comment,
                 dir=log_dir,
