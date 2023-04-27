@@ -24,12 +24,14 @@ def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, re
 
 @ray.remote
 def add_dataset(agent, dataset):
+    serialize_replay_buffer(agent.policy.replay_buffer)
     agent.dataset.add_dataset(dataset)
     return agent
 
 
 @ray.remote
 def train_agent(agent):
+    serialize_replay_buffer(agent.policy.replay_buffer)
     agent.learn()
     return agent
 
