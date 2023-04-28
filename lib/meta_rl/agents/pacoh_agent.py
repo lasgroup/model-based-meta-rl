@@ -208,8 +208,9 @@ class PACOHAgent(MBPOAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        if self.save_data:
-            self.save_trajectory_replay()
+        # Save trajectories from run_parallel_pacoh.py
+        # if self.save_data:
+        #     self.save_trajectory_replay()
         self.meta_fit()
         super().eval(val)
         self.start_trial()
