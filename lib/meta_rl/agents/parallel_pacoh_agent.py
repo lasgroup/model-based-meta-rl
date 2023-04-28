@@ -87,6 +87,7 @@ class ParallelPACOHAgent(PACOHAgent):
         )
         agent.hyper_posterior_particles = self.hyper_posterior_particles.detach().clone()
         agent.set_normalization_stats(self.get_normalization_stats())
+        agent.dataset.add_dataset(self.dataset)
         agent.start_trial()
         agent.dataset.reset()
         return agent
