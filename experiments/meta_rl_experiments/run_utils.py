@@ -73,8 +73,9 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
-    elif params.agent_name == "mpc":
-        agent, comment = agents.get_mpc_agent(
+    elif params.agent_name in ["mpc", "mpc_policy", "bptt", "mbpo"]:
+        agent_callable = eval(f"agents.get_{params.agent_name}_agent")
+        agent, comment = agent_callable(
             environment=environment,
             reward_model=reward_model,
             transformations=transformations,
