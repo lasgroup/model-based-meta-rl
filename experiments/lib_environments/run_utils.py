@@ -4,6 +4,8 @@ import argparse
 from utils.logger import Logger
 import utils.get_agents as agents
 from utils.get_environments import get_environment
+
+from lib.datasets.transforms.local_coordinates import LocalCoordinates
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 
 from rllib.agent.abstract_agent import AbstractAgent
@@ -25,6 +27,12 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
         MeanFunction(DeltaState()),
         ActionScaler(scale=environment.action_scale),
     ]
+
+    if "rccar" in params.env_config_file:
+        transformations = [
+            LocalCoordinates(),
+            ActionScaler(scale=environment.action_scale),
+        ]
 
     if params.agent_name in ["mpc", "mpc_policy", "bptt", "mbpo"]:
         agent_callable = eval(f"agents.get_{params.agent_name}_agent")

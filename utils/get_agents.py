@@ -1,27 +1,23 @@
-from typing import Union, Callable, Iterable, Tuple
+from typing import Tuple
 
-import os
 import torch
-import argparse
 
-from torch import nn, optim
+from torch import optim
 from torch.nn.modules import loss
 
-from rllib.model import AbstractModel
 from rllib.algorithms.ppo import PPO
 from rllib.algorithms.sac import SAC
 from rllib.agent import PPOAgent, SACAgent
 from rllib.dataset import ExperienceReplay
-from rllib.dataset.transforms import AbstractTransform
 from rllib.environment.abstract_environment import AbstractEnvironment
 
 from lib.algorithms.sb3_sac import SB3_SAC
 import lib.meta_rl.agents.parallel_pacoh_agent
 import lib.meta_rl.agents.parallel_grbal_agent
-from lib.environments.mujocoMB_envs.models.utils import get_env_model
 from lib.agents import MPCAgent, MPCPolicyAgent, MBPOAgent, BPTTAgent
 from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent
 from lib.environments.wrappers.model_based_environment import ModelBasedEnvironment
+from lib.environments.wrappers.rccar_model_based_environment import RCCarModelBasedEnvironment
 
 from utils.get_learners import *
 from utils.utils import get_dataset_path
@@ -417,6 +413,16 @@ def get_mbpo_agent(
         sim_num_steps=params.sim_num_steps,
         initial_states_distribution=None,
     )
+
+    if "rccar" in params.env_config_file:
+        model_based_env = RCCarModelBasedEnvironment(
+            dynamical_model=dynamical_model,
+            reward_model=reward_model,
+            action_scale=environment.action_scale,
+            num_envs=params.sim_n_envs,
+            sim_num_steps=params.sim_num_steps,
+            initial_states_distribution=None,
+        )
 
     policy = SB3_SAC(
         learned_env=model_based_env,

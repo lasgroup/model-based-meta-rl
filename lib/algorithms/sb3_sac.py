@@ -57,4 +57,4 @@ class SB3_SAC(SAC):
         pass
 
     def set_goal(self, goal=None):
-        pass
+        self.learned_env.set_goal(goal)

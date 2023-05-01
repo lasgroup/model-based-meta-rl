@@ -40,6 +40,12 @@ def get_environment(params):
         reward_model = environment.reward_model()
         termination_model = None
 
+    elif params.env_group == "rccar_envs":
+        from lib.environments.rccar_envs import RCCarEnv
+        environment = RCCarEnv()
+        reward_model = environment.reward_model()
+        termination_model = None
+
     elif params.env_group == "random_mujocoMB_envs":
         environment = RandomGymEnvironment(
             env_name=params.name,

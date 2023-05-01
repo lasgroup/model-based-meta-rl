@@ -32,6 +32,7 @@ class ModelBasedEnvironment(VecEnv):
 
         self.dynamical_model = dynamical_model
         self.reward_model = reward_model
+        self._goal = None
 
         self.action_scale = self.get_action_scale(action_scale)
         self.initial_states_distribution = initial_states_distribution
@@ -89,16 +90,17 @@ class ModelBasedEnvironment(VecEnv):
         info = [{"TimeLimit.truncated": False}] * self.num_envs
         action = self.action_scale.numpy() * action.clip(-1.0, 1.0)
 
-        observation, next_state, _ = step_model(
-            dynamical_model=self.dynamical_model,
-            reward_model=self.reward_model,
-            termination_model=None,
-            state=self.state,
-            action=torch.tensor(action, dtype=self.state.dtype, device=self.state.device),
-            action_scale=self.action_scale,
-            done=None,
-            pi=None,
-        )
+        with torch.no_grad():
+            observation, next_state, _ = step_model(
+                dynamical_model=self.dynamical_model,
+                reward_model=self.reward_model,
+                termination_model=None,
+                state=self.state,
+                action=torch.tensor(action, dtype=self.state.dtype, device=self.state.device),
+                action_scale=self.action_scale,
+                done=None,
+                pi=None,
+            )
 
         self.state = next_state
 
@@ -156,3 +158,9 @@ class ModelBasedEnvironment(VecEnv):
 
     def set_initial_distribution(self, sampler):
         self.initial_states_distribution = sampler
+
+    def set_goal(self, goal):
+        self._goal = goal
+
+    def set_state(self, state):
+        self.state = state
