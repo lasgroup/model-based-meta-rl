@@ -100,16 +100,13 @@ if __name__ == "__main__":
     agent.eval()
     agent.dynamical_model.eval()
 
-    learned_env = agent.model_based_env
-    policy = agent.policy
-
     horizon = 10
     eval_model_trajectories(val_files, agent, horizon)
 
     horizon = 32
     eval_model_trajectories(val_files, agent, horizon)
 
-    state = torch.tensor([1.2, -1.0, 1.57, 0.0, 0.0, 0.0]).reshape((1, -1))
+    state = torch.tensor([-1.2, -1.0, 1.57, 0.0, 0.0, 0.0]).reshape((1, -1))
     states_list = []
     actions_list = []
     for i in range(1000):

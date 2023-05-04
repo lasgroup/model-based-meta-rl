@@ -22,7 +22,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--env-group",
         type=str,
         default="point_envs",
-        choices=["gym_envs", "mujocoMB_envs", "point_envs"]
+        choices=["gym_envs", "mujocoMB_envs", "point_envs", "rccar_envs"]
     )
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--max-steps", type=int, default=200)

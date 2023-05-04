@@ -4,7 +4,7 @@ training:
   # Environment parameters
   name: RCCarEnv
   max_steps: 500
-  action_cost: 0.0
+  action_cost: 0.01
 
   # Training parameters
   train_episodes: 20
@@ -26,12 +26,12 @@ mbpo:
   model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
 
   # Critic parameters
-  value_function_layers: [250, 250]
+  value_function_layers: [400, 400]
   value_function_non_linearity: "Swish"
 
   # Policy parameters
   gamma: 0.99
-  policy_layers: [250, 250]
+  policy_layers: [400, 400]
   policy_non_linearity: "Swish"
   ppo_opt_lr: 0.0005
   policy_tau: 0.005
@@ -41,3 +41,24 @@ mbpo:
   sac_use_sde: False
   sac_ent_coef: "auto"
   sim_num_steps: 20
+
+# Agent parameters
+mpc:
+
+  # Model parameters
+  model_kind: "BayesianNN"
+  model_layers: [200, 200, 200, 200]
+  model_non_linearity: "ReLU"
+  model_opt_lr: 0.001
+  model_opt_weight_decay: 0.0
+  model_learn_num_iter: 50000
+  model_learn_batch_size: 32
+  model_include_aleatoric_uncertainty: False
+  model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
+
+  # MPC Parameters
+  mpc_solver: "icem"
+  mpc_horizon: 40
+  mpc_num_particles: 1000
+  mpc_pets_trajectory_samples: 5
+  mpc_num_elites: 50

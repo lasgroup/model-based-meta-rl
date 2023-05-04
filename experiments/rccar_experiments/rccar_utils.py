@@ -120,7 +120,7 @@ def eval_model_trajectories(files, agent, horizon=32):
         abs_errors[traj] = torch.abs(model_states[-1] - traj_states[-1])
 
     print(
-        f"Prediction horizon:     {horizon}"
+        f"Prediction horizon:     {horizon}\n"
         f"Mean x error:           {abs_errors[:, 0].mean():.5f}\n"
         f"Mean y error:           {abs_errors[:, 1].mean():.5f}\n"
         f"Mean theta error:       {abs_errors[:, 2].mean():.5f}\n"

@@ -16,7 +16,7 @@ class RCCarEnv(AbstractEnvironment):
     wait_time = 0.03
     max_steps = 500
 
-    def __init__(self):
+    def __init__(self, ctrl_cost_weight=0.005):
         super(RCCarEnv, self).__init__(
             dim_state=(6,),
             dim_action=(2,),
@@ -28,10 +28,10 @@ class RCCarEnv(AbstractEnvironment):
             num_observations=-1,
             dim_reward=(1,),
         )
-        self._goal = np.zeros(3)
-        self._zero_action = Vector3(0.0, 0.0, 0.0)
+        self._goal = np.array([0.0, 0.0, -1.57])
+        self._zero_action = np.zeros(self.dim_action)
 
-        self._reward_model = RCCarEnvReward(goal=self._goal)
+        self._reward_model = RCCarEnvReward(goal=self._goal, ctrl_cost_weight=ctrl_cost_weight)
         self._time = 0
 
         self._prev_time = None
@@ -90,7 +90,8 @@ class RCCarEnv(AbstractEnvironment):
         return observation
 
     def done(self, obs):
-        if self._time >= self.max_steps:
+        dist = np.sqrt(np.square(obs[:3] - self.goal).sum()) + np.sqrt(np.square(obs[3:]).sum())
+        if dist < 0.1 or self._time >= self.max_steps:
             self.apply_action(self._zero_action)
             return True
         return False
@@ -141,9 +142,16 @@ class RCCarEnvReward(StateActionReward):
         self.tolerance = ToleranceReward(
             lower_bound=0.0,
             upper_bound=0.05,
-            margin_coef=12,
+            margin_coef=20,
             sigmoid_="long_tail",
-            value_at_margin=0.1,
+            value_at_margin=0.2,
+        )
+        self.theta_tolerance = ToleranceReward(
+            lower_bound=0.0,
+            upper_bound=0.1,
+            margin_coef=32,
+            sigmoid_="long_tail",
+            value_at_margin=0.06,
         )
 
     def copy(self):
@@ -156,9 +164,11 @@ class RCCarEnvReward(StateActionReward):
 
     def state_reward(self, state, next_state=None):
         """Get reward that corresponds to the states."""
-        dist = next_state[..., :2] - self.goal[:2]
-        dist = torch.sqrt(torch.sum(torch.square(dist), dim=-1))
-        ret = self.tolerance(dist)
+        pos_diff = next_state[..., :2] - self.goal[:2]
+        theta_diff = next_state[..., 2] - self.goal[2]
+        pos_dist = torch.sqrt(torch.sum(torch.square(pos_diff), dim=-1))
+        theta_dist = torch.abs(((theta_diff + torch.pi) % (2 * torch.pi)) - torch.pi)
+        ret = self.tolerance(pos_dist) + 0.5 * self.theta_tolerance(theta_dist)
         return ret
 
 
