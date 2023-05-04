@@ -90,8 +90,10 @@ class RCCarEnv(AbstractEnvironment):
         return observation
 
     def done(self, obs):
-        dist = np.sqrt(np.square(obs[:3] - self.goal).sum()) + np.sqrt(np.square(obs[3:]).sum())
-        if dist < 0.1 or self._time >= self.max_steps:
+        dist = np.sqrt(np.square(obs[:2] - self.goal[:2]).sum())
+        ang_dev = np.abs(obs[2] - self.goal[2])
+        speed = np.sqrt(np.square(obs[3:]).sum())
+        if (dist < 0.1 and ang_dev < 0.2 and speed < 0.1) or self._time >= self.max_steps:
             self.apply_action(self._zero_action)
             return True
         return False
