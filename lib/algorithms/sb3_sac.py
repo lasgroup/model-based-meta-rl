@@ -16,6 +16,8 @@ class SB3_SAC(SAC):
             self,
             learned_env: ModelBasedEnvironment,
             params: argparse.Namespace,
+            *args,
+            **kwargs
     ):
 
         policy_kwargs = dict(
@@ -40,7 +42,9 @@ class SB3_SAC(SAC):
             use_sde=params.sac_use_sde,
             ent_coef=params.sac_ent_coef,
             target_entropy=-np.prod(dim_action).astype(np.float32),
-            policy_kwargs=policy_kwargs
+            policy_kwargs=policy_kwargs,
+            *args,
+            **kwargs
         )
 
         self.learned_env = learned_env

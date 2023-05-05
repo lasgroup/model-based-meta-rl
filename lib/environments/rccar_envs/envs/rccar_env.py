@@ -29,7 +29,7 @@ class RCCarEnv(AbstractEnvironment):
             dim_reward=(1,),
         )
         self._goal = np.array([0.0, 0.0, -1.57])
-        self._zero_action = np.zeros(self.dim_action)
+        self.zero_action = np.zeros(self.dim_action)
 
         self._reward_model = RCCarEnvReward(goal=self._goal, ctrl_cost_weight=ctrl_cost_weight)
         self._time = 0
@@ -90,11 +90,11 @@ class RCCarEnv(AbstractEnvironment):
         return observation
 
     def done(self, obs):
-        dist = np.sqrt(np.square(obs[:2] - self.goal[:2]).sum())
-        ang_dev = np.abs(obs[2] - self.goal[2])
+        dist = np.sqrt(np.square(obs[:2] - self._goal[:2]).sum())
+        ang_dev = np.abs(obs[2] - self._goal[2])
         speed = np.sqrt(np.square(obs[3:]).sum())
         if (dist < 0.1 and ang_dev < 0.2 and speed < 0.1) or self._time >= self.max_steps:
-            self.apply_action(self._zero_action)
+            self.apply_action(self.zero_action)
             return True
         return False
 
@@ -108,6 +108,7 @@ class RCCarEnv(AbstractEnvironment):
 
     def get_state(self):
         pos = np.array([self._pos.x, self._pos.y, self._pos.theta])
+        pos[2] = ((pos[2] + np.pi) % (2 * np.pi)) - np.pi
         vel = np.array([self._vel.linear.x, self._vel.linear.y, self._vel.angular.z])
         return np.concatenate([pos, vel])
 
@@ -170,7 +171,7 @@ class RCCarEnvReward(StateActionReward):
         theta_diff = next_state[..., 2] - self.goal[2]
         pos_dist = torch.sqrt(torch.sum(torch.square(pos_diff), dim=-1))
         theta_dist = torch.abs(((theta_diff + torch.pi) % (2 * torch.pi)) - torch.pi)
-        ret = self.tolerance(pos_dist) + 0.5 * self.theta_tolerance(theta_dist)
+        ret = self.tolerance(pos_dist.type(torch.double)) + 0.5 * self.theta_tolerance(theta_dist.type(torch.double))
         return ret
 
 

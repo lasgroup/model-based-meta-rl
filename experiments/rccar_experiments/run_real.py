@@ -11,6 +11,8 @@ from rllib.dataset.datatypes import Observation
 from rllib.util.neural_networks.utilities import to_torch
 from rllib.util.rollout import step_model, step_env
 from rllib.util.utilities import sample_model
+from stable_baselines3 import SAC
+from stable_baselines3.sac import MlpPolicy
 
 from lib.algorithms import SB3_SAC
 from experiments import AGENT_CONFIG_PATH
@@ -41,16 +43,17 @@ if __name__ == "__main__":
     for states, actions, next_states in zip(states_list, actions_list, next_states_list):
         observe_transitions(agent, states, actions, next_states)
 
-    agent.end_episode()
+    # agent.end_episode()
 
     # agent.simulate_and_learn_policy()
 
-    torch.save(agent.dynamical_model.base_model.nn[0].particles, "rccar_model.pt")
-    agent.policy.save("rccar_policy")
+    # torch.save(agent.dynamical_model.base_model.nn[0].particles, "rccar_model.pt")
+    # agent.policy.save("rccar_policy")
+    # agent.policy.policy.save("rccar_sac_policy")
     # agent.policy.save_replay_buffer("rccar_replay_buffer")
 
-    # agent.dynamical_model.base_model.nn[0].particles = torch.load("rccar_model.pt")
-    # agent.policy = SB3_SAC.load("rccar_policy")
+    agent.dynamical_model.base_model.nn[0].particles = torch.load("rccar_model.pt")
+    agent.policy.policy = MlpPolicy.load("rccar_sac_policy001")
     # agent.policy.load_replay_buffer("rccar_replay_buffer")
 
     # AbstractAgent.end_episode(agent)
@@ -62,11 +65,6 @@ if __name__ == "__main__":
     agent.set_goal(environment.goal)
     state = environment.reset()
 
-    while True:
-        print(f"Starting state: {state} \nPress y to confirm...")
-        if getch() == "y":
-            break
-
     agent.start_episode()
 
     done = False
@@ -76,7 +74,10 @@ if __name__ == "__main__":
     states_list = []
     actions_list = []
 
-    input("Press Enter to start episode...")
+    input(f"Starting state: {state} \nPress Enter to start episode...")
+
+    import time
+    time.sleep(15)
 
     while not done:
 
@@ -97,5 +98,7 @@ if __name__ == "__main__":
         time_step += 1
         if max_steps <= time_step:
             break
+
+    environment.apply_action(environment.zero_action)
 
     save_as_csv(states_list, actions_list)
