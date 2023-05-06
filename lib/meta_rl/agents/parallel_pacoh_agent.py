@@ -133,6 +133,7 @@ class ParallelPACOHAgent(PACOHAgent):
                     agent_copy = copy.deepcopy(agent)
                     agent_copy.dataset.reset()
                     agent_copy.model_learn_num_iter = 0
+                    agent_copy.num_learn_steps = 0
                     copy_agents_id.append(
                         rollout_parallel_agent.remote(
                             env_copy,

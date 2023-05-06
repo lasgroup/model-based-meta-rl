@@ -98,6 +98,9 @@ class MBPOAgent(ModelBasedAgent):
 
     def simulate_and_learn_policy(self, learn_steps=None):
 
+        if self.num_learn_steps <= 0:
+            return
+
         print(colorize("\nOptimizing policy with simulated data from the model", "yellow"))
 
         self.dynamical_model.eval()
