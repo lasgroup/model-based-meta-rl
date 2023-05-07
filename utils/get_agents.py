@@ -700,25 +700,18 @@ def get_grbal_agent(
             weight_decay=params.model_opt_weight_decay,
         )
 
-    # Define value function.
-    value_function = get_value_function(
-        dim_state=dim_state,
-        dim_action=dim_action,
-        num_states=num_states,
-        num_actions=num_actions,
-        params=params,
-        input_transform=input_transform
-    )
-    terminal_reward = value_function if params.mpc_terminal_reward else None
-
-    # Define policy
-    policy = get_mpc_policy(
+    model_based_env = ModelBasedEnvironment(
         dynamical_model=dynamical_model,
-        reward=reward_model,
-        params=params,
+        reward_model=reward_model,
         action_scale=environment.action_scale,
-        terminal_reward=terminal_reward,
-        termination_model=termination_model
+        num_envs=params.sim_n_envs,
+        sim_num_steps=params.sim_num_steps,
+        initial_states_distribution=None,
+    )
+
+    policy = SB3_SAC(
+        learned_env=model_based_env,
+        params=params
     )
 
     # Define Agent
@@ -732,7 +725,14 @@ def get_grbal_agent(
         trajectory_load_path = None
 
     agent = GrBALAgent(
-        mpc_policy=policy,
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        termination_model=termination_model,
+        model_based_env=model_based_env,
+        policy=policy,
+        policy_opt_gradient_steps=params.policy_opt_gradient_steps,
+        sim_num_steps=params.sim_num_steps,
+        gamma=params.gamma,
         model_optimizer=model_optimizer,
         inner_lr=params.grbal_inner_lr,
         past_segment_len=params.grbal_past_segment_len,
@@ -742,7 +742,6 @@ def get_grbal_agent(
         model_learn_batch_size=params.model_learn_batch_size,
         use_validation_set=params.use_validation_set,
         initial_distribution=initial_distribution,
-        gamma=params.gamma,
         multiple_runs_id=params.multiple_runs_id,
         trajectory_replay_load_path=trajectory_load_path,
         num_iter_meta_train=params.grbal_num_iter_meta_train,
@@ -804,25 +803,18 @@ def get_parallel_grbal_agent(
             weight_decay=params.model_opt_weight_decay,
         )
 
-    # Define value function.
-    value_function = get_value_function(
-        dim_state=dim_state,
-        dim_action=dim_action,
-        num_states=num_states,
-        num_actions=num_actions,
-        params=params,
-        input_transform=input_transform
-    )
-    terminal_reward = value_function if params.mpc_terminal_reward else None
-
-    # Define policy
-    policy = get_mpc_policy(
+    model_based_env = ModelBasedEnvironment(
         dynamical_model=dynamical_model,
-        reward=reward_model,
-        params=params,
+        reward_model=reward_model,
         action_scale=environment.action_scale,
-        terminal_reward=terminal_reward,
-        termination_model=termination_model
+        num_envs=params.sim_n_envs,
+        sim_num_steps=params.sim_num_steps,
+        initial_states_distribution=None,
+    )
+
+    policy = SB3_SAC(
+        learned_env=model_based_env,
+        params=params
     )
 
     # Define Agent
@@ -836,7 +828,14 @@ def get_parallel_grbal_agent(
         trajectory_load_path = None
 
     agent = lib.meta_rl.agents.parallel_grbal_agent.ParallelGrBALAgent(
-        mpc_policy=policy,
+        dynamical_model=dynamical_model,
+        reward_model=reward_model,
+        termination_model=termination_model,
+        model_based_env=model_based_env,
+        policy=policy,
+        policy_opt_gradient_steps=params.policy_opt_gradient_steps,
+        sim_num_steps=params.sim_num_steps,
+        gamma=params.gamma,
         model_optimizer=model_optimizer,
         inner_lr=params.grbal_inner_lr,
         past_segment_len=params.grbal_past_segment_len,
@@ -849,7 +848,6 @@ def get_parallel_grbal_agent(
         num_parallel_agents=params.grbal_num_parallel_agents,
         num_episodes_per_rollout=params.num_episodes_per_rollout,
         max_env_steps=params.max_steps,
-        gamma=params.gamma,
         multiple_runs_id=params.multiple_runs_id,
         trajectory_replay_load_path=trajectory_load_path,
         num_iter_meta_train=params.grbal_num_iter_meta_train,

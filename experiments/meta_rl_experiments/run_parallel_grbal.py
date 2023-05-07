@@ -21,6 +21,7 @@ def get_parallel_environments_and_agents(params):
     params.save_statistics = False
     params.use_wandb = False
     params.model_learn_num_iter = 0
+    params.num_learn_steps = 0
     params.collect_meta_data = True
 
     envs_agents = [(get_environment_and_meta_agent(params)) for _ in range(params.grbal_num_parallel_agents)]
@@ -75,7 +76,7 @@ if __name__ == "__main__":
         )
         train_returns = np.mean(train_returns)
     else:
-        meta_agent.meta_fit()
+        meta_agent.meta_learn()
         train_returns = 0.0
 
     meta_agent.logger.export_to_json()  # Save statistics.
