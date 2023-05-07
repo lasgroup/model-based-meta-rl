@@ -150,7 +150,7 @@ def train_model(
     model.train()
     early_stopping = EarlyStopping(epsilon, non_decrease_iter=non_decrease_iter)
 
-    for num_iter in tqdm(range(max_iter)):
+    for num_iter in tqdm(range(max_iter), miniters=500):
         observation, idx, mask = train_set.sample_batch(batch_size)
         _train_model_step(
             model, observation, optimizer, mask, logger, dynamical_model=dynamical_model
