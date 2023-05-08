@@ -59,10 +59,10 @@ if __name__ == "__main__":
     ) as file:
         env_config = yaml.safe_load(file)
 
-    train_config = env_config["training"]
-    agent_config = env_config[params["agent_name"].split('_')[-1]]
+    for config_set in ["training", "model", "policy"]:
+        params.update(env_config[config_set])
 
-    params.update(train_config)
+    agent_config = env_config[params["agent_name"].split('_')[-1]]
     params.update(agent_config)
 
     params = DotMap(params)
