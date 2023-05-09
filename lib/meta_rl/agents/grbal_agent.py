@@ -66,6 +66,7 @@ class GrBALAgent(MBPOAgent):
         self.num_iter_meta_train = num_iter_meta_train
         self.num_learn_eval_steps = num_learn_eval_steps
         self.num_learn_steps_on_trial = 5 * self.num_learn_steps
+        self.exploration_steps = 32
 
         self.sim_initial_states_num_trajectories = sim_initial_states_num_trajectories
         self.sim_memory_num_trajectories = sim_memory_num_trajectories
@@ -100,7 +101,8 @@ class GrBALAgent(MBPOAgent):
         else:
             current_model = self.pre_update_model.clone()
         self.dynamical_model.base_model.load_state_dict(current_model.module.state_dict())
-        self.simulate_and_learn_policy(learn_steps=self.num_learn_eval_steps)
+        if self.total_steps > self.exploration_steps:
+            self.simulate_and_learn_policy(learn_steps=self.num_learn_eval_steps)
         return super().act(state)
 
     def start_episode(self):
