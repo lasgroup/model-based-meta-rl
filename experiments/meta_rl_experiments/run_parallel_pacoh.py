@@ -67,7 +67,10 @@ if __name__ == "__main__":
 
     params = DotMap(params)
 
-    ray.init(num_cpus=params.num_cpu_cores)
+    ray.init(
+        num_cpus=params.num_cpu_cores,
+        object_store_memory=(2000 * 1e6 * params.num_cpu_cores)
+    )
 
     torch.manual_seed(params.seed)
     np.random.seed(params.seed)

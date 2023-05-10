@@ -142,7 +142,8 @@ def generate_run_commands(command_list: List[str], num_cpus: int = 1, num_gpus: 
         bsub_cmd = '#!/bin/bash\n\n' + \
                    f'#SBATCH --time={LONG if long else SHORT}:59:59\n' + \
                    f'#SBATCH --mem-per-cpu={mem}\n' + \
-                   f'#SBATCH -n {num_cpus}\n'
+                   f'#SBATCH -n {num_cpus}\n' \
+                   f'#SBATCH --tmp=128000\n'
 
         if num_gpus > 0:
             bsub_cmd += f'#SBATCH--gpus={num_gpus}\n'

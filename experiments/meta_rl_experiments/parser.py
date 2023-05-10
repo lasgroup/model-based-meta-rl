@@ -15,7 +15,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="random-ant.yaml",
+        default="random-half-cheetah.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
