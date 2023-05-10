@@ -105,10 +105,10 @@ class MBPOAgent(ModelBasedAgent):
 
         self.dynamical_model.eval()
 
-        if self.logger.use_wandb:
-            callback = WandbCallback()
-        else:
-            callback = None
+        # if self.logger.use_wandb:
+        #     callback = WandbCallback()
+        # else:
+        callback = None
 
         self.policy.learn(
             total_timesteps=learn_steps or self.num_learn_steps,
