@@ -166,30 +166,43 @@ class ParallelPACOHAgent(PACOHAgent):
             max_env_steps=None
     ):
         train_returns = []
+        assert self.parallel_episodes_per_env == 1
+        assert self.num_episodes_per_rollout == 1
         total_episodes_per_rollout = len(agents) * self.parallel_episodes_per_env * self.num_episodes_per_rollout
         num_rollouts = num_train_episodes // total_episodes_per_rollout
+        self.num_episodes_per_rollout = num_rollouts
         max_env_steps = self.max_env_steps if max_env_steps is None else max_env_steps
         tasks = meta_environment.train_env_params
-        for rollout in range(num_rollouts):
-            auto_garbage_collect()
-            agents_id = []
-            for task, agent in zip(tasks, agents):
-                env_copy, _, _ = get_wrapped_env(params, copy.deepcopy(task))
-                agents_id.append(
-                    rollout_parallel_agent.remote(
-                        env_copy,
-                        agent,
-                        max_env_steps,
-                        self.num_episodes_per_rollout,
-                        use_early_termination=use_early_termination
-                    )
+        agents_id = []
+        for task, agent in zip(tasks, agents):
+            env_copy, _, _ = get_wrapped_env(params, copy.deepcopy(task))
+            agents_id.append(
+                rollout_parallel_agent.remote(
+                    env_copy,
+                    agent,
+                    max_env_steps,
+                    self.num_episodes_per_rollout,
+                    use_early_termination=use_early_termination
                 )
-            agents = ray.get(agents_id)
-            self.log_agents(agents)
-            self.store_meta_training_data(agents)
-            for agent in agents:
-                train_returns = train_returns + agent.logger.get("train_return-0")[-self.num_episodes_per_rollout:].copy()
+            )
+        agents = ray.get(agents_id)
+        self.log_agents(agents)
+        self.store_complete_meta_training_data(agents)
+        for agent in agents:
+            train_returns = train_returns + agent.logger.get("train_return-0")[-self.num_episodes_per_rollout:].copy()
         return train_returns
+
+    def store_complete_meta_training_data(self, agents):
+        for agent in agents:
+            assert agent.dataset.num_episodes == self.num_episodes_per_rollout
+            for episode in range(agent.dataset.num_episodes):
+                self.dataset.start_episode()
+                self.dataset.add_dataset(
+                    other=agent.dataset,
+                    start_idx=agent.dataset.trajectory_starts[episode],
+                    length=agent.dataset.trajectory_lengths[episode]
+                )
+                self.dataset.end_episode()
 
     def store_meta_training_data(self, agents):
         for agent in agents:
@@ -202,8 +215,6 @@ class ParallelPACOHAgent(PACOHAgent):
             for episode in reversed(range(self.num_episodes_per_rollout)):
                 rollout_agent = train_agent
                 episode_dict = rollout_agent.logger[-(episode+1)].copy()
-                if episode == 0:
-                    episode_dict.update({key: value[1] for key, value in train_agent.logger.current.items()})
                 self.logger.end_episode(**episode_dict)
                 self.update_counters(rollout_agent)
                 print(self)

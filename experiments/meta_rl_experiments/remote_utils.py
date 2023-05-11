@@ -1,4 +1,5 @@
 import gc
+import os
 import psutil
 
 import ray
@@ -19,6 +20,7 @@ def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, re
             callbacks=None,
             use_early_termination=use_early_termination
         )
+        print(f"-------\nCompleted episode {episode + 1} out of {num_episodes} for agent on pid={os.getpid()}\n-------\n")
     return agent
 
 

@@ -13,7 +13,6 @@ from rllib.dataset import stack_list_of_tuples
 from rllib.util.training.utilities import get_model_validation_score
 
 from lib.agents import MBPOAgent
-from lib.datasets import TrajectoryReplay
 from lib.model.bayesian_model import BayesianNNModel
 from lib.model.bayesian_model_learning import train_bayesian_nn_step
 from lib.meta_rl.algorithms.pacoh.modules.kernels import RBFKernel
@@ -79,10 +78,6 @@ class PACOHAgent(MBPOAgent):
         self.multiple_runs_id = multiple_runs_id
         self.fit_at_step = fit_at_step
 
-        self.dataset = TrajectoryReplay(
-            max_len=max_memory,
-            transformations=self.dynamical_model.transformations
-        )
         if trajectory_replay_load_path is not None:
             self.load_trajectory_replay(trajectory_replay_load_path)
             self.save_data = False
@@ -187,11 +182,9 @@ class PACOHAgent(MBPOAgent):
     def start_episode(self):
         assert self.meta_environment is not None, "Meta training environment has not been set!"
         self.meta_environment.sample_next_env()
-        self.dataset.start_episode()
         super().start_episode()
 
     def end_episode(self):
-        self.dataset.end_episode()
         if (not self.training) and (not self.fit_at_step):
             # TODO: If not training, train using dataset (instead of observation queue) and also learn policy
             self.fit_task(

@@ -22,6 +22,7 @@ from rllib.util.value_estimation import mb_return
 from rllib.value_function import AbstractValueFunction
 from rllib.util.training.model_learning import train_model as train_model
 
+from lib.datasets import TrajectoryReplay
 from lib.datasets.utils import sample_transitions
 from lib.model.bayesian_model import BayesianNNModel
 from lib.model.bayesian_model_learning import train_model as bayesian_train_model
@@ -110,11 +111,15 @@ class ModelBasedAgent(AbstractAgent):
         else:
             num_heads = 1
 
-        self.dataset = BootstrapExperienceReplay(
+        # self.dataset = BootstrapExperienceReplay(
+        #     max_len=max_memory,
+        #     transformations=dynamical_model.transformations,
+        #     num_bootstraps=num_heads,
+        #     bootstrap=bootstrap,
+        # )
+        self.dataset = TrajectoryReplay(
             max_len=max_memory,
-            transformations=dynamical_model.transformations,
-            num_bootstraps=num_heads,
-            bootstrap=bootstrap,
+            transformations=self.dynamical_model.transformations
         )
         self.val_dataset = BootstrapExperienceReplay(
             max_len=max_memory if use_validation_set else 0,
@@ -190,11 +195,13 @@ class ModelBasedAgent(AbstractAgent):
         :return:
         """
         super().start_episode()
+        self.dataset.start_episode()
         self.new_episode = True
         if self.exploration_scheme == "thompson":
             self.dynamical_model.sample_posterior()
 
     def end_episode(self):
+        self.dataset.end_episode()
         if self.training:
             self.learn()
         super().end_episode()
