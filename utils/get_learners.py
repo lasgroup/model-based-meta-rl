@@ -348,6 +348,7 @@ def get_mpc_policy(
             num_particles=params.mpc_num_particles,
             num_elites=params.mpc_num_elites,
             alpha=params.mpc_alpha,
+            noise_beta=params.mpc_noise_beta,
             terminal_reward=terminal_reward,
             termination_model=termination_model,
             warm_start=not params.mpc_not_warm_start,
