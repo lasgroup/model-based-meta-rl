@@ -51,3 +51,20 @@ class MPCAgent(ModelBasedAgent):
             tensorboard=tensorboard,
             comment=comment,
         )
+
+        self.add_action_noise = True
+        self.action_noise_dist = torch.distributions.multivariate_normal.MultivariateNormal(
+            loc=torch.zeros(self.dynamical_model.dim_action[0]),
+            covariance_matrix=0.3*torch.eye(self.dynamical_model.dim_action[0])
+        )
+
+    def act(self, state: torch.Tensor) -> torch.Tensor:
+
+        action = super(MPCAgent, self).act(state)
+        action_scale = self.policy.action_scale.detach()
+
+        if self.training and self.add_action_noise:
+            noise = self.action_noise_dist.sample(state.shape[:-1])
+            action += action_scale * noise
+
+        return action.clip(-action_scale, +action_scale)
