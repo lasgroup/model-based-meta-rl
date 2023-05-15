@@ -73,10 +73,16 @@ class RegressionModel:
 
     def _compute_normalization_stats(self, x_train, y_train, normalization_stats=None):
         if normalization_stats is None:
-            self.x_mean = x_train.mean(dim=0)
-            self.x_std = x_train.std(dim=0)
-            self.y_mean = y_train.mean(dim=0)
-            self.y_std = y_train.std(dim=0)
+            if x_train.shape[0] > 1:
+                self.x_mean = x_train.mean(dim=0)
+                self.x_std = x_train.std(dim=0)
+                self.y_mean = y_train.mean(dim=0)
+                self.y_std = y_train.std(dim=0)
+            else:
+                self.x_mean = torch.zeros(x_train.shape[-1])
+                self.x_std = torch.ones(x_train.shape[-1])
+                self.y_mean = torch.zeros(y_train.shape[-1])
+                self.y_std = torch.ones(y_train.shape[-1])
         else:
             self.x_mean = normalization_stats['x_mean']
             self.x_std = normalization_stats['x_std']

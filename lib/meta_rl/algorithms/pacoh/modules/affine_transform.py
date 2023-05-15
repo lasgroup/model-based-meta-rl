@@ -11,7 +11,9 @@ class AffineTransform:
         if torch.numel(self.scale_tensor) == 1:
             self.scale_mat = self.scale_tensor * torch.eye(self.loc_tensor.shape[-1])
         else:
-            self.scale_mat = torch.diag(self.scale_tensor)
+            if self.scale_tensor.ndim == 2:
+                assert self.scale_tensor.shape[0] == 1
+            self.scale_mat = torch.diag(self.scale_tensor.squeeze())
 
     def apply(self, base_dist):
         if isinstance(base_dist, torch.distributions.Categorical):
@@ -29,8 +31,8 @@ class AffineTransform:
             elif isinstance(base_dist, torch.distributions.MixtureSameFamily):
                 assert isinstance(base_dist.component_distribution, torch.distributions.Normal)
                 transformed_component_distribution = torch.distributions.Normal(
-                    loc=(self.scale_mat @ base_dist.component_distribution.loc + self.loc_tensor),
-                    scale=(base_dist.component_distribution.scale.log() + self.scale_tensor.log()).exp()
+                    loc=(self.scale_mat @ base_dist.component_distribution.loc + self.loc_tensor.unsqueeze(-1)),
+                    scale=(base_dist.component_distribution.scale.log() + self.scale_tensor.unsqueeze(-1).log()).exp()
                 )
                 transformed_dist = torch.distributions.MixtureSameFamily(
                     base_dist.mixture_distribution, transformed_component_distribution

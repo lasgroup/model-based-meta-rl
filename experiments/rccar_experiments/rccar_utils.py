@@ -31,10 +31,11 @@ def split_controls(controls):
     return splits_new
 
 
-def load_data(files):
+def load_data(files, dir=None):
     states_list, actions_list, next_states_list = [], [], []
     for file in files:
-        states, actions, next_states = get_state_action_from_file(file)
+        filepath = os.path.join(dir or DATA_DIR, file)
+        states, actions, next_states = get_state_action_from_file(filepath)
         states_list.append(states)
         actions_list.append(actions)
         next_states_list.append(next_states)
@@ -43,7 +44,7 @@ def load_data(files):
 
 def get_state_action_from_file(filepath):
     data = np.loadtxt(
-        fname=os.path.join(DATA_DIR, filepath),
+        fname=filepath,
         delimiter=',',
         skiprows=SKIP_ROWS,
     )
