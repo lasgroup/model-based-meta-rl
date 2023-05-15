@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     ray.init(
         num_cpus=params.num_cpu_cores,
-        object_store_memory=(2000 * 1e6 * params.num_cpu_cores)
+        object_store_memory=(1000 * 1e6 * params.num_cpu_cores)
     )
 
     torch.manual_seed(params.seed)

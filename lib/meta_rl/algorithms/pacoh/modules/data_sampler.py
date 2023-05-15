@@ -260,6 +260,7 @@ class DatasetSampler:
             torch.cat((self.train_data[0], self.train_data[1]), dim=-1),
             shuffle=True,
             batch_size=batch_size,
+            drop_last=True
         )
         self.train_data_loader = train_dataset
         self.train_data_sampler = iter(self.train_data_loader)
@@ -279,7 +280,8 @@ class DatasetSampler:
             val_dataset = torch.utils.data.DataLoader(
                 torch.cat((self.val_data[0], self.val_data[1]), dim=-1),
                 shuffle=True,
-                batch_size=batch_size
+                batch_size=batch_size,
+                drop_last=True
             )
             self.val_data_loader = val_dataset
             self.val_data_sampler = iter(self.val_data_loader)
