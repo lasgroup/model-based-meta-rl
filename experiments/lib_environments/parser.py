@@ -15,13 +15,13 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--env-config-file",
         type=str,
-        default="point-env-2d.yaml",
+        default="rccar_env.yaml",
         help="Choose one of the pre-defined environment config files"
     )
     parser.add_argument(
         "--env-group",
         type=str,
-        default="point_envs",
+        default="rccar_envs",
         choices=["gym_envs", "mujocoMB_envs", "point_envs", "rccar_envs"]
     )
     parser.add_argument("--render", action="store_true")
@@ -38,7 +38,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--exploration",
         type=str,
-        default="optimistic",
+        default="greedy",
         choices=["optimistic", "greedy", "thompson"]
     )
     parser.add_argument("--beta", type=float, default=1.0)
