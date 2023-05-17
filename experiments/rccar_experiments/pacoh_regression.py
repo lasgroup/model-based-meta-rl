@@ -142,6 +142,19 @@ class EvalNetwork:
         metrics_mean, metrics_std = PACOH_NN_Regression._aggregate_eval_metrics_across_tasks(pacoh_eval_mean_per_task)
         return metrics_mean, metrics_std
 
+    def eval_bnn_multitask(self):
+        bnn_eval_mean_per_task = []
+        for task_num in range(self.n_tasks):
+            context_data, test_data = self.setup_test_data(task_num)
+            random_task = np.random.randint(self.n_tasks)
+            train_data = self.meta_data[random_task]
+            bnn = self.setup_bnn(train_data)
+            bnn.fit(None, None, num_iter_fit=20)
+            bnn_task_eval = bnn.eval(test_data[0], test_data[1])
+            bnn_eval_mean_per_task.append(bnn_task_eval)
+        metrics_mean, metrics_std = PACOH_NN_Regression._aggregate_eval_metrics_across_tasks(bnn_eval_mean_per_task)
+        return metrics_mean, metrics_std
+
 
 if __name__ == "__main__":
 
