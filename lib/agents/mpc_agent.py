@@ -52,7 +52,7 @@ class MPCAgent(ModelBasedAgent):
             comment=comment,
         )
 
-        self.add_action_noise = True
+        self.add_action_noise = False
         self.action_noise_dist = torch.distributions.multivariate_normal.MultivariateNormal(
             loc=torch.zeros(self.dynamical_model.dim_action[0]),
             covariance_matrix=0.3*torch.eye(self.dynamical_model.dim_action[0])

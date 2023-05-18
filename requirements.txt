@@ -1,4 +1,5 @@
 -e git+https://github.com/arbhardwaj98/rllib.git@master#egg=rllib
+-e git+https://github.com/dennisl88/rand_param_envs.git#egg=rand-param-envs
 torch~=1.11.0
 numpy>=1.20.0
 ray

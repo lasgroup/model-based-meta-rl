@@ -164,6 +164,7 @@ if __name__ == "__main__":
 
     params = parser.parse_args()
 
+    torch.set_num_threads(min(4, params.num_cpus))
     ray.init(num_cpus=params.num_cpus)
 
     meta_data = load_meta_data()
