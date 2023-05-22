@@ -1,6 +1,7 @@
 absl-py==1.4.0
 aiosignal==1.3.1
 attrs==23.1.0
+certifi @ file:///croot/certifi_1671487769961/work/certifi
 cffi==1.15.1
 charset-normalizer==3.1.0
 click==8.1.3
@@ -20,12 +21,12 @@ GitPython==3.1.31
 glfw==2.5.9
 gpytorch==1.1.1
 grpcio==1.51.3
-gym==0.25.2
+gym==0.21.0
 gym-legacy-toytext==0.0.5
 gym-notices==0.0.8
 idna==3.4
 imageio==2.28.1
-importlib-metadata==6.6.0
+importlib-metadata==4.13.0
 importlib-resources==5.12.0
 jsonschema==4.17.3
 kiwisolver==1.4.4
@@ -64,7 +65,7 @@ setproctitle==1.3.2
 shortuuid==1.0.11
 six==1.16.0
 smmap==5.0.0
-stable-baselines3==1.2.0
+stable-baselines3==1.5.0
 tensorboardX==2.6
 torch==1.11.0
 tqdm==4.64.1
