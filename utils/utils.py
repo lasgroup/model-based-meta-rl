@@ -34,8 +34,16 @@ def get_project_path():
 
 
 def get_dataset_path(params):
+    tasks = 20
+
+    if 'cart' in params.env_config_file:
+        if tasks == 20:
+            tasks = 15
+
+    ac = str(params.action_cost).replace(".", "")
+
     return os.path.join(
-        "experiments/meta_rl_experiments/experience_replay",
-        f"{params.env_config_file.replace('-', '_').replace('.yaml', '')}_{params.exploration}_train_{params.train_episodes}_{params.multiple_runs_id}.pkl"
+        f"/cluster/project/infk/krause/tmp-folder/experience_replay_BayesianNN_{tasks}tasks_{ac}acost/",
+        f"{params.env_config_file.replace('-', '_').replace('.yaml', '')}_greedy_train_{params.train_episodes}_{params.multiple_runs_id}.pkl"
     )
 
