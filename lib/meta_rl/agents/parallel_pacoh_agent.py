@@ -7,12 +7,13 @@ import experiments.meta_rl_experiments.run_utils as run_utils
 
 from lib.datasets.utils import combine_datasets
 from lib.meta_rl.agents.pacoh_agent import PACOHAgent
+from lib.meta_rl.agents.cem_pacoh_agent import CEMPACOHAgent
 from utils.get_environments import get_wrapped_env, get_wrapped_meta_env
 from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, add_dataset, train_agent, \
     auto_garbage_collect
 
 
-class ParallelPACOHAgent(PACOHAgent):
+class ParallelPACOHAgent(PACOHAgent):  # CEMPACOHAgent
     """
     Implementation for PACOH Agent for parallel meta-training data collection.
 

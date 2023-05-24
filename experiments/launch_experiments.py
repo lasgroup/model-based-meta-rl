@@ -44,9 +44,9 @@ def main(args):
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
 
-        if flags['agent-name'] == 'parallel_pacoh':
+        if flags['agent-name'] in ['parallel_pacoh', 'parallel_cem_pacoh']:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
-        elif flags['agent-name'] == 'parallel_grbal':
+        elif flags['agent-name'] in ['parallel_grbal']:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')
         else:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run.py')

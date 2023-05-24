@@ -55,6 +55,17 @@ policy:
   sac_ent_coef: "auto"
   sim_num_steps: 42
 
+# MPC Parameters
+mpc:
+  mpc_solver: "icem"
+  mpc_alpha: 0.1
+  mpc_noise_beta: 2.0
+  mpc_horizon: 30
+  mpc_num_iter: 3
+  mpc_num_particles: 1000
+  mpc_pets_trajectory_samples: 5
+  mpc_num_elites: 10
+
 # MBPO Parameters
 mbpo: {}
 

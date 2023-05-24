@@ -12,7 +12,7 @@ import os
 search_configs = OrderedDict({
     # random search
     "env-config-file": ['cart-pole-mujoco.yaml', 'half-cheetah.yaml', 'pusher.yaml', 'pendulum-swing-up.yaml'],
-    "agent-name": ['mbpo'],
+    "agent-name": ['mbpo', "mpc"],
     "exploration": ['greedy', 'optimistic']
 })
 

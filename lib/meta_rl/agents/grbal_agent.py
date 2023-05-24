@@ -10,15 +10,15 @@ from rllib.dataset import stack_list_of_tuples
 from rllib.util.neural_networks.utilities import deep_copy_module
 from rllib.util.training.utilities import model_loss, get_model_validation_score
 
+from lib.agents import MPCAgent
 from utils.utils import get_project_path
 from lib.datasets import TrajectoryReplay
-from lib.agents.mbpo_agent import MBPOAgent
 from lib.meta_rl.algorithms.maml import MAML
 from lib.datasets.utils import get_trajectory_segment
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 
 
-class GrBALAgent(MBPOAgent):
+class GrBALAgent(MPCAgent):
     """
     Implementation of the Gradient-based Adaptive Learner.
 
@@ -37,9 +37,6 @@ class GrBALAgent(MBPOAgent):
             model_learn_batch_size: int = 500,
             max_memory: int = 1000000,
             num_iter_meta_train: int = 0,
-            num_learn_eval_steps: int = 400,
-            sim_initial_states_num_trajectories=0,
-            sim_memory_num_trajectories=256,
             trajectory_replay_load_path=None,
             multiple_runs_id=0,
             clip_gradient_val=2.0,
@@ -64,12 +61,6 @@ class GrBALAgent(MBPOAgent):
         )
         self.clip_gradient_val = clip_gradient_val
         self.num_iter_meta_train = num_iter_meta_train
-        self.num_learn_eval_steps = num_learn_eval_steps
-        self.num_learn_steps_on_trial = 5 * self.num_learn_steps
-        self.exploration_steps = 32
-
-        self.sim_initial_states_num_trajectories = sim_initial_states_num_trajectories
-        self.sim_memory_num_trajectories = sim_memory_num_trajectories
 
         self.past_segment_len = past_segment_len
         self.future_segment_len = future_segment_len
@@ -101,8 +92,6 @@ class GrBALAgent(MBPOAgent):
         else:
             current_model = self.pre_update_model.clone()
         self.dynamical_model.base_model.load_state_dict(current_model.module.state_dict())
-        if self.total_steps > self.exploration_steps:
-            self.simulate_and_learn_policy(learn_steps=self.num_learn_eval_steps)
         return super().act(state)
 
     def start_episode(self):
@@ -114,18 +103,6 @@ class GrBALAgent(MBPOAgent):
     def end_episode(self):
         self.dataset.end_episode()
         super().end_episode()
-
-    # TODO: Learn only when observing trajectories
-    def learn(self):
-        self.learn_model()
-        if (
-                self.total_steps < self.exploration_steps or
-                self.total_episodes < self.exploration_episodes
-        ):
-            return
-        else:
-            self.dynamical_model.base_model.load_state_dict(self.pre_update_model.clone().module.state_dict())
-            self.simulate_and_learn_policy()
 
     def learn_model(self, epsilon=-1.0, non_decrease_iter=float("inf")):
         """
@@ -247,10 +224,8 @@ class GrBALAgent(MBPOAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        self.policy.reset_buffer()
         super().eval(val)
 
     def meta_learn(self):
         self.meta_fit()
         self.dynamical_model.base_model.load_state_dict(self.pre_update_model.clone().module.state_dict())
-        self.simulate_and_learn_policy(learn_steps=self.num_learn_steps_on_trial)

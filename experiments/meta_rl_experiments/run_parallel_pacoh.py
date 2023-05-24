@@ -26,7 +26,10 @@ def set_tasks(envs, meta_environment):
 
 
 def get_parallel_environments_and_agents(params):
-    params.agent_name = 'mbpo'
+    if params.agent_name == 'parallel_pacoh':
+        params.agent_name = 'mbpo'
+    elif params.agent_name == 'parallel_cem_pacoh':
+        params.agent_name = 'mpc'
     params.safe_log_dir = False
     params.log_to_file = False
     params.save_statistics = False
@@ -59,7 +62,7 @@ if __name__ == "__main__":
     ) as file:
         env_config = yaml.safe_load(file)
 
-    for config_set in ["training", "model", "policy"]:
+    for config_set in ["training", "model", "policy", "mpc"]:
         params.update(env_config[config_set])
 
     agent_config = env_config[params["agent_name"].split('_')[-1]]
@@ -76,7 +79,7 @@ if __name__ == "__main__":
     np.random.seed(params.seed)
     torch.set_num_threads(min(4, params.num_cpu_cores))
 
-    assert params.agent_name == 'parallel_pacoh'
+    assert params.agent_name in ['parallel_pacoh', 'parallel_cem_pacoh']
     meta_environment, meta_agent = get_environment_and_meta_agent(copy.deepcopy(params))
 
     meta_agent.logger.save_hparams(params.toDict())

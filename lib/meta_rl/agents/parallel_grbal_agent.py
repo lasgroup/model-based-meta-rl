@@ -123,7 +123,6 @@ class ParallelGrBALAgent(GrBALAgent):
         for obs in self.observation_queue.copy():
             agent.observation_queue.append(obs)
         agent.pre_update_model.load_state_dict(self.pre_update_model.state_dict())
-        agent.policy.set_parameters(self.policy.get_parameters())
         # agent.dynamical_model.base_model.load_state_dict(self.pre_update_model.module.state_dict())
         return agent
 

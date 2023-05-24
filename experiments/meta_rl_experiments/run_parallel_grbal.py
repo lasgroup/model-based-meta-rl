@@ -50,7 +50,7 @@ if __name__ == "__main__":
     ) as file:
         env_config = yaml.safe_load(file)
 
-    for config_set in ["training", "model", "policy"]:
+    for config_set in ["training", "model", "policy", "mpc"]:
         params.update(env_config[config_set])
 
     agent_config = env_config[params["agent_name"].split('_')[-1]]
