@@ -43,7 +43,7 @@ def get_dataset_path(params):
     ac = str(params.action_cost).replace(".", "")
 
     return os.path.join(
-        f"/cluster/project/infk/krause/tmp-folder/experience_replay_BayesianNN_{tasks}tasks_{ac}acost/",
+        f"/cluster/project/infk/krause/yardas/meta-mbrl/experience_replay_BayesianNN_{tasks}tasks_{ac}acost/",
         f"{params.env_config_file.replace('-', '_').replace('.yaml', '')}_greedy_train_{params.train_episodes}_{params.multiple_runs_id}.pkl"
     )
 
