@@ -110,7 +110,7 @@ class PACOHAgent(MBPOAgent):
         self.num_iter_meta_train = num_iter_meta_train
         self.num_iter_eval_train = num_iter_eval_train
         self.num_learn_eval_steps = num_learn_eval_steps
-        self.num_learn_steps_on_trial = 5 * self.num_learn_steps
+        self.num_learn_steps_on_trial = 10 * self.num_learn_steps
         self.early_stopping = early_stopping
         self.meta_batch_size = meta_batch_size
         self.per_task_batch_size = per_task_batch_size

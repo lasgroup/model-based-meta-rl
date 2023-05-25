@@ -26,7 +26,7 @@ training:
 model:
 
   model_kind: "BayesianNN"
-  model_layers: [400, 400, 400, 400]
+  model_layers: [200, 200, 200, 200]
   model_non_linearity: "ReLU"
   model_opt_lr: 0.001
   model_opt_weight_decay: 0.00005
@@ -61,8 +61,8 @@ mpc:
   mpc_alpha: 0.1
   mpc_noise_beta: 0.25
   mpc_horizon: 30
-  mpc_num_iter: 3
-  mpc_num_particles: 1000
+  mpc_num_iter: 5
+  mpc_num_particles: 500
   mpc_pets_trajectory_samples: 5
   mpc_num_elites: 10
 
