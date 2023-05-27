@@ -10,7 +10,7 @@ from rllib.util.rollout import rollout_episode
 
 @ray.remote
 def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, render=False, use_early_termination=True):
-    torch.set_num_threads(4)
+    torch.set_num_threads(2)
     if hasattr(agent.policy, "replay_buffer"):
         serialize_replay_buffer(agent.policy.replay_buffer)
     for episode in range(num_episodes):
