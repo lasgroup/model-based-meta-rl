@@ -17,10 +17,10 @@ training:
 
   # Data collection and exploration parameters
   collect_meta_data: False
-  exploration: "optimistic"
+  exploration: "greedy"
   beta: 1.5
   pacoh_training_model_kind: "BayesianNN"
-  pacoh_optimistic_evaluation: True
+  pacoh_optimistic_evaluation: False
 
 # Model Parameters
 model:
@@ -54,6 +54,17 @@ policy:
   sac_use_sde: False
   sac_ent_coef: "auto"
   sim_num_steps: 32
+
+mpc:
+  # MPC Parameters
+  mpc_solver: "icem"
+  mpc_alpha: 0.1
+  mpc_noise_beta: 2.0
+  mpc_horizon: 30
+  mpc_num_iter: 5
+  mpc_num_particles: 500
+  mpc_pets_trajectory_samples: 5
+  mpc_num_elites: 10
 
 # MBPO Parameters
 mbpo: {}
