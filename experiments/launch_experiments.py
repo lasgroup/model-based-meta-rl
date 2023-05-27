@@ -11,9 +11,9 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ['random-ant.yaml', 'random-half-cheetah.yaml'],
+    "env-config-file": ['random-half-cheetah.yaml'],
     "agent-name": ['parallel_pacoh'],
-    "exploration": ['optimistic']
+    "exploration": ["optimistic"]
 })
 
 
@@ -109,4 +109,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# python experiments/launch_experiments.py --exp-name initial_test --long --use-wandb --offline-logger --skip-early-termination --use-action-cost --num-cpu-cores 20 --dry
+# python experiments/launch_experiments.py --exp-name initial_test --long --use-wandb --skip-early-termination --use-action-cost --num-cpu-cores 20 --dry
