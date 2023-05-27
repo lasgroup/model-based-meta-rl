@@ -11,10 +11,7 @@ import os
 
 search_configs = OrderedDict({
     # random search
-    "env-config-file": ['reacher.yaml'], # TODO (yarden): write a config file for reacher. Use exploration in config file.
-    # FOR OPTIMISM: set exploration to optimistic, pacoh_optimistic_evaluation to True.
-    # Use rllib to get reacher.
-    # Write a random environment in lib/random_mujoco_mb_environments (its actually implemented, jst implement the reward.)
+    "env-config-file": ['random-half-cheetah.yaml'],
     "agent-name": ['parallel_pacoh'],
     "exploration": ["optimistic"]
 })

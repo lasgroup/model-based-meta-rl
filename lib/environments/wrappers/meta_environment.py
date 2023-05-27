@@ -127,11 +127,11 @@ class MetaEnvironmentWrapper:
         params = np.load(params_file, allow_pickle=True)['arr_0']
         offset_ = offset if num_tasks == 1 else 0  # Always use the first 5 tasks for testing
         idx = np.arange(num_tasks) + offset_
-        # Use this for data collection
-        if num_tasks < 10:
-            idx = np.arange(num_tasks) + offset * 3
-        else:
-            idx = np.random.choice(len(params), size=num_tasks, replace=False)
+        # # Use this for data collection
+        # if num_tasks < 10:
+        #     idx = np.arange(num_tasks) + offset * 3
+        # else:
+        #     idx = np.random.choice(len(params), size=num_tasks, replace=False)
         print(f"Loading environment params at index {idx} from file: \n{params_file} \n")
         return list(params[idx])
 
