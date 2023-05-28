@@ -6,3 +6,4 @@ from .envs.random_pendulum import RandomMBPendulumEnv
 from .envs.random_cart_pole import RandomMBCartPoleEnv
 from .envs.random_reacher3d import RandomMBReacher3DEnv
 from .envs.random_half_cheetah import RandomMBHalfCheetahEnv
+from .envs.random_reacher_sparse import RandomMBReacherSparseEnv
