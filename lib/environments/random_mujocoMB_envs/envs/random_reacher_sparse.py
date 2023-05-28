@@ -1,8 +1,6 @@
+import torch
 from rllib.environment.mujoco.reacher_2d import MBReacherEnv
 from rllib.reward.state_action_reward import StateActionReward
-
-import numpy as np
-
 from lib.environments.wrappers.random_mujoco_env import RandomMujocoEnv
 
 
@@ -22,19 +20,19 @@ def tolerance(
     if margin < 0:
         raise ValueError("`margin` must be non-negative.")
 
-    in_bounds = np.logical_and(lower <= x, x <= upper)
+    in_bounds = torch.logical_and(lower <= x, x <= upper)
     if margin == 0:
-        value = np.where(in_bounds, 1.0, 0.0)
+        value = torch.where(in_bounds, 1.0, 0.0)
     else:
-        d = np.where(x < lower, lower - x, x - upper) / margin
-        value = np.where(in_bounds, 1.0, gaussian(d, value_at_margin))
+        d = torch.where(x < lower, lower - x, x - upper) / margin
+        value = torch.where(in_bounds, 1.0, gaussian(d, value_at_margin))
 
-    return float(value) if np.isscalar(x) else value
+    return value
 
 
 def gaussian(x, value_at_1):
-    scale = np.sqrt(-2 * np.log(value_at_1))
-    return np.exp(-0.5 * (x * scale) ** 2)
+    scale = torch.sqrt(-2 * torch.log(value_at_1))
+    return torch.exp(-0.5 * (x * scale) ** 2)
 
 
 class SparseReacherReward(StateActionReward):
