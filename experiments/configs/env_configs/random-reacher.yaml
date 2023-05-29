@@ -3,8 +3,8 @@ training:
 
   # Environment parameters
   name: RandomMBReacherSparseEnv
-  max_steps: 150
-  action_cost: 0.001
+  max_steps: 50
+  action_cost: 0.1
 
   # Training parameters
   train_episodes: 800

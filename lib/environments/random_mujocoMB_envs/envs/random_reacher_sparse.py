@@ -54,7 +54,7 @@ class SparseReacherReward(StateActionReward):
         dist_to_target = (state[..., -3:] ** 2).sum(-1)
         # Magic from
         # https://github.com/openai/gym/blob/dcd185843a62953e27c2d54dc8c2d647d604b635/gym/envs/mujoco/assets/reacher.xml#L4
-        return tolerance(dist_to_target, (0, 0.009))
+        return tolerance(dist_to_target, (0, 0.009), margin=0)
 
 
 class RandomMBReacherSparseEnv(MBReacherEnv, RandomMujocoEnv):
