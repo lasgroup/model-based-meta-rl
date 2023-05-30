@@ -1,6 +1,5 @@
 from typing import Any
 import numpy as np
-from pynput import keyboard
 from rllib.environment.mujoco.cart_pole import MBCartPoleEnv
 from rllib.reward.state_action_reward import StateActionReward
 import torch
@@ -27,7 +26,7 @@ class SparseCartPoleReward(StateActionReward):
         """Get reward that corresponds to the states."""
         x0, theta = state[..., 0], state[..., 1]
         cart_in_bounds = tolerance(x0, (-self.rail_length, self.rail_length))
-        angle_in_bounds = tolerance(-torch.cos(theta), (0.995, 1)).prod()
+        angle_in_bounds = tolerance(-torch.cos(theta), (0.995, 1))
         return cart_in_bounds * angle_in_bounds
 
 
@@ -62,34 +61,34 @@ class RandomMBSparseCartPoleEnv(MBCartPoleEnv, RandomMujocoEnv):
         return self._get_obs()
 
 
-class Controller:
-    def __init__(self):
-        self.action = np.zeros((1,))
-        self.listener = keyboard.Listener(on_press=self.on_press)
-        self.listener.start()
-
-    def on_press(self, key):
-        try:
-            k = key.char
-        except:
-            k = key.name
-        if k == "j":
-            self.action = np.ones_like(self.action) * -3
-        elif k == "l":
-            self.action = np.ones_like(self.action) * 3
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        return self.action
-
-
-if __name__ == "__main__":
-    env = RandomMBSparseCartPoleEnv()
-    env.reset()
-    controller = Controller()
-    while True:
-        for _ in range(500):
-            action = controller()
-            env.step(action)
-            env.render()
-        print("resetting...")
-        env.reset()
+# class Controller:
+#     def __init__(self):
+#         self.action = np.zeros((1,))
+#         self.listener = keyboard.Listener(on_press=self.on_press)
+#         self.listener.start()
+#
+#     def on_press(self, key):
+#         try:
+#             k = key.char
+#         except:
+#             k = key.name
+#         if k == "j":
+#             self.action = np.ones_like(self.action) * -3
+#         elif k == "l":
+#             self.action = np.ones_like(self.action) * 3
+#
+#     def __call__(self, *args: Any, **kwds: Any) -> Any:
+#         return self.action
+#
+#
+# if __name__ == "__main__":
+#     env = RandomMBSparseCartPoleEnv()
+#     env.reset()
+#     controller = Controller()
+#     while True:
+#         for _ in range(500):
+#             action = controller()
+#             env.step(action)
+#             env.render()
+#         print("resetting...")
+#         env.reset()
