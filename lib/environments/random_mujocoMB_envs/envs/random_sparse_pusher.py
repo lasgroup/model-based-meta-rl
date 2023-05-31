@@ -26,13 +26,13 @@ class SparsePusherReward(StateActionReward):
         end_effector = state[..., -6:-3]
         pluck = state[..., -9:-6]
 
-        dist_to_ball = torch.linalg.norm(pluck - end_effector)
-        dist_to_goal = torch.linalg.norm(pluck - goal)
+        dist_to_ball = torch.linalg.norm(pluck - end_effector, dim=-1)
+        dist_to_goal = torch.linalg.norm(pluck - goal, dim=-1)
 
         reach_reward = tolerance(dist_to_ball, (0, 0.05), 0.3)
         fetch_reward = tolerance(dist_to_goal, (0, 0.05 + 0.1), 0.1)
         reach_then_fetch = reach_reward * (0.5 + 0.5 * fetch_reward)
-        print(reach_then_fetch, reach_reward, fetch_reward)
+        # print(reach_then_fetch, reach_reward, fetch_reward)
         return reach_then_fetch
 
 
