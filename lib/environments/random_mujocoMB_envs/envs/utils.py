@@ -27,5 +27,5 @@ def tolerance(
 
 
 def gaussian(x, value_at_1):
-    scale = torch.sqrt(-2 * torch.log(value_at_1))
+    scale = torch.sqrt(-2 * torch.log(torch.tensor(value_at_1).double()))
     return torch.exp(-0.5 * (x * scale) ** 2)
