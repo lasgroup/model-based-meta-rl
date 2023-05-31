@@ -16,7 +16,7 @@ training:
   num_test_episodes_per_env: 25
 
   # Data collection and exploration parameters
-  collect_meta_data: True
+  collect_meta_data: False
   exploration: "greedy"
   beta: 1.5
   pacoh_training_model_kind: "BayesianNN"
