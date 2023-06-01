@@ -21,7 +21,7 @@ def tolerance(
         value = torch.where(in_bounds, 1.0, 0.0)
     else:
         d = torch.where(x < lower, lower - x, x - upper) / margin
-        value = torch.where(in_bounds, 1.0, gaussian(d, value_at_margin))
+        value = torch.where(in_bounds, torch.tensor(1.0), gaussian(d, value_at_margin))
 
     return value
 
