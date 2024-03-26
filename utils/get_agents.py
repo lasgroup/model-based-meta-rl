@@ -584,7 +584,11 @@ def get_sac_agent(
 def get_rl2_agent(
         environment: AbstractEnvironment,
         params: argparse.Namespace,
-        input_transform: nn.Module = None
+        reward_model: AbstractModel = None,
+        transformations: Iterable[AbstractTransform] = None,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
 ) -> Tuple[PPOAgent, str]:
     """
     Get an Reinforcement Learning Squared (RL^2) agent

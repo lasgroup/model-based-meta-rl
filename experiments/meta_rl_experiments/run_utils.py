@@ -25,73 +25,12 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
     """
     environment, reward_model, termination_model = get_environment(params)
 
-    # TODO: Add more transformations
     transformations = [
         MeanFunction(DeltaState()),
         ActionScaler(scale=environment.action_scale),
     ]
 
-    if params.agent_name == "rl2":
-        agent, comment = agents.get_rl2_agent(
-            environment=environment,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "grbal":
-        agent, comment = agents.get_grbal_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "parallel_grbal":
-        agent, comment = agents.get_parallel_grbal_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "pacoh":
-        agent, comment = agents.get_pacoh_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "parallel_pacoh":
-        agent, comment = agents.get_parallel_pacoh_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "cem_pacoh":
-        agent, comment = agents.get_cem_pacoh_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name == "parallel_cem_pacoh":
-        agent, comment = agents.get_parallel_cem_pacoh_agent(
-            environment=environment,
-            reward_model=reward_model,
-            transformations=transformations,
-            termination_model=termination_model,
-            params=params,
-            input_transform=None
-        )
-    elif params.agent_name in ["mpc", "mpc_policy", "bptt", "mbpo"]:
+    if hasattr(agents, eval(f"get_{params.agent_name}_agent")):
         agent_callable = eval(f"agents.get_{params.agent_name}_agent")
         agent, comment = agent_callable(
             environment=environment,
@@ -102,7 +41,7 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
             input_transform=None
         )
     else:
-        raise NotImplementedError
+        raise ValueError(f"Agent {params.agent_name} not found")
 
     name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
            f"_{params.agent_name}" \
