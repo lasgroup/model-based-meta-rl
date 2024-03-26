@@ -1295,3 +1295,216 @@ def get_parallel_cem_pacoh_agent(
     )
 
     return agent, comment
+
+
+def get_ghv_mdp_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[GHVMDPAgent, str]:
+    """
+    Get a meta-RL agent based on GHV-MDP
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :param termination_model: Early termination check
+    :param initial_distribution: Distribution for initial exploration
+    :return: A GHVMDP agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define dynamics model
+    dynamical_model = GHVEnsembleModel(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        num_heads=params.model_num_heads,
+        prediction_strategy=params.model_prediction_strategy,
+        layers=params.model_layers,
+        biased_head=not params.model_unbiased_head,
+        non_linearity=params.model_non_linearity,
+        input_transform=input_transform,
+        deterministic=False,
+    )
+
+    params.update({"model": dynamical_model.__class__.__name__})
+    dynamical_model = TransformedModel(dynamical_model, transformations)
+
+    # Define model optimizer
+    try:
+        model_optimizer = optim.Adam(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = optim.Adam(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+
+    # Define value function.
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+    terminal_reward = value_function if params.mpc_terminal_reward else None
+
+    # Define policy
+    policy = get_mpc_policy(
+        dynamical_model=dynamical_model,
+        reward=reward_model,
+        params=params,
+        action_scale=environment.action_scale,
+        terminal_reward=terminal_reward,
+        termination_model=termination_model
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
+        params.train_episodes = 0
+    else:
+        trajectory_load_path = None
+
+    agent = GHVMDPAgent(
+        mpc_policy=policy,
+        model_optimizer=model_optimizer,
+        initial_distribution=initial_distribution,
+        gamma=params.gamma,
+        exploration_scheme=params.exploration,
+        model_learn_num_iter=params.model_learn_num_iter,
+        model_learn_batch_size=params.model_learn_batch_size,
+        env_name=params.env_config_file.replace('-', '_').replace('.yaml', ''),
+        trajectory_replay_load_path=trajectory_load_path,
+        multiple_runs_id=params.multiple_runs_id,
+        comment=comment,
+    )
+
+    return agent, comment
+
+
+def get_parallel_ghv_mdp_agent(
+        environment: AbstractEnvironment,
+        reward_model: AbstractModel,
+        transformations: Iterable[AbstractTransform],
+        params: argparse.Namespace,
+        input_transform: nn.Module = None,
+        termination_model: Union[Callable, None] = None,
+        initial_distribution: torch.distributions.Distribution = None
+) -> Tuple[GHVMDPAgent, str]:
+    """
+    Get a meta-RL agent based on PACOH
+    :param environment: RL environment
+    :param reward_model: Reward model
+    :param transformations: State and action transformations
+    :param params: Agent arguments
+    :param input_transform: Input transformation
+    :param termination_model: Early termination check
+    :param initial_distribution: Distribution for initial exploration
+    :return: A PACOH agent
+    """
+    dim_state = environment.dim_state
+    dim_action = environment.dim_action
+    num_states = environment.num_states
+    num_actions = environment.num_actions
+
+    # Define dynamics model
+    dynamical_model = GHVEnsembleModel(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        num_heads=params.model_num_heads,
+        prediction_strategy=params.model_prediction_strategy,
+        layers=params.model_layers,
+        biased_head=not params.model_unbiased_head,
+        non_linearity=params.model_non_linearity,
+        input_transform=input_transform,
+        deterministic=False,
+    )
+
+    params.update({"model": dynamical_model.__class__.__name__})
+    dynamical_model = TransformedModel(dynamical_model, transformations)
+
+    # Define model optimizer
+    try:
+        model_optimizer = optim.Adam(
+            dynamical_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+    except ValueError:
+        model_optimizer = optim.Adam(
+            dynamical_model.base_model.parameters(),
+            lr=params.model_opt_lr,
+            weight_decay=params.model_opt_weight_decay,
+        )
+
+    # Define value function.
+    value_function = get_value_function(
+        dim_state=dim_state,
+        dim_action=dim_action,
+        num_states=num_states,
+        num_actions=num_actions,
+        params=params,
+        input_transform=input_transform
+    )
+    terminal_reward = value_function if params.mpc_terminal_reward else None
+
+    # Define policy
+    policy = get_mpc_policy(
+        dynamical_model=dynamical_model,
+        reward=reward_model,
+        params=params,
+        action_scale=environment.action_scale,
+        terminal_reward=terminal_reward,
+        termination_model=termination_model
+    )
+
+    # Define Agent
+    model_name = dynamical_model.base_model.name
+    comment = f"{model_name} {params.exploration.capitalize()}"
+
+    if not params.collect_meta_data:
+        trajectory_load_path = get_dataset_path(params)
+        params.train_episodes = 0
+    else:
+        trajectory_load_path = None
+
+    agent = lib.meta_rl.agents.parallel_ghv_mdp_agent.ParallelGHVMDPAgent(
+        mpc_policy=policy,
+        model_optimizer=model_optimizer,
+        initial_distribution=initial_distribution,
+        gamma=params.gamma,
+        exploration_scheme=params.exploration,
+        env_name=params.env_config_file.replace('-', '_').replace('.yaml', ''),
+        trajectory_replay_load_path=trajectory_load_path,
+        model_learn_num_iter=params.model_learn_num_iter,
+        model_learn_batch_size=params.model_learn_batch_size,
+        num_parallel_agents=params.grbal_num_parallel_agents,
+        num_episodes_per_rollout=params.num_episodes_per_rollout,
+        max_env_steps=params.max_steps,
+        multiple_runs_id=params.multiple_runs_id,
+        comment=comment,
+    )
+
+    return agent, comment

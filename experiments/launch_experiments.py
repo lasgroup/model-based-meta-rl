@@ -48,6 +48,8 @@ def main(args):
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
         elif flags['agent-name'] in ['parallel_grbal']:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')
+        elif flags['agent-name'] in ['parallel_ghvmdp']:
+            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_ghv_mdp.py')
         else:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run.py')
 
