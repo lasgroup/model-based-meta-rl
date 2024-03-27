@@ -15,7 +15,7 @@ from lib.algorithms.sb3_sac import SB3_SAC
 import lib.meta_rl.agents.parallel_pacoh_agent
 import lib.meta_rl.agents.parallel_grbal_agent
 from lib.agents import MPCAgent, MPCPolicyAgent, MBPOAgent, BPTTAgent
-from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent, CEMPACOHAgent
+from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent, CEMPACOHAgent, GHVMDPAgent
 from lib.environments.wrappers.model_based_environment import ModelBasedEnvironment
 from lib.environments.wrappers.rccar_model_based_environment import RCCarModelBasedEnvironment
 

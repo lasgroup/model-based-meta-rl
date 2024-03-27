@@ -3,7 +3,7 @@ from gym.utils import colorize
 import torch
 
 from lib.agents import MPCAgent
-from lib.model.ghv_model_learning import ghv_model_loss, train_model
+from lib.model.ghv_mdp_model_learning import ghv_model_loss, train_model
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 
 
