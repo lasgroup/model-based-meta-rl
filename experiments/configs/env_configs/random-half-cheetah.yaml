@@ -17,10 +17,10 @@ training:
 
   # Data collection and exploration parameters
   collect_meta_data: False
-  exploration: "greedy"
-  beta: 1.5
+  exploration: "optimistic"
+  beta: 0.5
   pacoh_training_model_kind: "BayesianNN"
-  pacoh_optimistic_evaluation: False
+  pacoh_optimistic_evaluation: True
 
 # Model Parameters
 model:
@@ -29,7 +29,7 @@ model:
   model_layers: [200, 200, 200, 200]
   model_non_linearity: "ReLU"
   model_opt_lr: 0.001
-  model_opt_weight_decay: 0.00005
+  model_opt_weight_decay: 0.001
   model_learn_num_iter: 2000
   model_learn_batch_size: 200
   model_include_aleatoric_uncertainty: False
@@ -72,7 +72,7 @@ mbpo: {}
 # PACOH Parameters
 pacoh:
 
-  pacoh_num_iter_meta_train: 100000
+  pacoh_num_iter_meta_train: 300000
   pacoh_num_iter_eval_train: 25
   pacoh_num_hyper_posterior_particles: 3
   pacoh_n_samples_per_prior: 3
