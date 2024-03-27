@@ -54,11 +54,11 @@ if __name__ == "__main__":
     if params["agent_config_path"] == "":
         params["agent_config_path"] = AGENT_CONFIG_PATH
     with open(
-            os.path.join(
-                params["agent_config_path"],
-                params["env_config_file"]
-            ),
-            "r"
+        os.path.join(
+            params["agent_config_path"],
+            params["env_config_file"]
+        ),
+        "r"
     ) as file:
         env_config = yaml.safe_load(file)
 
