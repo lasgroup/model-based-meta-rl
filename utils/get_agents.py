@@ -928,6 +928,17 @@ def get_pacoh_agent(
         initial_states_distribution=None,
     )
 
+    if "rccar" in params.env_config_file:
+        model_based_env = RCCarModelBasedEnvironment(
+            dynamical_model=dynamical_model,
+            reward_model=reward_model,
+            action_scale=environment.action_scale,
+            num_envs=params.sim_n_envs,
+            sim_num_steps=params.sim_num_steps,
+            initial_states_distribution=None,
+            add_aleatoric_noise=params.sim_add_aleatoric_noise
+        )
+
     policy = SB3_SAC(
         learned_env=model_based_env,
         params=params
@@ -1032,6 +1043,17 @@ def get_parallel_pacoh_agent(
         sim_num_steps=params.sim_num_steps,
         initial_states_distribution=None,
     )
+
+    if "rccar" in params.env_config_file:
+        model_based_env = RCCarModelBasedEnvironment(
+            dynamical_model=dynamical_model,
+            reward_model=reward_model,
+            action_scale=environment.action_scale,
+            num_envs=params.sim_n_envs,
+            sim_num_steps=params.sim_num_steps,
+            initial_states_distribution=None,
+            add_aleatoric_noise=params.sim_add_aleatoric_noise
+        )
 
     policy = SB3_SAC(
         learned_env=model_based_env,

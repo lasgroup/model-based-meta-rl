@@ -7,6 +7,7 @@ from utils.get_environments import get_environment
 
 from lib.datasets.transforms.local_coordinates import LocalCoordinates
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
+from lib.datasets.transforms import LocalCoordinates, ActionBufferScaler, ActionStacking
 
 from rllib.agent.abstract_agent import AbstractAgent
 from rllib.environment.abstract_environment import AbstractEnvironment
@@ -22,11 +23,18 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
     """
     environment, reward_model, termination_model = get_environment(params)
 
-    # TODO: Add more transformations
     transformations = [
         MeanFunction(DeltaState()),
         ActionScaler(scale=environment.action_scale),
     ]
+
+    if "rccar" in params.env_config_file:
+        transformations = [
+            LocalCoordinates(action_stacking_dim=environment.action_stacking_dim),
+            ActionScaler(scale=environment.action_scale),
+            ActionBufferScaler(scale=environment.action_scale, action_stacking_dim=environment.action_stacking_dim),
+            ActionStacking(action_stacking_dim=environment.action_stacking_dim, action_dim=environment.dim_action[0])
+        ]
 
     if "rccar" in params.env_config_file:
         transformations = [

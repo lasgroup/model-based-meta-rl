@@ -11,7 +11,7 @@ class RCCarDemoEnv(AbstractEnvironment):
     wait_time = 0.03
     max_steps = 500
 
-    def __init__(self):
+    def __init__(self, ctrl_cost_weight=0.01, env_params=None):
         super(RCCarDemoEnv, self).__init__(
             dim_state=(6,),
             dim_action=(2,),

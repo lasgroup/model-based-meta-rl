@@ -9,6 +9,7 @@ import utils.get_agents as agents
 from utils.get_environments import get_environment
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
+from lib.datasets.transforms import LocalCoordinates, ActionBufferScaler, ActionStacking
 
 from rllib.model import AbstractModel
 from rllib.agent.abstract_agent import AbstractAgent
@@ -29,6 +30,14 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
         MeanFunction(DeltaState()),
         ActionScaler(scale=environment.action_scale),
     ]
+
+    if "rccar" in params.env_config_file:
+        transformations = [
+            LocalCoordinates(action_stacking_dim=environment.action_stacking_dim),
+            ActionScaler(scale=environment.action_scale),
+            ActionBufferScaler(scale=environment.action_scale, action_stacking_dim=environment.action_stacking_dim),
+            ActionStacking(action_stacking_dim=environment.action_stacking_dim, action_dim=environment.dim_action[0])
+        ]
 
     if hasattr(agents, eval(f"get_{params.agent_name}_agent")):
         agent_callable = eval(f"agents.get_{params.agent_name}_agent")

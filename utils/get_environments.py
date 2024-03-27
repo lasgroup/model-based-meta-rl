@@ -41,8 +41,11 @@ def get_environment(params):
         termination_model = None
 
     elif params.env_group == "rccar_envs":
-        from lib.environments.rccar_envs import RCCarEnv
-        environment = RCCarEnv(ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0)
+        from lib.environments.rccar_envs import RCCarEnv, RCCarSimEnv, RandomRCCarSimEnv
+        environment = eval(params.name)(
+            ctrl_cost_weight=params.action_cost if params.use_action_cost else 0.0,
+            env_params=params.get('env_params', None),
+        )
         reward_model = environment.reward_model()
         termination_model = None
 
