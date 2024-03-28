@@ -201,7 +201,7 @@ class CEMPACOHAgent(MPCAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        # Save trajectories from run_parallel_pacoh.py
+        # Save trajectories from run script
         # if self.save_data:
         #     self.save_trajectory_replay()
         self.meta_fit()

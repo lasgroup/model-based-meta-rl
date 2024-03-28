@@ -12,10 +12,11 @@ from rllib.dataset import ExperienceReplay
 from rllib.environment.abstract_environment import AbstractEnvironment
 
 from lib.algorithms.sb3_sac import SB3_SAC
-import lib.meta_rl.agents.parallel_pacoh_agent
+import lib.meta_rl.agents.parallel_mbpo_pacoh_agent
+import lib.meta_rl.agents.parallel_cem_pacoh_agent
 import lib.meta_rl.agents.parallel_grbal_agent
 from lib.agents import MPCAgent, MPCPolicyAgent, MBPOAgent, BPTTAgent
-from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, PACOHAgent, CEMPACOHAgent, GHVMDPAgent
+from lib.meta_rl.agents import RLSquaredAgent, GrBALAgent, MBPOPACOHAgent, CEMPACOHAgent, GHVMDPAgent
 from lib.environments.wrappers.model_based_environment import ModelBasedEnvironment
 from lib.environments.wrappers.rccar_model_based_environment import RCCarModelBasedEnvironment
 
@@ -863,7 +864,7 @@ def get_parallel_grbal_agent(
     return agent, comment
 
 
-def get_pacoh_agent(
+def get_mbpo_pacoh_agent(
         environment: AbstractEnvironment,
         reward_model: AbstractModel,
         transformations: Iterable[AbstractTransform],
@@ -871,7 +872,7 @@ def get_pacoh_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> Tuple[PACOHAgent, str]:
+) -> Tuple[MBPOPACOHAgent, str]:
     """
     Get a meta-RL agent based on PACOH
     :param environment: RL environment
@@ -954,7 +955,7 @@ def get_pacoh_agent(
     else:
         trajectory_load_path = None
 
-    agent = PACOHAgent(
+    agent = MBPOPACOHAgent(
         dynamical_model=dynamical_model,
         reward_model=reward_model,
         termination_model=termination_model,
@@ -982,7 +983,7 @@ def get_pacoh_agent(
     return agent, comment
 
 
-def get_parallel_pacoh_agent(
+def get_parallel_mbpo_pacoh_agent(
         environment: AbstractEnvironment,
         reward_model: AbstractModel,
         transformations: Iterable[AbstractTransform],
@@ -990,7 +991,7 @@ def get_parallel_pacoh_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> Tuple[PACOHAgent, str]:
+) -> Tuple[MBPOPACOHAgent, str]:
     """
     Get a meta-RL agent based on PACOH
     :param environment: RL environment
@@ -1070,7 +1071,7 @@ def get_parallel_pacoh_agent(
     else:
         trajectory_load_path = None
 
-    agent = lib.meta_rl.agents.parallel_pacoh_agent.ParallelPACOHAgent(
+    agent = lib.meta_rl.agents.parallel_mbpo_pacoh_agent.ParallelMBPOPACOHAgent(
         dynamical_model=dynamical_model,
         reward_model=reward_model,
         termination_model=termination_model,
@@ -1109,7 +1110,7 @@ def get_cem_pacoh_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> Tuple[PACOHAgent, str]:
+) -> Tuple[CEMPACOHAgent, str]:
     """
     Get a meta-RL agent based on PACOH
     :param environment: RL environment
@@ -1218,7 +1219,7 @@ def get_parallel_cem_pacoh_agent(
         input_transform: nn.Module = None,
         termination_model: Union[Callable, None] = None,
         initial_distribution: torch.distributions.Distribution = None
-) -> Tuple[PACOHAgent, str]:
+) -> Tuple[CEMPACOHAgent, str]:
     """
     Get a meta-RL agent based on PACOH
     :param environment: RL environment
@@ -1294,7 +1295,7 @@ def get_parallel_cem_pacoh_agent(
     else:
         trajectory_load_path = None
 
-    agent = lib.meta_rl.agents.parallel_pacoh_agent.ParallelPACOHAgent(
+    agent = lib.meta_rl.agents.parallel_cem_pacoh_agent.ParallelCEMPACOHAgent(
         mpc_policy=policy,
         model_optimizer=model_optimizer,
         initial_distribution=initial_distribution,

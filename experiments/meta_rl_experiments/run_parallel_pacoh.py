@@ -26,7 +26,7 @@ def set_tasks(envs, meta_environment):
 
 
 def get_parallel_environments_and_agents(params):
-    if params.agent_name == 'parallel_pacoh':
+    if params.agent_name == 'parallel_mbpo_pacoh':
         params.agent_name = 'mbpo'
     elif params.agent_name == 'parallel_cem_pacoh':
         params.agent_name = 'mpc'
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     np.random.seed(params.seed)
     torch.set_num_threads(min(4, params.num_cpu_cores))
 
-    assert params.agent_name in ['parallel_pacoh', 'parallel_cem_pacoh']
+    assert params.agent_name in ['parallel_mbpo_pacoh', 'parallel_cem_pacoh']
     meta_environment, meta_agent = get_environment_and_meta_agent(copy.deepcopy(params))
 
     meta_agent.logger.save_hparams(params.toDict())

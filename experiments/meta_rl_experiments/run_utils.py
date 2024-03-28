@@ -49,8 +49,8 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
-    except:
-        raise ValueError(f"Agent {params.agent_name} not found")
+    except AttributeError:
+        raise ValueError(f"Agent {params.agent_name} is not a valid agent.")
 
     name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
            f"_{params.agent_name}" \

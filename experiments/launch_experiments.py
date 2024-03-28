@@ -12,7 +12,7 @@ import os
 search_configs = OrderedDict({
     # random search
     "env-config-file": ['random-half-cheetah.yaml'],
-    "agent-name": ['parallel_pacoh'],
+    "agent-name": ['parallel_cem_pacoh'],
     "exploration": ["optimistic"]
 })
 
@@ -44,7 +44,7 @@ def main(args):
         if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
             continue
 
-        if flags['agent-name'] in ['parallel_pacoh', 'parallel_cem_pacoh']:
+        if flags['agent-name'] in ['parallel_mbpo_pacoh', 'parallel_cem_pacoh']:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
         elif flags['agent-name'] in ['parallel_grbal']:
             run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')

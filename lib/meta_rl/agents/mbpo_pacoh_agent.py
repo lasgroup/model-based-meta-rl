@@ -26,7 +26,7 @@ Add plot trajectories and axis
 """
 
 
-class PACOHAgent(MBPOAgent):
+class MBPOPACOHAgent(MBPOAgent):
     """
     Implementation of the Meta MBRL Agent based on PACOH.
 
@@ -201,7 +201,7 @@ class PACOHAgent(MBPOAgent):
     def eval(self, val=True):
         """Set the agent in evaluation mode."""
         self.meta_environment.eval(val)
-        # Save trajectories from run_parallel_pacoh.py
+        # Save trajectories from run script
         # if self.save_data:
         #     self.save_trajectory_replay()
         self.meta_fit()
