@@ -91,3 +91,14 @@ grbal:
   grbal_future_segment_len: 32
   grbal_inner_lr: 0.003
   grbal_num_iter_meta_train: 20000
+
+#GHVMDP Parameters
+ghvmdp:
+
+  model_kind: "GHVEnsemble"
+  model_opt_weight_decay: 0.0001
+  model_learn_batch_size: 32
+
+  # Parallel Rollout Parameters
+  num_episodes_per_rollout: 1
+  grbal_num_parallel_agents: 5

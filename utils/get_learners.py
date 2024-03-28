@@ -12,6 +12,7 @@ from rllib.value_function import AbstractValueFunction, NNValueFunction, Abstrac
     NNQFunction
 
 from lib.model.bayesian_model import BayesianNNModel
+from lib.model.ghv_mdp_model import GHVEnsembleModel
 from lib.policies.rnn_policy import RNNPolicy
 from lib.solvers.icem_shooting import ICEMShooting
 from lib.hucrl.hallucinated_model import HallucinatedModel
@@ -83,6 +84,20 @@ def get_model(
             likelihood_std=params.pacoh_likelihood_std,
             include_aleatoric_uncertainty=params.model_include_aleatoric_uncertainty,
             prediction_strategy=params.model_prediction_strategy,
+            biased_head=not params.model_unbiased_head,
+            non_linearity=params.model_non_linearity,
+            input_transform=input_transform,
+            deterministic=False,
+        )
+    elif params.model_kind in ["GHVEnsemble"]:
+        model = GHVEnsembleModel(
+            dim_state=dim_state,
+            dim_action=dim_action,
+            num_states=num_states,
+            num_actions=num_actions,
+            num_heads=params.model_num_heads,
+            prediction_strategy=params.model_prediction_strategy,
+            layers=params.model_layers,
             biased_head=not params.model_unbiased_head,
             non_linearity=params.model_non_linearity,
             input_transform=input_transform,

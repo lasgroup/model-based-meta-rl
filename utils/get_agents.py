@@ -1319,7 +1319,7 @@ def get_parallel_cem_pacoh_agent(
     return agent, comment
 
 
-def get_ghv_mdp_agent(
+def get_ghvmdp_agent(
         environment: AbstractEnvironment,
         reward_model: AbstractModel,
         transformations: Iterable[AbstractTransform],
@@ -1345,22 +1345,15 @@ def get_ghv_mdp_agent(
     num_actions = environment.num_actions
 
     # Define dynamics model
-    dynamical_model = GHVEnsembleModel(
+    dynamical_model = get_model(
         dim_state=dim_state,
         dim_action=dim_action,
         num_states=num_states,
         num_actions=num_actions,
-        num_heads=params.model_num_heads,
-        prediction_strategy=params.model_prediction_strategy,
-        layers=params.model_layers,
-        biased_head=not params.model_unbiased_head,
-        non_linearity=params.model_non_linearity,
+        transformations=transformations,
         input_transform=input_transform,
-        deterministic=False,
+        params=params
     )
-
-    params.update({"model": dynamical_model.__class__.__name__})
-    dynamical_model = TransformedModel(dynamical_model, transformations)
 
     # Define model optimizer
     try:
@@ -1424,7 +1417,7 @@ def get_ghv_mdp_agent(
     return agent, comment
 
 
-def get_parallel_ghv_mdp_agent(
+def get_parallel_ghvmdp_agent(
         environment: AbstractEnvironment,
         reward_model: AbstractModel,
         transformations: Iterable[AbstractTransform],
@@ -1434,7 +1427,7 @@ def get_parallel_ghv_mdp_agent(
         initial_distribution: torch.distributions.Distribution = None
 ) -> Tuple[GHVMDPAgent, str]:
     """
-    Get a meta-RL agent based on PACOH
+    Get a meta-RL agent based on GHV-MDP
     :param environment: RL environment
     :param reward_model: Reward model
     :param transformations: State and action transformations
@@ -1442,7 +1435,7 @@ def get_parallel_ghv_mdp_agent(
     :param input_transform: Input transformation
     :param termination_model: Early termination check
     :param initial_distribution: Distribution for initial exploration
-    :return: A PACOH agent
+    :return: A GHV-MDP agent
     """
     dim_state = environment.dim_state
     dim_action = environment.dim_action
@@ -1450,22 +1443,15 @@ def get_parallel_ghv_mdp_agent(
     num_actions = environment.num_actions
 
     # Define dynamics model
-    dynamical_model = GHVEnsembleModel(
+    dynamical_model = get_model(
         dim_state=dim_state,
         dim_action=dim_action,
         num_states=num_states,
         num_actions=num_actions,
-        num_heads=params.model_num_heads,
-        prediction_strategy=params.model_prediction_strategy,
-        layers=params.model_layers,
-        biased_head=not params.model_unbiased_head,
-        non_linearity=params.model_non_linearity,
+        transformations=transformations,
         input_transform=input_transform,
-        deterministic=False,
+        params=params
     )
-
-    params.update({"model": dynamical_model.__class__.__name__})
-    dynamical_model = TransformedModel(dynamical_model, transformations)
 
     # Define model optimizer
     try:
