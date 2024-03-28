@@ -39,7 +39,7 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
             ActionStacking(action_stacking_dim=environment.action_stacking_dim, action_dim=environment.dim_action[0])
         ]
 
-    if hasattr(agents, eval(f"get_{params.agent_name}_agent")):
+    try:
         agent_callable = eval(f"agents.get_{params.agent_name}_agent")
         agent, comment = agent_callable(
             environment=environment,
@@ -49,7 +49,7 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
             params=params,
             input_transform=None
         )
-    else:
+    except:
         raise ValueError(f"Agent {params.agent_name} not found")
 
     name = f"{params.env_config_file.replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
