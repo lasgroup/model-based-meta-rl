@@ -1,12 +1,23 @@
 import os
-from typing import Union
-
+import ray
 import sys
+import copy
+import yaml
+import time
+import torch
 import dotmap
+import argparse
+import numpy as np
+
+from typing import Union
+from dotmap import DotMap
 
 from utils.logger import Logger
 import utils.get_agents as agents
+
+from experiments import AGENT_CONFIG_PATH
 from utils.get_environments import get_environment
+from experiments.meta_rl_experiments.parser import get_argument_parser
 from lib.hucrl.hallucinated_environment import HallucinatedEnvironmentWrapper
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
 from lib.datasets.transforms import LocalCoordinates, ActionBufferScaler, ActionStacking
@@ -83,3 +94,38 @@ def get_environment_and_meta_agent(params: dotmap.DotMap) -> (AbstractEnvironmen
     agent.set_meta_environment(environment)
 
     return environment, agent
+
+
+def get_params():
+    parser = get_argument_parser()
+    params = vars(parser.parse_args())
+
+    if params["agent_config_path"] == "":
+        params["agent_config_path"] = AGENT_CONFIG_PATH
+    with open(
+        os.path.join(
+            params["agent_config_path"],
+            params["env_config_file"]
+        ),
+        "r"
+    ) as file:
+        env_config = yaml.safe_load(file)
+
+    for config_set in ["training", "model", "policy", "mpc"]:
+        params.update(env_config[config_set])
+
+    agent_config = env_config[params["agent_name"].split('_')[-1]]
+    params.update(agent_config)
+
+    params = DotMap(params)
+
+    ray.init(
+        num_cpus=params.num_cpu_cores,
+        object_store_memory=(1000 * 1e6 * params.num_cpu_cores)
+    )
+
+    torch.manual_seed(params.seed)
+    np.random.seed(params.seed)
+    torch.set_num_threads(min(4, params.num_cpu_cores))
+
+    return params

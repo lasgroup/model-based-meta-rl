@@ -36,12 +36,6 @@ def get_environment_and_agent(params: argparse.Namespace) -> (AbstractEnvironmen
             ActionStacking(action_stacking_dim=environment.action_stacking_dim, action_dim=environment.dim_action[0])
         ]
 
-    if "rccar" in params.env_config_file:
-        transformations = [
-            LocalCoordinates(),
-            ActionScaler(scale=environment.action_scale),
-        ]
-
     if params.agent_name in ["mpc", "mpc_policy", "bptt", "mbpo"]:
         agent_callable = eval(f"agents.get_{params.agent_name}_agent")
         agent, comment = agent_callable(

@@ -34,8 +34,8 @@ def get_argument_parser() -> argparse.ArgumentParser:
         "--agent-name",
         type=str,
         default="parallel_pacoh",
-        choices=["mpc", "rl2", "grbal", "parallel_grbal", "ghvmdp", "parallel_ghvmdp", "pacoh", "parallel_pacoh",
-                 "cem_pacoh", "parallel_cem_pacoh"]
+        choices=["rl2", "grbal", "parallel_grbal", "ghvmdp", "parallel_ghvmdp", "mbpo_pacoh", "parallel_mbpo_pacoh",
+                 "cem_pacoh", "parallel_cem_pacoh", "mbpo", "mpc"]
     )
     parser.add_argument(
         "--exploration",
