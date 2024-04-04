@@ -125,13 +125,16 @@ class MetaEnvironmentWrapper:
     def load_params_from_file(self, num_tasks, rel_params_dir, offset=0, mode='train'):
         params_file = os.path.join(get_project_path(), rel_params_dir, f'{mode}.npz')
         params = np.load(params_file, allow_pickle=True)['arr_0']
-        offset_ = offset if num_tasks == 1 else 0  # Always use the first 5 tasks for testing
-        idx = np.arange(num_tasks) + offset_
-        # # Use this for data collection
-        # if num_tasks < 10:
-        #     idx = np.arange(num_tasks) + offset * 3
-        # else:
-        #     idx = np.random.choice(len(params), size=num_tasks, replace=False)
+        if mode == 'test':  # Always use the first 5 tasks for testing
+            offset_ = offset if num_tasks == 1 else 0
+            idx = np.arange(num_tasks) + offset_
+        elif mode == 'train':  # Use random set of tasks for data collection
+            if num_tasks < 10:
+                idx = np.arange(num_tasks) + offset * 3
+            else:
+                idx = np.random.choice(len(params), size=num_tasks, replace=False)
+        else:
+            raise ValueError(f"Invalid mode: {mode}. Must be 'train' or 'test'")
         print(f"Loading environment params at index {idx} from file: \n{params_file} \n")
         return list(params[idx])
 

@@ -5,6 +5,7 @@ import yaml
 import time
 import torch
 import numpy as np
+from rllib.util.training.utilities import Evaluate
 
 import experiments.meta_rl_experiments.run_utils as run_utils
 
@@ -17,12 +18,13 @@ def eval_rollout(base_agent, params, meta_environment=None, num_episodes=1, rend
     if meta_environment is None:
         meta_environment = base_agent.meta_environment
     copy_agents_id = []
-    for episode in range(params.num_test_env_instances):
+    for task in range(params.num_test_env_instances):
         env_copy, _, _ = get_wrapped_meta_env(
             params,
-            meta_training_tasks=[meta_environment.test_env_params[episode]],
-            meta_test_tasks=[meta_environment.test_env_params[episode]]
+            meta_training_tasks=[meta_environment.test_env_params[task]],
+            meta_test_tasks=[meta_environment.test_env_params[task]]
         )
+        env_copy.eval()
         agent_copy = get_copy(base_agent, copy.deepcopy(params), env_copy)
         copy_agents_id.append(
             rollout_parallel_agent.remote(
@@ -80,7 +82,6 @@ if __name__ == "__main__":
         render=params.render,
         use_early_termination=not params.skip_early_termination
     )
-
     eval_returns = np.mean(returns)
     print(f"Test Cumulative Rewards: {eval_returns}")
 
