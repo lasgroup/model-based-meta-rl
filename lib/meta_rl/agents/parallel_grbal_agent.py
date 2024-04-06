@@ -8,7 +8,7 @@ from experiments.meta_rl_experiments import run_utils
 
 from lib.meta_rl.agents import GrBALAgent
 from utils.get_environments import get_wrapped_meta_env
-from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, auto_garbage_collect
+from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, auto_garbage_collect, log_agents
 
 
 class ParallelGrBALAgent(GrBALAgent):
@@ -65,9 +65,9 @@ class ParallelGrBALAgent(GrBALAgent):
                 episode_dict = agent.logger[-episode-1]
                 if i == len(copy_agents) - 1:
                     episode_dict["env_avg_train_return-0"] = np.mean(returns[:, -episode-1], axis=0)
-                self.logger.end_episode(**episode_dict)
                 print(self)
             self.update_counters(agent)
+        log_agents(self, copy_agents, num_episodes)
 
         return returns.flatten()
 

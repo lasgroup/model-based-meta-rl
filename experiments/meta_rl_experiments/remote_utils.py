@@ -2,8 +2,9 @@ import gc
 import os
 import psutil
 
-import torch
 import ray
+import torch
+import numpy as np
 
 from rllib.util.rollout import rollout_episode
 
@@ -61,3 +62,24 @@ def auto_garbage_collect(pct=80.0):
     """
     if psutil.virtual_memory().percent >= pct:
         gc.collect()
+
+
+def log_agents(base_agent, parallel_agents, num_episodes):
+    for episode in range(num_episodes):
+        episode_dict = {}
+        for key in parallel_agents[0].logger.statistics[episode].keys():
+            ret_array = np.zeros((len(parallel_agents)))
+            for i, agent in enumerate(parallel_agents):
+                ret_array[i] = agent.logger.statistics[episode][key]
+            episode_dict[key] = np.mean(ret_array, axis=0)
+        base_agent.logger.end_episode(prefix="env_average", **episode_dict)
+
+
+def update_counters(base_agent, agent):
+    base_agent.counters["total_episodes"] += 1
+    base_agent.counters["total_steps"] += agent.total_steps
+    if base_agent.training:
+        base_agent.counters["train_episodes"] += 1
+        base_agent.counters["train_steps"] += agent.train_steps
+    else:
+        base_agent.counters["eval_episodes"] += 1

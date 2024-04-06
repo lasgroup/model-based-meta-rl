@@ -164,11 +164,12 @@ class Logger(object):
                     step=self.current[key][0],
                 )
 
-    def end_episode(self, **kwargs):
+    def end_episode(self, prefix='average', **kwargs):
         """Finalize collected data and add final fixed values.
 
         Parameters
         ----------
+        prefix : str
         kwargs : dict
             Any kwargs passed to end_episode overwrites tracked data if present.
             This can be used to store fixed values that are tracked per episode
@@ -187,7 +188,7 @@ class Logger(object):
             if isinstance(value, float) or isinstance(value, int):
                 if self.use_wandb:
                     wandb.log(
-                        {f"average/{key}": value}, step=self.episode
+                        {f"{prefix}/{key}": value}, step=self.episode
                     )
 
         self.statistics.append(data)

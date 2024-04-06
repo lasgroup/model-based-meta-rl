@@ -9,7 +9,7 @@ from lib.datasets.utils import combine_datasets
 from lib.meta_rl.agents.cem_pacoh_agent import CEMPACOHAgent
 from utils.get_environments import get_wrapped_env, get_wrapped_meta_env
 from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, add_dataset, train_agent, \
-    auto_garbage_collect
+    auto_garbage_collect, log_agents
 
 
 class ParallelCEMPACOHAgent(CEMPACOHAgent):
@@ -68,9 +68,9 @@ class ParallelCEMPACOHAgent(CEMPACOHAgent):
                 episode_dict = agent.logger[-episode-1]
                 if i == len(copy_agents) - 1:
                     episode_dict["env_avg_train_return-0"] = np.mean(returns[:, -episode-1], axis=0)
-                self.logger.end_episode(**episode_dict)
                 print(self)
             self.update_counters(agent)
+        log_agents(self, copy_agents, num_episodes)
 
         return returns.flatten()
 

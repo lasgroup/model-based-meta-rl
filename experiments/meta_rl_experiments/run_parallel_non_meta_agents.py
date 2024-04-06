@@ -10,8 +10,8 @@ from rllib.util.training.utilities import Evaluate
 import experiments.meta_rl_experiments.run_utils as run_utils
 
 from utils.get_environments import get_wrapped_env, get_wrapped_meta_env
-from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent
 from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
+from experiments.meta_rl_experiments.remote_utils import rollout_parallel_agent, update_counters, log_agents
 
 
 def eval_rollout(base_agent, params, meta_environment=None, num_episodes=1, render=False, use_early_termination=True):
@@ -44,9 +44,9 @@ def eval_rollout(base_agent, params, meta_environment=None, num_episodes=1, rend
             episode_dict = agent.logger[-episode-1]
             if i == len(copy_agents) - 1:
                 episode_dict["env_avg_train_return-0"] = np.mean(returns[:, -episode-1], axis=0)
-            base_agent.logger.end_episode(**episode_dict)
             print(base_agent)
-        base_agent.update_counters(agent)
+        update_counters(base_agent, agent)
+    log_agents(base_agent, copy_agents, num_episodes)
 
     return returns.flatten()
 
