@@ -21,10 +21,6 @@ from lib.meta_rl.algorithms.pacoh.modules.likelihood import GaussianLikelihood
 from lib.meta_rl.algorithms.pacoh.modules.hyper_prior import GaussianHyperPrior
 from lib.meta_rl.algorithms.pacoh.modules.prior_posterior import BatchedGaussianPrior
 
-"""
-Add plot trajectories and axis
-"""
-
 
 class CEMPACOHAgent(MPCAgent):
     """
@@ -558,15 +554,18 @@ class CEMPACOHAgent(MPCAgent):
         model_kind = params.pacoh_training_model_kind
         num_tasks = params.num_train_env_instances
         action_cost = str(params.action_cost).replace(".", "")
-        proj_rel_path = base_path + f"_{model_kind}_{num_tasks}tasks_{action_cost}acost"
+        proj_rel_path = base_path + f"_{num_tasks}tasks_{action_cost}acost"
         file_name = f"{self.env_name}_{params.exploration}_{mode}_{self.dataset.num_episodes}_{self.multiple_runs_id}.pkl"
         if not os.path.exists(os.path.join(get_project_path(), proj_rel_path)):
             os.makedirs(os.path.join(get_project_path(), proj_rel_path), exist_ok=True)
         save_path = os.path.join(get_project_path(), proj_rel_path, file_name)
         torch.save(self.dataset, save_path)
+        print(f"Saved trajectory replay to {save_path}")
 
     def load_trajectory_replay(self, project_rel_path):
         load_path = os.path.join(get_project_path(), project_rel_path)
         self.dataset = torch.load(load_path)
+        print(f"Loaded trajectory replay from {load_path}")
         if os.path.exists(load_path.replace('train', 'test')):
             self.val_dataset = torch.load(load_path.replace('train', 'test'))
+            print(f"Loaded validation trajectory replay from {load_path.replace('train', 'test')}")

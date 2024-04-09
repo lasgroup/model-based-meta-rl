@@ -35,7 +35,7 @@ def get_project_path():
 
 def get_dataset_path(params):
     return os.path.join(
-        "experiments/meta_rl_experiments/experience_replay",
+        f"experiments/meta_rl_experiments/experience_replay_{params.num_train_env_instances}tasks_{str(params.action_cost).replace('.', '')}acost",
         f"{params.env_config_file.replace('-', '_').replace('.yaml', '')}_{params.exploration}_train_{params.train_episodes}_{params.multiple_runs_id}.pkl"
     )
 
