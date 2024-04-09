@@ -1,20 +1,12 @@
-import os
-import ray
 import copy
-import yaml
 import time
-import torch
 import numpy as np
 
-from dotmap import DotMap
 from rllib.util.training.utilities import Evaluate
 
-from experiments import AGENT_CONFIG_PATH
 from experiments.meta_rl_experiments import run_utils
-from experiments.meta_rl_experiments.parser import get_argument_parser
 from experiments.lib_environments.run_utils import get_environment_and_agent
 from lib.environments.wrappers.meta_environment import MetaEnvironmentWrapper
-from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 
 
 def set_tasks(envs, meta_environment):
@@ -52,7 +44,7 @@ if __name__ == "__main__":
     params = run_utils.get_params()
 
     assert params.agent_name in ['parallel_mbpo_pacoh', 'parallel_cem_pacoh']
-    meta_environment, meta_agent = get_environment_and_meta_agent(copy.deepcopy(params))
+    meta_environment, meta_agent = run_utils.get_environment_and_meta_agent(copy.deepcopy(params))
 
     meta_agent.logger.save_hparams(params.toDict())
 

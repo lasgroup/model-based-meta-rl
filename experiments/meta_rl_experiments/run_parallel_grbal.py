@@ -1,18 +1,10 @@
-import os
-import ray
 import copy
-import yaml
 import time
-import torch
 import numpy as np
 
-from dotmap import DotMap
 from rllib.util.training.utilities import Evaluate
 
-from experiments import AGENT_CONFIG_PATH
 from experiments.meta_rl_experiments import run_utils
-from experiments.meta_rl_experiments.parser import get_argument_parser
-from experiments.meta_rl_experiments.run_utils import get_environment_and_meta_agent
 
 
 def get_parallel_environments_and_agents(params):
@@ -25,7 +17,7 @@ def get_parallel_environments_and_agents(params):
     params.num_learn_steps = 0
     params.collect_meta_data = True
 
-    envs_agents = [(get_environment_and_meta_agent(params)) for _ in range(params.grbal_num_parallel_agents)]
+    envs_agents = [(run_utils.get_environment_and_meta_agent(params)) for _ in range(params.grbal_num_parallel_agents)]
 
     task_envs = [env_agent[0] for env_agent in envs_agents]
     task_agents = [env_agent[1] for env_agent in envs_agents]
@@ -40,7 +32,7 @@ if __name__ == "__main__":
     params = run_utils.get_params()
 
     assert params.agent_name == 'parallel_grbal'
-    meta_environment, meta_agent = get_environment_and_meta_agent(params)
+    meta_environment, meta_agent = run_utils.get_environment_and_meta_agent(params)
 
     meta_agent.logger.save_hparams(params.toDict())
 
