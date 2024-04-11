@@ -1,10 +1,7 @@
 # Exploration Parameters
 collect_meta_data: False
 pacoh_training_model_kind: "ProbabilisticEnsemble"
-exploration: "optimistic"
-pacoh_optimistic_evaluation: True
 beta: 1.5
-# action_cost: 1.0     # Pusher Default = 0.1,    Cart Pole Default = 0.01
 
 # Model Parameters
 model_kind: "BayesianNN"

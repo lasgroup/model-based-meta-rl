@@ -64,6 +64,11 @@ def get_environment(params):
         else:
             termination_model = None
 
+    elif params.env_group == "custom_envs":
+        import lib.environments.custom_envs as custom_envs
+        # Update the environment initialization with the parameters
+        environment = eval(f"{custom_envs}.{params.name}")()
+
     else:
         raise NotImplementedError
 

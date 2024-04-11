@@ -9,15 +9,24 @@ import numpy as np
 import copy
 import os
 
-search_configs = OrderedDict({
-    # random search
-    "env-config-file": ['random-half-cheetah.yaml'],
-    "agent-name": ['parallel_cem_pacoh'],
-    "exploration": ["optimistic"]
-})
+from utils.utils import get_project_path
+
+
+def resolve_agent_name(agent_name):
+    AGENT_DICT = {
+        "pacoh_rl": ['parallel_cem_pacoh', 'optimistic'],
+        "pacoh_rl_greedy": ['parallel_cem_pacoh', 'greedy'],
+        "pacoh_rl_sac": ['parallel_mbpo_pacoh', 'greedy'],
+        "grbal": ['parallel_grbal', 'greedy'],
+        "hucrl": ['mpc', 'optimistic'],
+        "pets": ['mpc', 'greedy'],
+        "mbpo": ['mbpo', 'greedy'],
+    }
+    return AGENT_DICT[agent_name]
 
 
 def main(args):
+
     rds = np.random.RandomState(args.seed)
     init_seeds = list(rds.randint(0, 10 ** 6, size=(100,)))
 
@@ -25,50 +34,46 @@ def main(args):
     exp_base_path = os.path.join(RESULT_DIR, args.exp_name)
 
     command_list = []
-    possible_configs = np.argwhere(np.ones([len(search_configs[param]) for param in search_configs.keys()]))
-    for idx in possible_configs:
-        # transfer flags from the args
-        flags = copy.deepcopy(args.__dict__)
-        for key in ["seed", "num_seeds_per_hparam", "dry", "long"]:
-            flags.pop(key)
-        for i, param in enumerate(search_configs.keys()):
-            flags[param] = search_configs[param][idx[i]]
+    internal_agent_name, exploration = resolve_agent_name(args.agent_name)
 
-        exp_name = f"{flags['env-config-file'].replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
-                   f"_{flags['agent-name']}" \
-                   f"_{flags['exploration']}"
-        current_time = datetime.now().strftime("%b%d_%H_%M_%S")
-        exp_path = os.path.join(exp_base_path, f"{exp_name}_{current_time}")
-        flags['agent-config-path'] = os.path.abspath(os.path.join('slurm_outputs', args.exp_name, 'configs'))
+    # transfer flags from the args
+    flags = copy.deepcopy(args.__dict__)
+    for key in ["seed", "num_seeds", "dry", "long"]:
+        flags.pop(key)
+    flags["agent_name"] = internal_agent_name
+    flags["exploration"] = exploration
+    flags["pacoh_optimistic_evaluation"] = exploration == "optimistic" and "pacoh" in internal_agent_name
+    print(flags)
 
-        if flags['agent-name'] == "ppo" and flags['exploration'] == "optimistic":
-            continue
+    exp_name = f"{flags['env_config_file'].replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
+               f"_{flags['agent_name']}" \
+               f"_{flags['exploration']}"
+    current_time = datetime.now().strftime("%b%d_%H_%M_%S")
+    exp_path = os.path.join(exp_base_path, f"{exp_name}_{current_time}")
 
-        if flags['agent-name'] in ['parallel_mbpo_pacoh', 'parallel_cem_pacoh']:
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_pacoh.py')
-        elif flags['agent-name'] in ['parallel_grbal']:
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_grbal.py')
-        elif flags['agent-name'] in ['parallel_ghvmdp']:
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run_parallel_ghv_mdp.py')
-        else:
-            run_file_path = os.path.abspath('experiments/meta_rl_experiments/run.py')
+    if flags['agent_name'] in ['parallel_mbpo_pacoh', 'parallel_cem_pacoh']:
+        run_file_path = os.path.join(get_project_path(), 'experiments/meta_rl_experiments/run_parallel_pacoh.py')
+    elif flags['agent_name'] in ['parallel_grbal']:
+        run_file_path = os.path.join(get_project_path(), 'experiments/meta_rl_experiments/run_parallel_grbal.py')
+    else:
+        run_file_path = os.path.join(get_project_path(), 'experiments/meta_rl_experiments/run_parallel_non_meta_agents.py')
 
-        for j in range(args.num_seeds_per_hparam):
-            seed = init_seeds[j]
-            flags_ = dict(**flags, **{'seed': seed})
-            flags_hash = hash_dict(flags_)
-            if flags_['exploration'] == 'greedy':
-                flags_['exp_name'] = flags_['exp_name'].replace('opt', 'gre')
-            flags_['log-dir'] = os.path.join(exp_path, flags_hash)
-            flags_['multiple-runs-id'] = j
-            cmd = generate_base_command(run_file_path, flags=flags_)
-            command_list.append(cmd)
+    for j in range(args.num_seeds):
+        seed = init_seeds[j]
+        flags_ = dict(**flags, **{'seed': seed})
+        flags_hash = hash_dict(flags_)
+        if flags_['exploration'] == 'greedy':
+            flags_['exp_name'] = flags_['exp_name'].replace('opt', 'gre')
+        flags_['log-dir'] = os.path.join(exp_path, flags_hash)
+        flags_['multiple-runs-id'] = j
+        cmd = generate_base_command(run_file_path, flags=flags_)
+        command_list.append(cmd)
 
     # submit jobs
     generate_run_commands(
         command_list,
         exp_name=args.exp_name,
-        mode='euler_slurm',
+        mode='local',
         num_cpus=args.num_cpu_cores,
         promt=True,
         dry=args.dry,
@@ -80,33 +85,25 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # Experiment Parameters
+    parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--exp-name", type=str, default="pacoh_defaults")
-    parser.add_argument("--num-seeds-per-hparam", type=int, default=5)
+    parser.add_argument("--num-seeds", type=int, default=1)
+
     parser.add_argument("--dry", action="store_true")
     parser.add_argument("--long", action="store_true")
-    parser.add_argument("--seed", type=int, default=1)
-
-    parser.add_argument("--num-cpu-cores", type=int, default=20)
+    parser.add_argument("--num-cpu-cores", type=int, default=4)
 
     # Training Parameters
+    parser.add_argument("--env-config-file", type=str, default="random-sparse-pendulum.yaml")
     parser.add_argument(
-        "--env-group",
+        "--agent-name",
         type=str,
-        default="random_mujocoMB_envs",
-        choices=["gym_envs", "mujocoMB_envs", "random_mujocoMB_envs", "point_envs"]
+        default="pacoh_rl",
+        choices=["pacoh_rl", "pacoh_rl_greedy", "pacoh_rl_sac", "grbal", "hucrl", "pets", "mbpo"]
     )
-    parser.add_argument("--eval-frequency", type=int, default=0)
-    parser.add_argument("--skip-early-termination", action="store_true")
-
-    # Meta Learning Parameters
-    parser.add_argument("--env-random-scale-limit", type=float, default=3.0)
-
-    parser.add_argument("--use-action-cost", action="store_true")
-
-    parser.add_argument("--save-statistics", action="store_true")
+    parser.add_argument("--collect-meta-data", type=bool, default=True)
     parser.add_argument("--render", action="store_true")
     parser.add_argument("--use-wandb", action="store_true")
-    parser.add_argument("--offline-logger", action="store_true")
 
     args = parser.parse_args()
     main(args)

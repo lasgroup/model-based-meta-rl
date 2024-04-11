@@ -19,12 +19,10 @@ class RandomTemplateEnv(TemplateEnv):
 
     RAND_PARAMS: List[str] = ['physics_param1', 'physics_param2', 'physics_param3', 'physics_param4']
 
-    def __init__(self, rand_params: List[str] = None, random_scale_limit: int = 3.0, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        # To update the initialization function, see the get_environment function from utils/get_environment.py
         TemplateEnv.__init__(self, *args, **kwargs)
-        if rand_params is None:
-            rand_params = self.RAND_PARAMS
-        self.rand_params = rand_params
-        self.random_scale_limit = random_scale_limit
+        self.rand_params = self.RAND_PARAMS
         self.cur_params = None
 
     def sample_tasks(self, num_tasks: int) -> List[Dict]:

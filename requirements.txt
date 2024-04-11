@@ -53,7 +53,7 @@ pyrsistent==0.19.3
 python-dateutil==2.8.2
 pytz==2023.3
 PyYAML==5.4.1
--e git+ssh://git@github.com/yardenas/rand_param_envs.git@6067fa35582520d6a287f585e9ae2c2ad59b8a72#egg=rand_param_envs
+-e git+https://github.com/dennisl88/rand_param_envs.git@4d1529d61ca0d65ed4bd9207b108d4a4662a4da0#egg=rand_param_envs
 ray==2.4.0
 requests==2.30.0
 -e git+https://github.com/arbhardwaj98/rllib.git@f84982a8cf091eadd41591376b5d896247d9db28#egg=rllib

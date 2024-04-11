@@ -141,7 +141,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pacoh-num-hyper-posterior-particles", type=int, default=2)
     parser.add_argument("--pacoh-n-samples-per-prior", type=int, default=3)
     parser.add_argument("--pacoh-num-posterior-particles", type=int, default=2)
-    parser.add_argument("--pacoh-optimistic-evaluation", type=bool, default="store_true")
+    parser.add_argument("--pacoh-optimistic-evaluation", action="store_true")
     parser.add_argument("--pacoh-likelihood-std", type=float, default=0.1)
     parser.add_argument("--pacoh-training-model-kind", type=str, default="ProbabilisticEnsemble")
 

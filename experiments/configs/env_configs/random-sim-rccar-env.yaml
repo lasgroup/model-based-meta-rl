@@ -17,13 +17,6 @@ training:
   num_test_env_instances: 5
   num_test_episodes_per_env: 20
 
-  # Data collection and exploration parameters
-  collect_meta_data: False
-  exploration: "greedy"
-  beta: 0.25
-  pacoh_training_model_kind: "BayesianNN"
-  pacoh_optimistic_evaluation: False
-
   env_params: { use_tire_model: True, action_delay: 0.00 }
 
 # Model parameters
@@ -37,7 +30,7 @@ model:
   model_learn_num_iter: 1000
   model_learn_batch_size: 32
   model_include_aleatoric_uncertainty: False
-  model_prediction_strategy: "moment_matching" # Important, choices: ["moment_matching", "sample_multiple_head"]
+  model_prediction_strategy: "moment_matching" # choices: ["moment_matching", "sample_multiple_head"]
 
 policy:
 
@@ -63,6 +56,8 @@ mbpo: {}
 
 pacoh:
 
+  beta: 0.25
+  pacoh_training_model_kind: "BayesianNN"
   pacoh_num_iter_meta_train: 42000
   pacoh_num_iter_eval_train: 25
   pacoh_num_hyper_posterior_particles: 3
