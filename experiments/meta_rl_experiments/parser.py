@@ -33,7 +33,7 @@ def get_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--agent-name",
         type=str,
-        default="parallel_pacoh",
+        default="parallel_mbpo_pacoh",
         choices=["rl2", "grbal", "parallel_grbal", "ghvmdp", "parallel_ghvmdp", "mbpo_pacoh", "parallel_mbpo_pacoh",
                  "cem_pacoh", "parallel_cem_pacoh", "mbpo", "mpc"]
     )
