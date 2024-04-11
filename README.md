@@ -42,7 +42,16 @@ We recommend using [Anaconda](https://www.anaconda.com/) to set up an environmen
 
 ### Installing MuJoCo
 
-Detailed instructions for installing `mujoco210` and `mujuco-py` can be found at: https://github.com/openai/mujoco-py:
+Detailed instructions for installing `mujoco210` and `mujuco-py` can be found at: https://github.com/openai/mujoco-py.
+After installing MuJoCo, set the correct environment paths for your dynamic loaders: 
+```bash
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mujoco210/bin
+LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libGLEW.so
+```
+You can add these lines to your `.bashrc` or `.bash_profile` file to set the environment variables automatically.
+
+### Installing the codebase
+
 
 
 ## Reproducing the experiments
