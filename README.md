@@ -48,10 +48,6 @@ LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libGLEW.so
 ```
 You can add these lines to your `.bashrc` or `.bash_profile` file to set the environment variables automatically.
 
-### Installing the codebase
-
-
-
 ## Reproducing the experiments
 
 The `launch_experiments.py` script can be used to run the experiments for the different algorithms and environments. 
