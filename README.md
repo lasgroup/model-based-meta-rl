@@ -1,5 +1,4 @@
 # Probabilistic Model-based Meta Reinforcement Learning
-***
 
 This repo contains the source code to reproduce the experiments in the paper 
 ["Data-Efficient Task Generalization via Probabilistic Model-based Meta Reinforcement Learning"](https://ieeexplore.ieee.org/document/10452796).
@@ -26,7 +25,6 @@ _IEEE Robotics and Automation Letters (RA-L)_, vol. 9, no. 4, pp. 3918-3925, Apr
 ```
 
 ## Setup
-***
 
 ### Setting up the conda environment
 We recommend using [Anaconda](https://www.anaconda.com/) to set up an environment with the dependencies of this repository. After installing Anaconda, the following commands set up the environment:
@@ -46,7 +44,6 @@ Detailed instructions for installing `mujoco210` and `mujuco-py` can be found at
 
 
 ## Reproducing the experiments
-***
 
 The `launch_experiments.py` script can be used to run the experiments for the different algorithms and environments. 
 The script takes the following arguments:
@@ -73,7 +70,7 @@ If the meta-training data has been collected previously, set this to `False` to 
 - `use-wandb`: If set to `True`, the script will log the training progress to [Weights and Biases](https://wandb.ai/).
 
 ## Extending the code
-***
+
 The code can be used with custom environments and datasets. The following sections provide instructions on how to create new environments and use custom datasets.
 
 ### Creating new environments
