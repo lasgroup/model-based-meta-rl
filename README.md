@@ -35,22 +35,20 @@ We recommend using [Anaconda](https://www.anaconda.com/) to set up an environmen
 2. Activate the environment and install the required packages:
     ```bash
     conda activate meta_rl
-    pip install -r requirements.txt
+    pip install -e .
     ```
 
 ### Installing MuJoCo
 
-Detailed instructions for installing `mujoco210` and `mujuco-py` can be found at: https://github.com/openai/mujoco-py.
-After installing MuJoCo, set the correct environment paths for your dynamic loaders: 
+Download MuJoCo Pro 1.31 binaries from [Roboti website](https://www.roboti.us/download.html) along with the [license key](https://www.roboti.us/file/mjkey.txt) and save them in the directory `~/.mujoco/`. Detailed installation instructions can be found on the MuJoCo Python [project page](https://github.com/openai/mujoco-py/tree/0.5.7#obtaining-the-binaries-and-license-key). After installing MuJoCo, set the correct environment paths for your dynamic loaders: 
 ```bash
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mujoco210/bin
-LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libGLEW.so
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.mujoco/mjpro131/bin:/usr/lib/nvidia
 ```
 You can add these lines to your `.bashrc` or `.bash_profile` file to set the environment variables automatically.
 
 ## Reproducing the experiments
 
-The `launch_experiments.py` script can be used to run the experiments for the different algorithms and environments. 
+The `experiments/launch_experiments.py` script can be used to run the experiments for the different algorithms and environments. 
 The script takes the following arguments:
 
 - `env-config-file`: The name of the environment configuration file. 
@@ -91,5 +89,3 @@ For more details, see `utils/get_environments.py`.
 Users can also use custom meta-training datasets with the provided algorithms. 
 The file `lib/datasets/dataloaders/dataloader.py` contains a demo script for loading and saving a new dataset. Users can
 implement their own dataloaders, which are then stored in the appropriate format and can be used later for meta-learning.
-         
-
