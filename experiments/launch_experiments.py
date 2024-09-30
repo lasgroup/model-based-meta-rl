@@ -5,6 +5,7 @@ from experiments.experiment_utils import generate_base_command, generate_run_com
 
 from datetime import datetime
 import argparse
+import pprint
 import numpy as np
 import copy
 import os
@@ -43,7 +44,7 @@ def main(args):
     flags["agent_name"] = internal_agent_name
     flags["exploration"] = exploration
     flags["pacoh_optimistic_evaluation"] = exploration == "optimistic" and "pacoh" in internal_agent_name
-    print(flags)
+    print(f"Starting training with the following arguments:\n{pprint.pformat(flags)}")
 
     exp_name = f"{flags['env_config_file'].replace('-', '_').replace('.yaml', '').replace('mujoco', '')}" \
                f"_{flags['agent_name']}" \

@@ -141,10 +141,10 @@ class GaussianPriorPerVariable(VectorizedModel):
         log_vars = torch.cat(log_vars, dim=0)
 
         name = f'{self.name}/model_parameters_mean'
-        setattr(self, name, torch.tensor(torch.squeeze(means), dtype=torch.float32, requires_grad=True))
+        setattr(self, name, torch.squeeze(means).clone().detach().to(torch.float32).requires_grad_(True))
 
         name = f'{self.name}/model_parameters_log_var'
-        setattr(self, name, torch.tensor(torch.squeeze(log_vars), dtype=torch.float32, requires_grad=True))
+        setattr(self, name, torch.squeeze(log_vars).clone().detach().to(torch.float32).requires_grad_(True))
 
     def _init_likelihood_prior(self, likelihood_param_size, likelihood_prior_mean, likelihood_prior_std):
         self.learn_likelihood_variables = False
@@ -155,11 +155,11 @@ class GaussianPriorPerVariable(VectorizedModel):
 
             mean = torch.ones(likelihood_param_size, dtype=torch.float32) * likelihood_prior_mean
             name = f'{self.name}/likelihood_parameters_mean'
-            setattr(self, name, torch.tensor(mean, dtype=torch.float32, requires_grad=True))
+            setattr(self, name, torch.squeeze(mean).clone().detach().to(torch.float32).requires_grad_(True))
 
             log_var = torch.ones(likelihood_param_size, dtype=torch.float32) * math.log(likelihood_prior_std)
             name = f'{self.name}/likelihood_parameters_log_var'
-            setattr(self, name, torch.tensor(log_var, dtype=torch.float32, requires_grad=True))
+            setattr(self, name, torch.squeeze(log_var).clone().detach().to(torch.float32).requires_grad_(True))
 
     def _add_noise_to_variables(self, init_noise_std):
         # exclude mean and log_var for model parameters, since they have been initialized from the models

@@ -15,6 +15,7 @@ def rollout_parallel_agent(environment, agent, max_env_steps, num_episodes=1, re
     if hasattr(agent.policy, "replay_buffer"):
         serialize_replay_buffer(agent.policy.replay_buffer)
     for episode in range(num_episodes):
+        print(f"Rolling out episode {episode} out of {num_episodes}")
         rollout_episode(
             environment=environment,
             agent=agent,
