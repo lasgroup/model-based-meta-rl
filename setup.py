@@ -9,7 +9,7 @@ def parse_requirements(filename):
 requirements = parse_requirements('requirements.txt')
 
 git_dependencies = [
-    "rllib@git+https://github.com/arbhardwaj98/rllib.git@f84982a8cf091eadd41591376b5d896247d9db28#egg=rllib",
+    "rllib@git+https://github.com/arbhardwaj98/rllib.git#egg=rllib",
     "rand_param_envs@git+https://github.com/dennisl88/rand_param_envs.git#egg=rand_param_envs"
 ]
 
