@@ -2,8 +2,18 @@
 
 This repo contains the source code to reproduce the experiments in the paper 
 ["Data-Efficient Task Generalization via Probabilistic Model-based Meta Reinforcement Learning"](https://ieeexplore.ieee.org/document/10452796).
-Here we provide instructions on how to set up and run the code to reproduce the experiments reported in the paper.
-Users can also create new environments and use custom datasets using the example code provided here.
+
+<p align="center">
+  <img src="./pipeline.png" width="65%" title="PACOH-RL Pipeline">
+</p>
+
+You can find more information about the work at the following links:
+
+[ArXiv Preprint](https://arxiv.org/abs/2311.07558)
+
+[Hardware Experiments](https://youtu.be/1v1Zkta_7W0?si=kNU-egIDvaBBSHhA)
+
+Here we provide instructions on how to set up and run the code to reproduce the experiments reported in the paper. Users can also create new environments and use custom datasets using the example code provided here.
 
 ### Citation
 
